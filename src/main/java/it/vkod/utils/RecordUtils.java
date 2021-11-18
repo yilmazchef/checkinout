@@ -3,7 +3,6 @@ package it.vkod.utils;
 
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import it.vkod.data.entity.User;
-import it.vkod.repositories.CheckRepository;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,12 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringComponent
 @RequiredArgsConstructor
-public class DataGenerator {
+public class RecordUtils {
 
 	private final PasswordEncoder passwordEncoder;
 	private final UserRepository userRepository;
-	private final CheckRepository checkRepository;
-
 
 	@Bean
 	public CommandLineRunner initUserRecords() {

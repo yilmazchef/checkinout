@@ -40,9 +40,6 @@ public class Check implements Serializable, Cloneable {
 
 	private Float lon;
 
-	private Long eventId;
-
-
 	public Check withId( final Long id ) {
 
 		this.id = id;
@@ -111,14 +108,6 @@ public class Check implements Serializable, Cloneable {
 		this.lon = lon;
 		return this;
 	}
-
-
-	public Check withEventId( final Long eventId ) {
-
-		this.eventId = eventId;
-		return this;
-	}
-
 
 	public boolean isNew() {
 
