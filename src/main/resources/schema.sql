@@ -1,3 +1,5 @@
+drop table events;
+drop table checks;
 drop table users;
 
 create table if not exists users
@@ -18,8 +20,6 @@ create table if not exists users
 
 ) charset = utf8;
 
-drop table checks;
-
 create table if not exists checks
 (
     id              bigint auto_increment,
@@ -36,7 +36,6 @@ create table if not exists checks
     primary key (id)
 ) charset = utf8;
 
-drop table events;
 
 create table if not exists events
 (
