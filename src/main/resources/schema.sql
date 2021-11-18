@@ -15,6 +15,7 @@ create table if not exists users
     registered_on   date         null,
     registered_at   time         null,
     updated_at      time         null,
+    roles           varchar(100) default 'USER',
 
     primary key (id)
 
