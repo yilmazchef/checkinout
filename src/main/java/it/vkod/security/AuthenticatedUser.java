@@ -21,6 +21,7 @@ public class AuthenticatedUser {
 
 	private final UserRepository userRepository;
 
+
 	private Optional< Authentication > getAuthentication() {
 
 		SecurityContext context = SecurityContextHolder.getContext();
@@ -31,7 +32,7 @@ public class AuthenticatedUser {
 
 	public Optional< User > get() {
 
-		return getAuthentication().map( authentication -> userRepository.findByUsername( authentication.getName() ) );
+		return getAuthentication().map( authentication -> userRepository.getByUsername( authentication.getName() ));
 	}
 
 

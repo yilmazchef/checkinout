@@ -6,14 +6,22 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.data.entity.Check;
-import it.vkod.data.service.CheckService;
+import it.vkod.data.entity.Event;
+import it.vkod.data.service.CheckRepository;
+import it.vkod.data.service.EventRepository;
+import it.vkod.data.service.UserRepository;
 import it.vkod.security.AuthenticatedUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.security.PermitAll;
+import java.sql.Date;
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @PageTitle( "Check-in" )
 @Route( "in" )
@@ -21,14 +29,16 @@ import javax.annotation.security.PermitAll;
 @PermitAll
 public class CheckinView extends VerticalLayout {
 
-	public CheckinView( @Autowired AuthenticatedUser authenticatedUser, @Autowired CheckService checkService ) {
+	public CheckinView( @Autowired AuthenticatedUser authenticatedUser,
+	                    @Autowired UserRepository userRepository,
+	                    @Autowired CheckRepository checkRepository,
+	                    @Autowired EventRepository eventRepository ) {
 
 		initStyle();
 
 		final var user = authenticatedUser.get();
 
-
-		user.ifPresent( u -> {
+		user.ifPresent( organizer -> {
 
 			final var scanLayout = new VerticalLayout();
 			final var reader = new ZXingVaadinReader();
@@ -37,26 +47,37 @@ public class CheckinView extends VerticalLayout {
 			reader.setId( "video" ); //id needs to be 'video' if From.camera.
 			reader.setStyle( "object-fit: cover; width:100; height:100vh; max-height:100" );
 
-			reader.addValueChangeListener( onValueChange -> {
-				final var expectedQR = u.getUsername();
-				final var actualQR = onValueChange.getValue();
-				final var matches = expectedQR.equalsIgnoreCase( actualQR );
-				if ( matches ) {
+			reader.addValueChangeListener( scannedQRCode -> {
+				final var oAttendee = userRepository.findByUsername( scannedQRCode.getValue() );
+				if ( oAttendee.isPresent() ) {
+					final var check = checkRepository.save(
+							new Check()
+									.setActive( true )
+									.setCurrentSession( VaadinSession.getCurrent().getSession().getId() )
+									.setPincode( 111111 )
+									.setCheckedInAt( Time.valueOf( LocalTime.now() ) )
+									.setCheckedOutAt( Time.valueOf( LocalTime.now() ) )
+									.setQrcode( scannedQRCode.getValue() )
+									.setLat( 10.00F )
+									.setLon( 10.00F )
+									.setCheckedOn( Date.valueOf( LocalDate.now() ) )
+					);
 
-					Check check = new Check()
-							.setUser( u )
-							.setQrcode( onValueChange.getValue() );
+					eventRepository.save( new Event()
+							.setCheck( check )
+							.setAttendee( oAttendee.get() )
+							.setOrganizer( organizer ) );
 
-					final var savedKey = checkService.save( check );
 
-					Notification.show( "Granted (V): Welcome " + u.getFirstName() + " " + u.getLastName() + "!" + "\n" + savedKey.toString(),
+					Notification.show( "Granted (V): Welcome " + organizer.getFirstName() + " " + organizer.getLastName() + "!",
 							4000,
 							Notification.Position.BOTTOM_CENTER ).open();
 				} else {
-					Notification.show( ( "Rejected (X): " + actualQR ),
+					Notification.show( ( "Rejected (X): " + scannedQRCode.getValue() ),
 							4000,
 							Notification.Position.BOTTOM_CENTER ).open();
 				}
+
 
 			} );
 

@@ -8,29 +8,28 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.*;
+import java.util.Set;
 
-@Entity
 @Getter
 @RequiredArgsConstructor
 @Setter
 @Accessors( chain = true )
-@ToString( onlyExplicitlyIncluded = true )
+@ToString
+@Entity
 public class User implements Persistable< Long >, Serializable {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue( strategy = GenerationType.IDENTITY )
 	private Long id;
 
-	@ToString.Include
 	@Column( nullable = false, unique = true )
 	private String username;
 
@@ -57,61 +56,27 @@ public class User implements Persistable< Long >, Serializable {
 	@Lob
 	private String profile;
 
-	@OneToMany( mappedBy = "user", cascade = { CascadeType.REMOVE, CascadeType.MERGE }, orphanRemoval = true )
-	private final List< Check > checks = new ArrayList<>();
+	@Override
+	public boolean equals( final Object o ) {
 
-
-	@PrePersist
-	public void prePersist() {
-
-		if ( this.roles != null ) {
-			this.roles = new HashSet<>();
-			this.roles.add( Role.USER );
+		if ( this == o ) {
+			return true;
 		}
 
-		this.registeredOn = Objects.requireNonNull( Date.valueOf( LocalDate.now() ) );
-		this.registeredAt = Objects.requireNonNull( Time.valueOf( LocalTime.now() ) );
-	}
-
-
-	@PreUpdate
-	public void preUpdate() {
-
-		if ( this.roles.isEmpty() ) {
-			this.roles.add( Role.USER );
+		if ( !( o instanceof User ) ) {
+			return false;
 		}
-		this.updatedAt = Objects.requireNonNull( Time.valueOf( LocalTime.now() ) );
+
+		final User user = ( User ) o;
+
+		return new EqualsBuilder().append( getId(), user.getId() ).append( getUsername(), user.getUsername() ).isEquals();
 	}
-
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash( username, phone );
-	}
-
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-
-
-	@Override
-	public boolean equals( Object obj ) {
-
-		if ( this == obj ) {
-			return true;
-		}
-		if ( !( obj instanceof User ) ) {
-			return false;
-		}
-		User other = ( User ) obj;
-		return Objects.equals( username, other.username ) && Objects.equals( phone, other.phone );
+		return new HashCodeBuilder( 17, 37 ).append( getId() ).append( getUsername() ).toHashCode();
 	}
 
 
@@ -122,3 +87,5 @@ public class User implements Persistable< Long >, Serializable {
 	}
 
 }
+
+
