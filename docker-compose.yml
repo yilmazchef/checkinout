@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+
+  db_server:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'checkinoutdb'
+      MYSQL_ROOT_PASSWORD: 'P@ssw0rd'
+      MYSQL_USER: 'check'
+      MYSQL_PASSWORD: 'P@ssw0rd'
+    ports:
+      - "3306:3306"
+
+  db_admin:
+    image: adminer:4.8.1-standalone
+    restart: always
+    depends_on:
+      - db_server
+    ports:
+      - "9090:8080"
+
+  webapp:
+    build: .
+    restart: on-failure
+    depends_on:
+      - db_server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db_server:3306/checkinoutdb?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&autoReconnect=true&useSSL=false
+    links:
+      - db_server:db_server
+    ports:
+      - "8080:8080"
+
