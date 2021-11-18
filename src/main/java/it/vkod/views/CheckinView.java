@@ -11,9 +11,9 @@ import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.data.entity.Check;
 import it.vkod.data.entity.Event;
-import it.vkod.data.service.CheckRepository;
-import it.vkod.data.service.EventRepository;
-import it.vkod.data.service.UserRepository;
+import it.vkod.repositories.CheckRepository;
+import it.vkod.repositories.EventRepository;
+import it.vkod.repositories.UserRepository;
 import it.vkod.security.AuthenticatedUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -48,26 +48,27 @@ public class CheckinView extends VerticalLayout {
 			reader.setStyle( "object-fit: cover; width:100; height:100vh; max-height:100" );
 
 			reader.addValueChangeListener( scannedQRCode -> {
+
 				final var oAttendee = userRepository.findByUsername( scannedQRCode.getValue() );
 				if ( oAttendee.isPresent() ) {
-					final var check = checkRepository.save(
-							new Check()
-									.setActive( true )
-									.setCurrentSession( VaadinSession.getCurrent().getSession().getId() )
-									.setPincode( 111111 )
-									.setCheckedInAt( Time.valueOf( LocalTime.now() ) )
-									.setCheckedOutAt( Time.valueOf( LocalTime.now() ) )
-									.setQrcode( scannedQRCode.getValue() )
-									.setLat( 10.00F )
-									.setLon( 10.00F )
-									.setCheckedOn( Date.valueOf( LocalDate.now() ) )
-					);
+					final var checkEntity = new Check()
+							.withActive( true )
+							.withCurrentSession( VaadinSession.getCurrent().getSession().getId() )
+							.withPincode( 111111 )
+							.withCheckedInAt( Time.valueOf( LocalTime.now() ) )
+							.withCheckedOutAt( Time.valueOf( LocalTime.now() ) )
+							.withQrcode( scannedQRCode.getValue() )
+							.withLat( 10.00F )
+							.withLon( 10.00F )
+							.withCheckedOn( Date.valueOf( LocalDate.now() ) );
+					final var check = checkRepository.save( checkEntity );
 
-					eventRepository.save( new Event()
-							.setCheck( check )
-							.setAttendee( oAttendee.get() )
-							.setOrganizer( organizer ) );
+					final var eventEntity = new Event()
+							.withCheckId( check.getId() )
+							.withAttendeeId( oAttendee.get().getId() )
+							.withOrganizerId( organizer.getId() );
 
+					final var event = eventRepository.save( eventEntity );
 
 					Notification.show( "Granted (V): Welcome " + organizer.getFirstName() + " " + organizer.getLastName() + "!",
 							4000,

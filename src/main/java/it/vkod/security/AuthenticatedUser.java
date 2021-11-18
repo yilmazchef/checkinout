@@ -4,7 +4,7 @@ package it.vkod.security;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 import it.vkod.data.entity.User;
-import it.vkod.data.service.UserRepository;
+import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;

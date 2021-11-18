@@ -5,46 +5,72 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
-import org.springframework.data.domain.Persistable;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
 import java.io.Serializable;
 
 @Getter
-@RequiredArgsConstructor
 @Setter
-@Accessors( chain = true )
+@RequiredArgsConstructor
 @ToString
-@Entity
-public class Event implements Persistable< Long >, Serializable {
+@Table("events")
+public class Event implements Serializable, Cloneable {
 
 	@Id
-	@GeneratedValue( strategy = GenerationType.IDENTITY )
 	private Long id;
 
-	@ManyToOne
-	private User attendee;
+	private Long attendeeId;
 
-	@ManyToOne
-	private User organizer;
+	private Long organizerId;
 
-	@OneToOne( mappedBy = "event" )
-	private Check check;
+	private Long checkId;
 
 
-	public Event setCheck( Check check ) {
+	public Event withId( final Long id ) {
 
-		check.setEvent( this );
-		this.setCheck( check );
+		this.id = id;
 		return this;
 	}
 
 
-	@Override
+	public Event withAttendeeId( final Long attendeeId ) {
+
+		this.attendeeId = attendeeId;
+		return this;
+	}
+
+
+	public Event withOrganizerId( final Long organizerId ) {
+
+		this.organizerId = organizerId;
+		return this;
+	}
+
+
+	public Event withCheckId( final Long checkId ) {
+
+		this.checkId = checkId;
+		return this;
+	}
+
+
 	public boolean isNew() {
 
 		return this.id == null;
+	}
+
+
+	@Override
+	public Event clone() {
+
+		try {
+			final Event clone = ( Event ) super.clone();
+			// TODO: copy mutable state here, so the clone can't change the internals of the original
+			return clone;
+		} catch ( CloneNotSupportedException e ) {
+			throw new AssertionError();
+		}
 	}
 
 }

@@ -5,26 +5,21 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.springframework.data.domain.Persistable;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
 
-@Entity
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Accessors( chain = true )
 @ToString
-public class Check implements Persistable< Long >, Serializable {
+@Table("checks")
+public class Check implements Serializable, Cloneable {
 
 	@Id
-	@GeneratedValue( strategy = GenerationType.IDENTITY )
 	private Long id;
 
 	private Integer pincode;
@@ -37,55 +32,110 @@ public class Check implements Persistable< Long >, Serializable {
 
 	private String currentSession;
 
-	private boolean isActive;
+	private Boolean isActive;
 
-	@Column( unique = true )
-	@Lob
 	private String qrcode;
 
 	private Float lat;
 
 	private Float lon;
 
+	private Long eventId;
 
-	@Override
-	public boolean equals( final Object o ) {
 
-		if ( this == o ) {
-			return true;
-		}
+	public Check withId( final Long id ) {
 
-		if ( !( o instanceof Check ) ) {
-			return false;
-		}
-
-		final Check check = ( Check ) o;
-
-		return new EqualsBuilder().append( getId(), check.getId() ).isEquals();
+		this.id = id;
+		return this;
 	}
 
 
-	@Override
-	public int hashCode() {
+	public Check withPincode( final Integer pincode ) {
 
-		return new HashCodeBuilder( 17, 37 ).append( getId() ).toHashCode();
+		this.pincode = pincode;
+		return this;
 	}
 
 
-	@Override
+	public Check withCheckedOn( final Date checkedOn ) {
+
+		this.checkedOn = checkedOn;
+		return this;
+	}
+
+
+	public Check withCheckedInAt( final Time checkedInAt ) {
+
+		this.checkedInAt = checkedInAt;
+		return this;
+	}
+
+
+	public Check withCheckedOutAt( final Time checkedOutAt ) {
+
+		this.checkedOutAt = checkedOutAt;
+		return this;
+	}
+
+
+	public Check withCurrentSession( final String currentSession ) {
+
+		this.currentSession = currentSession;
+		return this;
+	}
+
+
+	public Check withActive( final Boolean active ) {
+
+		isActive = active;
+		return this;
+	}
+
+
+	public Check withQrcode( final String qrcode ) {
+
+		this.qrcode = qrcode;
+		return this;
+	}
+
+
+	public Check withLat( final Float lat ) {
+
+		this.lat = lat;
+		return this;
+	}
+
+
+	public Check withLon( final Float lon ) {
+
+		this.lon = lon;
+		return this;
+	}
+
+
+	public Check withEventId( final Long eventId ) {
+
+		this.eventId = eventId;
+		return this;
+	}
+
+
 	public boolean isNew() {
 
 		return this.id == null;
 	}
 
 
-	@OneToOne( optional = false )
-	private Event event;
+	@Override
+	public Check clone() {
 
-
-	public Event getEvent() {
-
-		return event;
+		try {
+			final Check clone = ( Check ) super.clone();
+			// TODO: copy mutable state here, so the clone can't change the internals of the original
+			return clone;
+		} catch ( CloneNotSupportedException e ) {
+			throw new AssertionError();
+		}
 	}
 
 }

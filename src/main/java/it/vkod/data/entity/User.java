@@ -1,51 +1,38 @@
 package it.vkod.data.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.vkod.data.Role;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.springframework.data.domain.Persistable;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
-import java.util.Set;
 
 @Getter
-@RequiredArgsConstructor
 @Setter
-@Accessors( chain = true )
+@RequiredArgsConstructor
 @ToString
-@Entity
-public class User implements Persistable< Long >, Serializable {
+@Table( "users" )
+public class User implements Serializable, Cloneable {
 
 	@Id
-	@GeneratedValue( strategy = GenerationType.IDENTITY )
 	private Long id;
 
-	@Column( nullable = false, unique = true )
 	private String username;
 
-	@Column( unique = true )
 	private String phone;
 
 	private String firstName;
 
 	private String lastName;
 
-	@Column( nullable = false )
-	@JsonIgnore
 	private String hashedPassword;
 
-	@ElementCollection( fetch = FetchType.EAGER )
-	private Set< Role > roles;
+	private String roles;
 
 	private Date registeredOn;
 
@@ -53,37 +40,102 @@ public class User implements Persistable< Long >, Serializable {
 
 	private Time updatedAt;
 
-	@Lob
 	private String profile;
 
-	@Override
-	public boolean equals( final Object o ) {
 
-		if ( this == o ) {
-			return true;
-		}
+	public User withId( final Long id ) {
 
-		if ( !( o instanceof User ) ) {
-			return false;
-		}
-
-		final User user = ( User ) o;
-
-		return new EqualsBuilder().append( getId(), user.getId() ).append( getUsername(), user.getUsername() ).isEquals();
+		this.id = id;
+		return this;
 	}
 
 
-	@Override
-	public int hashCode() {
+	public User withUsername( final String username ) {
 
-		return new HashCodeBuilder( 17, 37 ).append( getId() ).append( getUsername() ).toHashCode();
+		this.username = username;
+		return this;
 	}
 
 
-	@Override
+	public User withPhone( final String phone ) {
+
+		this.phone = phone;
+		return this;
+	}
+
+
+	public User withFirstName( final String firstName ) {
+
+		this.firstName = firstName;
+		return this;
+	}
+
+
+	public User withLastName( final String lastName ) {
+
+		this.lastName = lastName;
+		return this;
+	}
+
+
+	public User withHashedPassword( final String hashedPassword ) {
+
+		this.hashedPassword = hashedPassword;
+		return this;
+	}
+
+
+	public User withRoles( final String roles ) {
+		
+		this.roles = roles;
+		return this;
+	}
+
+
+	public User withRegisteredOn( final Date registeredOn ) {
+
+		this.registeredOn = registeredOn;
+		return this;
+	}
+
+
+	public User withRegisteredAt( final Time registeredAt ) {
+
+		this.registeredAt = registeredAt;
+		return this;
+	}
+
+
+	public User withUpdatedAt( final Time updatedAt ) {
+
+		this.updatedAt = updatedAt;
+		return this;
+	}
+
+
+	public User withProfile( final String profile ) {
+
+		this.profile = profile;
+		return this;
+	}
+
+
 	public boolean isNew() {
 
 		return this.username == null;
+	}
+
+
+	@Override
+	public User clone() {
+
+		try {
+			final User clone = ( User ) super.clone();
+			// TODO: copy mutable state here, so the clone can't change the internals of the original
+			return clone;
+		} catch ( CloneNotSupportedException e ) {
+			throw new AssertionError();
+		}
 	}
 
 }

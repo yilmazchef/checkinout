@@ -2,7 +2,7 @@ package it.vkod.security;
 
 
 import it.vkod.data.entity.User;
-import it.vkod.data.service.UserRepository;
+import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 	private static List< GrantedAuthority > getAuthorities( User user ) {
 
-		return user.getRoles().stream().map( role -> new SimpleGrantedAuthority( "ROLE_" + role.getTitle() ) )
+		return Arrays
+				.stream( user.getRoles().split( "," ) )
+				.map( role -> new SimpleGrantedAuthority( "ROLE_" + role ) )
 				.collect( Collectors.toList() );
 
 	}
