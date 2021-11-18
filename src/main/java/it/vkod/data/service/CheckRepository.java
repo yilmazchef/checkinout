@@ -8,8 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CheckRepository extends JpaRepository< Check, Long > {
 
-	Page< Check > findAllByUser_Username( final String username, final Pageable pageable );
-
-	Page< Check > findAllByUser_Phone( final String phone, final Pageable pageable );
 
 }
