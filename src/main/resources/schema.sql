@@ -41,11 +41,14 @@ create table if not exists checks
 create table if not exists events
 (
     id           bigint auto_increment,
-    attendee_id  bigint null,
+    check_id     bigint not null,
+    attendee_id  bigint not null,
     organizer_id bigint null,
 
     primary key (id),
 
+    constraint check_to_attendee_fk
+        foreign key (check_id) references checks (id),
     constraint user_to_attendee_fk
         foreign key (attendee_id) references users (id),
     constraint user_to_organizer_fk
