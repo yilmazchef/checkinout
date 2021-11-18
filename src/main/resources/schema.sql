@@ -1,6 +1,6 @@
-drop table events;
-drop table checks;
-drop table users;
+drop table if exists events;
+drop table if exists checks;
+drop table if exists users;
 
 create table if not exists users
 (
