@@ -16,7 +16,6 @@
     "@polymer/iron-resizable-behavior": "3.0.1",
     "@polymer/iron-scroll-target-behavior": "3.0.1",
     "@polymer/polymer": "3.2.0",
-    "@vaadin-component-factory/vcf-toggle-button": "1.0.3",
     "@vaadin/flow-frontend": "./target/flow-frontend",
     "@vaadin/form": "./target/flow-frontend/form",
     "@vaadin/router": "1.7.4",
@@ -125,7 +124,6 @@
       "@polymer/iron-resizable-behavior": "3.0.1",
       "@polymer/iron-scroll-target-behavior": "3.0.1",
       "@polymer/polymer": "3.2.0",
-      "@vaadin-component-factory/vcf-toggle-button": "1.0.3",
       "@vaadin/router": "1.7.4",
       "@vaadin/vaadin-accordion": "21.0.3",
       "@vaadin/vaadin-app-layout": "21.0.3",
@@ -210,6 +208,6 @@
       "workbox-precaching": "6.2.0",
       "workbox-webpack-plugin": "6.2.0"
     },
-    "hash": "04862a81ceeb9f3914cdda8756372b0358a409bbf549e0cbb314510b3c89183f"
+    "hash": "806425d0b0bebe28272943a2d9571f44caba9b4d69d348e80113deb8d6cf7a34"
   }
 }
