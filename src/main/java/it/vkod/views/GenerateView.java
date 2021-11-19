@@ -29,16 +29,16 @@ public class GenerateView extends VerticalLayout {
 
 		addClassNames( "flex", "flex-col", "h-full" );
 
-		final var user = authenticatedUser.get();
+		final var oUser = authenticatedUser.get();
 
-		user.ifPresent( u -> {
+		oUser.ifPresent( user -> {
 
 			final var generateLayout = new VerticalLayout();
-			final var qrField = new TextField( u.getUsername() );
+			final var qrField = new TextField( user.getUsername() );
 			final var generateButton = new Button( "Generate", onClick -> {
 				try {
-					generateLayout.add( convertToImage( generateQR( u.getUsername(), 512, 512 ), u.getUsername() ) );
-					Notification.show( ( "Generated a QR Code for " + u.getUsername() ), 3000,
+					generateLayout.add( convertToImage( generateQR( user.getUsername(), 512, 512 ), user.getUsername() ) );
+					Notification.show( ( "Generated a QR Code for " + user.getUsername() ), 8000,
 							Notification.Position.BOTTOM_CENTER ).open();
 
 				} catch ( WriterException | IOException fileEx ) {
