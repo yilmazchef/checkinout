@@ -5,11 +5,11 @@ drop table if exists users;
 create table if not exists users
 (
     id              bigint auto_increment,
-    username        varchar(255) not null,
     first_name      varchar(255) null,
     last_name       varchar(255) null,
+    username        varchar(255) not null unique,
+    email           varchar(255) not null unique,
     phone           varchar(255) null unique,
-    email           varchar(255) null unique,
     hashed_password varchar(255) not null,
     profile         longtext     null,
     registered_on   date         null,

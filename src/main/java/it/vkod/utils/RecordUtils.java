@@ -18,6 +18,7 @@ public class RecordUtils {
 	private final PasswordEncoder passwordEncoder;
 	private final UserRepository userRepository;
 
+
 	@Bean
 	public CommandLineRunner initUserRecords() {
 
@@ -54,6 +55,8 @@ public class RecordUtils {
 		User user = new User().withUsername( username ).withHashedPassword( passwordEncoder.encode( "P@ssw0rd" ) )
 				.withProfile( profile )
 				.withFirstName( firstName ).withLastName( lastName )
+				.withEmail( username.concat( "@" ).concat( "@intecbrussel.be" ) )
+				.withPhone( "046733254" + username.length() )
 				.withRoles( roles );
 
 		userRepository.save( user );

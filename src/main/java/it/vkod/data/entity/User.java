@@ -26,6 +26,8 @@ public class User implements Serializable, Cloneable {
 
 	private String phone;
 
+	private String email;
+
 	private String firstName;
 
 	private String lastName;
@@ -53,6 +55,13 @@ public class User implements Serializable, Cloneable {
 	public User withUsername( final String username ) {
 
 		this.username = username;
+		return this;
+	}
+
+
+	public User withEmail( final String email ) {
+
+		this.email = email;
 		return this;
 	}
 
