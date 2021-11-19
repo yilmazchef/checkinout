@@ -75,33 +75,42 @@ public class CheckinView extends VerticalLayout {
 				if ( oAttendee.isPresent() ) {
 					final var attendee = oAttendee.get();
 
-					final var checkEntity = new Check()
-							.withActive( true )
-							.withCurrentSession( VaadinSession.getCurrent().getSession().getId() )
-							.withPincode( 111111 )
-							.withCheckedInAt( Time.valueOf( LocalTime.now() ) )
-							.withCheckedOutAt( Time.valueOf( LocalTime.now() ) )
-							.withQrcode( scannedQRCode.getValue() )
-							.withLat( 10.00F )
-							.withLon( 10.00F )
-							.withCheckedOn( Date.valueOf( LocalDate.now() ) );
-					final var check = checkRepository.save( checkEntity );
+					final var hasCheckedInBefore = checkRepository.findByCheckedOnAndQrcode( Date.valueOf( LocalDate.now() ), scannedQRCode.getValue() );
 
-					final var eventEntity = new Event()
-							.withCheckId( check.getId() )
-							.withAttendeeId( attendee.getId() )
-							.withOrganizerId( organizer.getId() );
+					if ( hasCheckedInBefore.isEmpty() ) {
+						final var checkEntity = new Check()
+								.withActive( true )
+								.withCurrentSession( VaadinSession.getCurrent().getSession().getId() )
+								.withPincode( 111111 )
+								.withCheckedInAt( Time.valueOf( LocalTime.now() ) )
+								.withCheckedOutAt( Time.valueOf( LocalTime.now() ) )
+								.withQrcode( scannedQRCode.getValue() )
+								.withLat( 10.00F )
+								.withLon( 10.00F )
+								.withCheckedOn( Date.valueOf( LocalDate.now() ) );
+						final var check = checkRepository.save( checkEntity );
 
-					final var event = eventRepository.save( eventEntity );
+						final var eventEntity = new Event()
+								.withCheckId( check.getId() )
+								.withAttendeeId( attendee.getId() )
+								.withOrganizerId( organizer.getId() );
 
-					final var foundUser = userRepository.findById( event.getAttendeeId() );
-					foundUser.ifPresent( userList::add );
-					attendeesGrid.setItems( userList );
+						final var event = eventRepository.save( eventEntity );
 
-					Notification.show( "Granted (V): Attendee " + attendee.getFirstName() + " " + attendee.getLastName() +
-									", Organizer: " + organizer.getFirstName() + " " + organizer.getLastName(),
-							4000,
-							Notification.Position.BOTTOM_CENTER ).open();
+						final var foundUser = userRepository.findById( event.getAttendeeId() );
+						foundUser.ifPresent( userList::add );
+						attendeesGrid.setItems( userList );
+
+						Notification.show( "Granted (V): Attendee " + attendee.getFirstName() + " " + attendee.getLastName() +
+										", Organizer: " + organizer.getFirstName() + " " + organizer.getLastName(),
+								4000,
+								Notification.Position.BOTTOM_CENTER ).open();
+					} else {
+						Notification.show( ( "Already Checked Before (?): " + scannedQRCode.getValue() ),
+								4000,
+								Notification.Position.BOTTOM_CENTER ).open();
+					}
+
 				} else {
 					Notification.show( ( "Rejected (X): " + scannedQRCode.getValue() ),
 							4000,
