@@ -17,7 +17,7 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@PageTitle( "Check-in" )
+@PageTitle( "Check-out" )
 @Route( "out" )
 @PermitAll
 public class CheckoutView extends VerticalLayout {

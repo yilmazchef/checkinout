@@ -51,6 +51,8 @@ public class CheckinView extends VerticalLayout {
 
 				final var oAttendee = userRepository.findByUsername( scannedQRCode.getValue() );
 				if ( oAttendee.isPresent() ) {
+					final var attendee = oAttendee.get();
+
 					final var checkEntity = new Check()
 							.withActive( true )
 							.withCurrentSession( VaadinSession.getCurrent().getSession().getId() )
@@ -65,12 +67,14 @@ public class CheckinView extends VerticalLayout {
 
 					final var eventEntity = new Event()
 							.withCheckId( check.getId() )
-							.withAttendeeId( oAttendee.get().getId() )
+							.withAttendeeId( attendee.getId() )
 							.withOrganizerId( organizer.getId() );
 
 					final var event = eventRepository.save( eventEntity );
 
-					Notification.show( "Granted (V): Welcome " + organizer.getFirstName() + " " + organizer.getLastName() + "!",
+
+					Notification.show( "Granted (V): Attendee " + attendee.getFirstName() + " " + attendee.getLastName() +
+									", Organizer: " + organizer.getFirstName() + " " + organizer.getLastName(),
 							4000,
 							Notification.Position.BOTTOM_CENTER ).open();
 				} else {
