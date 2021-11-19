@@ -1,7 +1,7 @@
 package it.vkod.views;
 
 
-import com.vaadin.componentfactory.ToggleButton;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -30,10 +30,7 @@ public class CheckoutView extends VerticalLayout {
 
 		final var oUser = authenticatedUser.get();
 
-		if ( oUser.isPresent() ) {
-
-			ToggleButton toggle = new ToggleButton( "Check in" );
-			toggle.addValueChangeListener( evt -> toggle.setLabel( "Check out" ) );
+		if(oUser.isPresent()){
 
 			final var organizer = oUser.get();
 
@@ -73,7 +70,7 @@ public class CheckoutView extends VerticalLayout {
 
 			} );
 
-			scanLayout.add( toggle, reader );
+			scanLayout.add( reader );
 			add( scanLayout );
 		}
 	}

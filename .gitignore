@@ -19,3 +19,4 @@ error-screenshots/
 webpack.generated.js
 /.vscode/
 /.mysql/
+/data/
