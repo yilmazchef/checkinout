@@ -64,8 +64,8 @@ public class CheckinView extends VerticalLayout {
 		user.ifPresent( organizer -> {
 
 			final var attendeesGrid = new Grid< User >();
-			attendeesGrid.addColumn( User::getFirstName ).setHeader( "First Name" ).setKey( "first_name" );
-			attendeesGrid.addColumn( User::getLastName ).setHeader( "LastName" ).setKey( "last_name" );
+			attendeesGrid.addColumn( User::getFirstName ).setHeader( "First Name" ).setKey( "firstName" );
+			attendeesGrid.addColumn( User::getLastName ).setHeader( "LastName" ).setKey( "lastName" );
 			attendeesGrid.addColumn( User::getEmail ).setHeader( "Email" ).setKey( "email" );
 			attendeesGrid.addThemeVariants( GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES );
 

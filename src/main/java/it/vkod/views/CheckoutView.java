@@ -153,15 +153,29 @@ public class CheckoutView extends VerticalLayout {
 								.withLon( 20.00F )
 				);
 
-				final var eventEntity = new Event()
-						.withCheckId( check.getId() )
-						.withAttendeeId( attendee.getId() )
-						.withOrganizerId( organizer.getId() )
-						.withCheckType( "OUT" );
+				final var oEvent = eventRepository.findByAttendeeIdAndCheckId( attendee.getId(), check.getId() );
 
-				final var event = eventRepository.save( eventEntity );
+				final var eventBeingEdited = new Object() {
+					Event data = null;
+				};
 
-				final var foundUser = userRepository.findById( event.getAttendeeId() );
+				if ( oEvent.isPresent() ) {
+					eventBeingEdited.data = oEvent.get()
+							.withCheckId( check.getId() )
+							.withAttendeeId( attendee.getId() )
+							.withOrganizerId( organizer.getId() )
+							.withCheckType( "OUT" );
+				} else {
+					eventBeingEdited.data = new Event()
+							.withCheckId( check.getId() )
+							.withAttendeeId( attendee.getId() )
+							.withOrganizerId( organizer.getId() )
+							.withCheckType( "OUT" );
+				}
+
+				final var savedOrUpdatedEvent = eventRepository.save( eventBeingEdited.data );
+
+				final var foundUser = userRepository.findById( savedOrUpdatedEvent.getAttendeeId() );
 				foundUser.ifPresent( userList::add );
 				attendeesGrid.setItems( userList );
 
