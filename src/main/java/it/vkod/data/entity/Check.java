@@ -16,7 +16,7 @@ import java.sql.Time;
 @Setter
 @RequiredArgsConstructor
 @ToString
-@Table("checks")
+@Table( "checks" )
 public class Check implements Serializable, Cloneable {
 
 	@Id
@@ -39,6 +39,7 @@ public class Check implements Serializable, Cloneable {
 	private Float lat;
 
 	private Float lon;
+
 
 	public Check withId( final Long id ) {
 
@@ -109,6 +110,7 @@ public class Check implements Serializable, Cloneable {
 		return this;
 	}
 
+
 	public boolean isNew() {
 
 		return this.id == null;
@@ -120,8 +122,19 @@ public class Check implements Serializable, Cloneable {
 
 		try {
 			final Check clone = ( Check ) super.clone();
-			// TODO: copy mutable state here, so the clone can't change the internals of the original
+			clone.setPincode( this.getPincode() );
+			clone.setCheckedOutAt( this.getCheckedOutAt() );
+			clone.setCheckedInAt( this.getCheckedInAt() );
+			clone.setCurrentSession( this.getCurrentSession() );
+			clone.setQrcode( this.getQrcode() );
+			clone.setId( this.getId() );
+			clone.setCheckedOn( this.getCheckedOn() );
+			clone.setIsActive( this.getIsActive() );
+			clone.setLat( this.getLat() );
+			clone.setLon( this.getLon() );
+
 			return clone;
+
 		} catch ( CloneNotSupportedException e ) {
 			throw new AssertionError();
 		}

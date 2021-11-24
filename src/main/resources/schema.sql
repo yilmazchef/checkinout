@@ -41,9 +41,10 @@ create table if not exists checks
 create table if not exists events
 (
     id           bigint auto_increment,
-    check_id     bigint not null,
-    attendee_id  bigint not null,
-    organizer_id bigint null,
+    check_id     bigint             not null,
+    attendee_id  bigint             not null,
+    organizer_id bigint             null,
+    check_type   ENUM ('IN', 'OUT') NOT NULL,
 
     primary key (id),
 

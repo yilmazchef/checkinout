@@ -30,6 +30,7 @@ import java.util.ArrayList;
 
 @PageTitle( "Check-in" )
 @Route( "in" )
+@RouteAlias( "checkin" )
 @RouteAlias( "" )
 @PermitAll
 public class CheckinView extends VerticalLayout {
@@ -93,7 +94,8 @@ public class CheckinView extends VerticalLayout {
 						final var eventEntity = new Event()
 								.withCheckId( check.getId() )
 								.withAttendeeId( attendee.getId() )
-								.withOrganizerId( organizer.getId() );
+								.withOrganizerId( organizer.getId() )
+								.withCheckType( "IN" );
 
 						final var event = eventRepository.save( eventEntity );
 
@@ -101,8 +103,8 @@ public class CheckinView extends VerticalLayout {
 						foundUser.ifPresent( userList::add );
 						attendeesGrid.setItems( userList );
 
-						Notification.show( "Granted (V): Attendee " + attendee.getFirstName() + " " + attendee.getLastName() +
-										", Organizer: " + organizer.getFirstName() + " " + organizer.getLastName(),
+						Notification.show( attendee.getFirstName() + " " + attendee.getLastName() + " has checked IN" +
+										"." + "Organized by " + organizer.getFirstName() + " " + organizer.getLastName(),
 								4000,
 								Notification.Position.BOTTOM_CENTER ).open();
 					} else {

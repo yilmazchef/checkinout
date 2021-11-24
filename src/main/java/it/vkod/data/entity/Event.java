@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Setter
 @RequiredArgsConstructor
 @ToString
-@Table("events")
+@Table( "events" )
 public class Event implements Serializable, Cloneable {
 
 	@Id
@@ -25,6 +25,15 @@ public class Event implements Serializable, Cloneable {
 	private Long organizerId;
 
 	private Long checkId;
+
+	private String checkType;
+
+
+	public Event withCheckType( final String checkType ) {
+
+		this.checkType = checkType;
+		return this;
+	}
 
 
 	public Event withId( final Long id ) {

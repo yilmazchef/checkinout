@@ -1,14 +1,23 @@
 package it.vkod.views;
 
 
-import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
+import it.vkod.data.entity.Check;
+import it.vkod.data.entity.Event;
+import it.vkod.data.entity.User;
 import it.vkod.repositories.CheckRepository;
+import it.vkod.repositories.EventRepository;
+import it.vkod.repositories.UserRepository;
 import it.vkod.security.AuthenticatedUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,22 +26,41 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 
 @PageTitle( "Check-out" )
 @Route( "out" )
+@RouteAlias( "checkout" )
 @PermitAll
 public class CheckoutView extends VerticalLayout {
 
 	public CheckoutView( @Autowired AuthenticatedUser authenticatedUser,
-	                     @Autowired CheckRepository checkRepository ) {
+	                     @Autowired UserRepository userRepository,
+	                     @Autowired CheckRepository checkRepository,
+	                     @Autowired EventRepository eventRepository ) {
 
 		initStyle();
 
-		final var oUser = authenticatedUser.get();
 
-		if(oUser.isPresent()){
+		SplitLayout splitLayout = new SplitLayout();
 
-			final var organizer = oUser.get();
+		final var user = authenticatedUser.get();
+
+		user.ifPresent( organizer -> {
+
+			final var attendeesGrid = new Grid< User >();
+			attendeesGrid.addColumn( User::getFirstName ).setHeader( "First Name" );
+			attendeesGrid.addColumn( User::getLastName ).setHeader( "LastName" );
+			attendeesGrid.addColumn( User::getUsername ).setHeader( "Username" );
+			attendeesGrid.addThemeVariants( GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES );
+
+			final var userList = new ArrayList< User >();
+			final var checkList = checkRepository.findByCheckedOnToday();
+			for ( final Check check : checkList ) {
+				final var foundUser = userRepository.findByUsername( check.getQrcode() );
+				foundUser.ifPresent( userList::add );
+			}
+			attendeesGrid.setItems( userList );
 
 			final var scanLayout = new VerticalLayout();
 			final var reader = new ZXingVaadinReader();
@@ -43,36 +71,69 @@ public class CheckoutView extends VerticalLayout {
 
 			reader.addValueChangeListener( scannedQRCode -> {
 
-				final var oCheck = checkRepository.findByCheckedOnAndQrcode(
-						Date.valueOf( LocalDate.now() ), scannedQRCode.getValue()
-				);
+				final var oAttendee = userRepository.findByUsername( scannedQRCode.getValue() );
+				if ( oAttendee.isPresent() ) {
+					final var attendee = oAttendee.get();
 
-				if ( oCheck.isPresent() ) {
+					final var foundCheck = checkRepository.findByCheckedOnAndQrcode( Date.valueOf( LocalDate.now() ), scannedQRCode.getValue() );
 
-					final var check = oCheck.get();
-					checkRepository.save( check.withCheckedOutAt( Time.valueOf( LocalTime.now() ) ) );
+					if ( foundCheck.isPresent() ) {
 
+						final var check = checkRepository.save(
+								foundCheck.get()
+										.withCurrentSession( VaadinSession.getCurrent().getSession().getId() )
+										.withQrcode( scannedQRCode.getValue() )
+										.withCheckedOutAt( Time.valueOf( LocalTime.now() ) )
+										.withLat( 20.00F )
+										.withLon( 20.00F )
+						);
 
-					Notification.show( "Granted (V): Welcome " + organizer.getFirstName() + " " + organizer.getLastName() + "!",
-							4000,
-							Notification.Position.BOTTOM_CENTER ).open();
+						final var eventEntity = new Event()
+								.withCheckId( check.getId() )
+								.withAttendeeId( attendee.getId() )
+								.withOrganizerId( organizer.getId() )
+								.withCheckType( "OUT" );
+
+						final var event = eventRepository.save( eventEntity );
+
+						final var foundUser = userRepository.findById( event.getAttendeeId() );
+						foundUser.ifPresent( userList::add );
+						attendeesGrid.setItems( userList );
+
+						Notification.show( attendee.getFirstName() + " " + attendee.getLastName() + " has checked OUT" +
+										"." + "Organized by " + organizer.getFirstName() + " " + organizer.getLastName(),
+								4000,
+								Notification.Position.BOTTOM_CENTER ).open();
+					} else {
+						Notification.show( ( "Rejected (Invalid QR): " + scannedQRCode.getValue() ),
+								4000,
+								Notification.Position.BOTTOM_CENTER ).open();
+					}
+
 				} else {
-					Notification.show( ( "Rejected (X): " + scannedQRCode.getValue() ),
+					Notification.show( ( "The following user has NOT checked in (?): " + scannedQRCode.getValue() ),
 							4000,
 							Notification.Position.BOTTOM_CENTER ).open();
 				}
 
 
-				scanLayout.setMargin( false );
-				scanLayout.setPadding( false );
-				scanLayout.setJustifyContentMode( JustifyContentMode.CENTER );
-				scanLayout.setAlignItems( Alignment.CENTER );
-
 			} );
 
+			scanLayout.setMargin( false );
+			scanLayout.setPadding( false );
+			scanLayout.setJustifyContentMode( JustifyContentMode.CENTER );
+			scanLayout.setAlignItems( Alignment.CENTER );
 			scanLayout.add( reader );
-			add( scanLayout );
-		}
+
+			splitLayout.addToPrimary( scanLayout );
+			splitLayout.addToSecondary( attendeesGrid );
+
+		} );
+
+		splitLayout.setSplitterPosition( 80 );
+		add( splitLayout );
+
+
 	}
 
 
