@@ -32,11 +32,22 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   security:
     user:
       name: ${SPRING_SECURITY_USERNAME}
       password: ${SPRING_SECURITY_PASSWORD}
       roles: ${SPRING_SECURITY_ROLES}
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: chefsandbox@gmail.com
+    password: ${SPRING_MAIL_PASSWORD:1q2w3e4rP@ssw0rd}
+    properties:
+      mail:
+        smtp.auth: true
+        smtp.starttls.enable: true
 
   application:
     name: checkinout-pwa

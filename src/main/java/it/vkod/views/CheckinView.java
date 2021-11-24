@@ -1,11 +1,14 @@
 package it.vkod.views;
 
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -35,10 +38,21 @@ import java.util.ArrayList;
 @PermitAll
 public class CheckinView extends VerticalLayout {
 
+	private final AuthenticatedUser authenticatedUser;
+	private final UserRepository userRepository;
+	private final CheckRepository checkRepository;
+	private final EventRepository eventRepository;
+
+
 	public CheckinView( @Autowired AuthenticatedUser authenticatedUser,
 	                    @Autowired UserRepository userRepository,
 	                    @Autowired CheckRepository checkRepository,
 	                    @Autowired EventRepository eventRepository ) {
+
+		this.authenticatedUser = authenticatedUser;
+		this.userRepository = userRepository;
+		this.checkRepository = checkRepository;
+		this.eventRepository = eventRepository;
 
 		initStyle();
 
@@ -50,9 +64,9 @@ public class CheckinView extends VerticalLayout {
 		user.ifPresent( organizer -> {
 
 			final var attendeesGrid = new Grid< User >();
-			attendeesGrid.addColumn( User::getFirstName ).setHeader( "First Name" );
-			attendeesGrid.addColumn( User::getLastName ).setHeader( "LastName" );
-			attendeesGrid.addColumn( User::getUsername ).setHeader( "Username" );
+			attendeesGrid.addColumn( User::getFirstName ).setHeader( "First Name" ).setKey( "first_name" );
+			attendeesGrid.addColumn( User::getLastName ).setHeader( "LastName" ).setKey( "last_name" );
+			attendeesGrid.addColumn( User::getEmail ).setHeader( "Email" ).setKey( "email" );
 			attendeesGrid.addThemeVariants( GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES );
 
 			final var userList = new ArrayList< User >();
@@ -70,57 +84,8 @@ public class CheckinView extends VerticalLayout {
 			reader.setId( "video" ); //id needs to be 'video' if From.camera.
 			reader.setStyle( "object-fit: cover; width:100; height:100vh; max-height:100" );
 
-			reader.addValueChangeListener( scannedQRCode -> {
-
-				final var oAttendee = userRepository.findByUsername( scannedQRCode.getValue() );
-				if ( oAttendee.isPresent() ) {
-					final var attendee = oAttendee.get();
-
-					final var hasCheckedInBefore = checkRepository.findByCheckedOnAndQrcode( Date.valueOf( LocalDate.now() ), scannedQRCode.getValue() );
-
-					if ( hasCheckedInBefore.isEmpty() ) {
-						final var checkEntity = new Check()
-								.withActive( true )
-								.withCurrentSession( VaadinSession.getCurrent().getSession().getId() )
-								.withPincode( 111111 )
-								.withCheckedInAt( Time.valueOf( LocalTime.now() ) )
-								.withCheckedOutAt( Time.valueOf( LocalTime.now() ) )
-								.withQrcode( scannedQRCode.getValue() )
-								.withLat( 10.00F )
-								.withLon( 10.00F )
-								.withCheckedOn( Date.valueOf( LocalDate.now() ) );
-						final var check = checkRepository.save( checkEntity );
-
-						final var eventEntity = new Event()
-								.withCheckId( check.getId() )
-								.withAttendeeId( attendee.getId() )
-								.withOrganizerId( organizer.getId() )
-								.withCheckType( "IN" );
-
-						final var event = eventRepository.save( eventEntity );
-
-						final var foundUser = userRepository.findById( event.getAttendeeId() );
-						foundUser.ifPresent( userList::add );
-						attendeesGrid.setItems( userList );
-
-						Notification.show( attendee.getFirstName() + " " + attendee.getLastName() + " has checked IN" +
-										"." + "Organized by " + organizer.getFirstName() + " " + organizer.getLastName(),
-								4000,
-								Notification.Position.BOTTOM_CENTER ).open();
-					} else {
-						Notification.show( ( "Already Checked Before (?): " + scannedQRCode.getValue() ),
-								4000,
-								Notification.Position.BOTTOM_CENTER ).open();
-					}
-
-				} else {
-					Notification.show( ( "Rejected (X): " + scannedQRCode.getValue() ),
-							4000,
-							Notification.Position.BOTTOM_CENTER ).open();
-				}
-
-
-			} );
+			reader.addValueChangeListener( scannedQRCode -> checkInUser( organizer, attendeesGrid, userList,
+					scannedQRCode.getValue() ) );
 
 			scanLayout.setMargin( false );
 			scanLayout.setPadding( false );
@@ -128,8 +93,21 @@ public class CheckinView extends VerticalLayout {
 			scanLayout.setAlignItems( Alignment.CENTER );
 			scanLayout.add( reader );
 
+			final var changesLayout = new VerticalLayout();
+			FormLayout failSafeLayout = new FormLayout();
+
+			TextField usernameField = new TextField();
+			usernameField.setLabel( "Student Username" );
+			usernameField.setRequired( true );
+
+			final var failSafeRegisterButton = new Button( "Check IN Manually",
+					onClick -> checkInUser( organizer, attendeesGrid, userList, usernameField.getValue() ) );
+
+			failSafeLayout.add( usernameField, failSafeRegisterButton );
+			changesLayout.add( failSafeLayout, attendeesGrid );
+
 			splitLayout.addToPrimary( scanLayout );
-			splitLayout.addToSecondary( attendeesGrid );
+			splitLayout.addToSecondary( changesLayout );
 
 		} );
 
@@ -137,6 +115,58 @@ public class CheckinView extends VerticalLayout {
 		add( splitLayout );
 
 
+	}
+
+
+	private void checkInUser( final User organizer, final Grid< User > attendeesGrid,
+	                          final ArrayList< User > userList, final String scannedQRCode ) {
+
+		final var oAttendee = userRepository.findByUsername( scannedQRCode );
+		if ( oAttendee.isPresent() ) {
+			final var attendee = oAttendee.get();
+
+			final var hasCheckedInBefore = checkRepository.findByCheckedOnAndQrcode( Date.valueOf( LocalDate.now() ), scannedQRCode );
+
+			if ( hasCheckedInBefore.isEmpty() ) {
+				final var checkEntity = new Check()
+						.withActive( true )
+						.withCurrentSession( VaadinSession.getCurrent().getSession().getId() )
+						.withPincode( 111111 )
+						.withCheckedInAt( Time.valueOf( LocalTime.now() ) )
+						.withCheckedOutAt( Time.valueOf( LocalTime.now() ) )
+						.withQrcode( scannedQRCode )
+						.withLat( 10.00F )
+						.withLon( 10.00F )
+						.withCheckedOn( Date.valueOf( LocalDate.now() ) );
+				final var check = checkRepository.save( checkEntity );
+
+				final var eventEntity = new Event()
+						.withCheckId( check.getId() )
+						.withAttendeeId( attendee.getId() )
+						.withOrganizerId( organizer.getId() )
+						.withCheckType( "IN" );
+
+				final var event = eventRepository.save( eventEntity );
+
+				final var foundUser = userRepository.findById( event.getAttendeeId() );
+				foundUser.ifPresent( userList::add );
+				attendeesGrid.setItems( userList );
+
+				Notification.show( attendee.getFirstName() + " " + attendee.getLastName() + " has checked IN" +
+								"." + "Organized by " + organizer.getFirstName() + " " + organizer.getLastName(),
+						4000,
+						Notification.Position.BOTTOM_CENTER ).open();
+			} else {
+				Notification.show( ( "Already Checked Before (?): " + scannedQRCode ),
+						4000,
+						Notification.Position.BOTTOM_CENTER ).open();
+			}
+
+		} else {
+			Notification.show( ( "Invalid or Unregistered QR ! ->  " + scannedQRCode ),
+					4000,
+					Notification.Position.BOTTOM_CENTER ).open();
+		}
 	}
 
 
