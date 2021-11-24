@@ -10,6 +10,11 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends CrudRepository< User, Long > {
 
+	Optional< User > findByUsernameAndHashedPassword( final String username, final String hashedPassword );
+
+	Optional< User > findByEmailAndHashedPassword( final String email, final String hashedPassword );
+
+	Optional< User > findByPhoneAndHashedPassword( final String phone, final String hashedPassword );
 
 	Optional< User > findByUsername( final String username );
 

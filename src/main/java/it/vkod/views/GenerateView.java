@@ -11,10 +11,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
-import it.vkod.security.AuthenticatedUser;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import it.vkod.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.security.PermitAll;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -22,50 +22,61 @@ import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle( "Generate" )
 @Route( value = "gen" )
-@PermitAll
+@AnonymousAllowed
 public class GenerateView extends VerticalLayout {
 
-	public GenerateView( @Autowired AuthenticatedUser authenticatedUser ) {
+	private final UserRepository userRepository;
+
+
+	public GenerateView( @Autowired UserRepository userRepository ) {
+
+		this.userRepository = userRepository;
 
 		addClassNames( "flex", "flex-col", "h-full" );
 
-		final var oUser = authenticatedUser.get();
 
-		oUser.ifPresent( user -> {
+		final var generateLayout = new VerticalLayout();
+		final var usernameField = new TextField();
 
-			final var generateLayout = new VerticalLayout();
-			final var qrField = new TextField( user.getUsername() );
-			final var generateButton = new Button( "Generate", onClick -> {
+		final var generateButton = new Button( "Generate", onClick -> {
+
+			final var oUser = this.userRepository.findByUsername( usernameField.getValue().toLowerCase() );
+
+			if ( oUser.isPresent() ) {
+				final var user = oUser.get();
 				try {
-					generateLayout.add( convertToImage( generateQR( user.getUsername(), 512, 512 ), user.getUsername() ) );
+					generateLayout.add( convertToImage( generateQR( user, 512, 512 ), user.getUsername() ) );
 					Notification.show( ( "Generated a QR Code for " + user.getUsername() ), 8000,
 							Notification.Position.BOTTOM_CENTER ).open();
 
 				} catch ( WriterException | IOException fileEx ) {
 					Notification.show( fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER ).open();
 				}
-			} );
-
-			generateLayout.setMargin( false );
-			generateLayout.setPadding( false );
-			generateLayout.setJustifyContentMode( JustifyContentMode.CENTER );
-			generateLayout.setAlignItems( Alignment.CENTER );
-			generateLayout.add( qrField, generateButton );
-
-			setJustifyContentMode( JustifyContentMode.CENTER );
-			setHorizontalComponentAlignment( Alignment.CENTER );
-			setAlignItems( Alignment.CENTER );
-			add( generateLayout );
+			} else {
+				Notification.show( "USER DOES NOT EXIST !! ", 3000, Notification.Position.BOTTOM_CENTER ).open();
+			}
 
 		} );
+
+		generateLayout.setMargin( false );
+		generateLayout.setPadding( false );
+		generateLayout.setJustifyContentMode( JustifyContentMode.CENTER );
+		generateLayout.setAlignItems( Alignment.CENTER );
+		generateLayout.add( usernameField, generateButton );
+
+		setJustifyContentMode( JustifyContentMode.CENTER );
+		setHorizontalComponentAlignment( Alignment.CENTER );
+		setAlignItems( Alignment.CENTER );
+		add( generateLayout );
 
 
 	}
 
 
-	private Image convertToImage( byte[] imageData, String imageInfo ) {
+	private Image convertToImage( final byte[] imageData, final String username ) {
 
-		return new Image( new StreamResource( "isr", ( InputStreamFactory ) () -> new ByteArrayInputStream( imageData ) ), imageInfo );
+		return new Image( new StreamResource( username.concat( "_QR.png" ),
+				( InputStreamFactory ) () -> new ByteArrayInputStream( imageData ) ), username );
 	}
 
 }

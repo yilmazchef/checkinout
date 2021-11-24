@@ -8,6 +8,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -23,6 +24,7 @@ import it.vkod.repositories.EventRepository;
 import it.vkod.repositories.UserRepository;
 import it.vkod.security.AuthenticatedUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.annotation.security.PermitAll;
 import java.sql.Date;
@@ -42,17 +44,20 @@ public class CheckinView extends VerticalLayout {
 	private final UserRepository userRepository;
 	private final CheckRepository checkRepository;
 	private final EventRepository eventRepository;
+	private final BCryptPasswordEncoder passwordEncoder;
 
 
 	public CheckinView( @Autowired AuthenticatedUser authenticatedUser,
 	                    @Autowired UserRepository userRepository,
 	                    @Autowired CheckRepository checkRepository,
-	                    @Autowired EventRepository eventRepository ) {
+	                    @Autowired EventRepository eventRepository,
+	                    @Autowired BCryptPasswordEncoder passwordEncoder ) {
 
 		this.authenticatedUser = authenticatedUser;
 		this.userRepository = userRepository;
 		this.checkRepository = checkRepository;
 		this.eventRepository = eventRepository;
+		this.passwordEncoder = passwordEncoder;
 
 		initStyle();
 
@@ -111,7 +116,9 @@ public class CheckinView extends VerticalLayout {
 
 		} );
 
-		splitLayout.setSplitterPosition( 80 );
+		splitLayout.setSplitterPosition( 50 );
+		splitLayout.addThemeVariants( SplitLayoutVariant.LUMO_SMALL);
+
 		add( splitLayout );
 
 
@@ -149,7 +156,7 @@ public class CheckinView extends VerticalLayout {
 					Event data = null;
 				};
 
-				if ( oEvent.isPresent()) {
+				if ( oEvent.isPresent() ) {
 					eventBeingEdited.data = oEvent.get()
 							.withCheckId( check.getId() )
 							.withAttendeeId( attendee.getId() )

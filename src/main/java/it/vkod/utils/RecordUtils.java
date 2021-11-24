@@ -11,9 +11,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Random;
+
 @SpringComponent
 @RequiredArgsConstructor
 public class RecordUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger( RecordUtils.class );
 
 	private final PasswordEncoder passwordEncoder;
 	private final UserRepository userRepository;
@@ -23,7 +27,6 @@ public class RecordUtils {
 	public CommandLineRunner initUserRecords() {
 
 		return args -> {
-			Logger logger = LoggerFactory.getLogger( getClass() );
 			if ( userRepository.count() != 0L ) {
 				logger.info( "Using existing database" );
 				return;
@@ -46,8 +49,8 @@ public class RecordUtils {
 			createUserRecord( "quinten.declerck", profileImg2, "Quinten", "De Clerck", "TEACHER" );
 
 			createUserRecord( "pearl.de.smet", profileImg2, "Pearl", "De Smet", "LEADER" );
+			createUserRecord( "cindy.pipeleers", profileImg1, "Cindy", "Pipeleers", "MANAGER" );
 			createUserRecord( "wouter.vandenberge", profileImg2, "Wouter", "Van den Berge", "ADMIN" );
-
 
 		};
 	}
@@ -59,10 +62,11 @@ public class RecordUtils {
 				.withProfile( profile )
 				.withFirstName( firstName ).withLastName( lastName )
 				.withEmail( username.concat( "@" ).concat( "@intecbrussel.be" ) )
-				.withPhone( "046733254" + username.length() )
+				.withPhone( String.format( "0467334%d", username.length() * new Random().nextInt( 1000 ) ) )
 				.withRoles( roles );
 
-		userRepository.save( user );
+		final var savedUser = userRepository.save( user );
+		logger.info( "New record is added: " + savedUser );
 	}
 
 }

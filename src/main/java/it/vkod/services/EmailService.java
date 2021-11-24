@@ -2,6 +2,7 @@ package it.vkod.services;
 
 
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -23,7 +24,7 @@ public class EmailService {
 	}
 
 
-	public void sendSimpleMessage( final String to, final String subject, final String text ) {
+	public void sendSimpleMessage( final String to, final String subject, final String text ) throws MailException {
 
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom( "chefsandbox@gmail.com" );
@@ -31,11 +32,12 @@ public class EmailService {
 		message.setSubject( subject );
 		message.setText( text );
 		emailSender.send( message );
+
 	}
 
 
 	public void sendMessageWithAttachment( final String to, final String subject, final String text,
-	                                       final String pathToAttachment ) throws MessagingException {
+	                                       final String pathToAttachment ) throws MessagingException, MailException {
 
 		MimeMessage message = emailSender.createMimeMessage();
 
