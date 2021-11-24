@@ -159,7 +159,7 @@ public class CheckoutView extends VerticalLayout {
 					Event data = null;
 				};
 
-				if ( oEvent.isPresent() ) {
+				if ( oEvent.isPresent() && oEvent.get().getCheckType().equalsIgnoreCase( "OUT" ) ) {
 					eventBeingEdited.data = oEvent.get()
 							.withCheckId( check.getId() )
 							.withAttendeeId( attendee.getId() )
