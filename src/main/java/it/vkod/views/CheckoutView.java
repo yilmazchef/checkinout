@@ -153,13 +153,14 @@ public class CheckoutView extends VerticalLayout {
 								.withLon( 20.00F )
 				);
 
-				final var oEvent = eventRepository.findByAttendeeIdAndCheckId( attendee.getId(), check.getId() );
+				final var oEvent = eventRepository.findByAttendeeIdAndCheckIdAndCheckType( attendee.getId(),
+						check.getId(), "OUT" );
 
 				final var eventBeingEdited = new Object() {
 					Event data = null;
 				};
 
-				if ( oEvent.isPresent() && oEvent.get().getCheckType().equalsIgnoreCase( "OUT" ) ) {
+				if ( oEvent.isPresent() ) {
 					eventBeingEdited.data = oEvent.get()
 							.withCheckId( check.getId() )
 							.withAttendeeId( attendee.getId() )

@@ -15,6 +15,9 @@ public interface EventRepository extends CrudRepository< Event, Long > {
 
 	List< Event > findByAttendeeId( final Long attendeeId );
 
-	Optional< Event > findByAttendeeIdAndCheckId( final Long attendeeId, final Long checkId );
+	List< Event > findByAttendeeIdAndCheckId( final Long attendeeId, final Long checkId );
+
+	Optional< Event > findByAttendeeIdAndCheckIdAndCheckType( final Long attendeeId, final Long checkId,
+	                                                          final String checkType );
 
 }

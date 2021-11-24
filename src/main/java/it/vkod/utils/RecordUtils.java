@@ -31,20 +31,23 @@ public class RecordUtils {
 
 			logger.info( "Generating pre-defined user records" );
 
-			createUserRecord( "student",
-					"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80",
-					"John", "Doe",
-					"USER" );
+			final var profileImg1 = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80";
+			final var profileImg2 = "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80";
 
-			createUserRecord( "yilmaz.mustafa",
-					"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80",
-					"Yilmaz", "Mustafa",
-					"ADMIN" );
+			createUserRecord( "student", profileImg1, "John", "Doe", "USER" );
 
-			createUserRecord( "pearl.de.smet",
-					"https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80",
-					"Pearl", "De Smet",
-					"ADMIN" );
+			createUserRecord( "yilmaz.mustafa", profileImg2, "Yilmaz", "Mustafa", "TEACHER" );
+			createUserRecord( "patrick.geudens", profileImg1, "Patrick", "Geudens", "TEACHER" );
+			createUserRecord( "atilla.balin", profileImg2, "Atilla", "Balin", "TEACHER" );
+			createUserRecord( "manuel.cogneau", profileImg1, "Manuel", "Cogneau", "TEACHER" );
+			createUserRecord( "benedikt.lantsoght", profileImg2, "Benedikt", "Lantsoght", "TEACHER" );
+			createUserRecord( "kenan.kurda", profileImg2, "Kenan", "Kurda", "TEACHER" );
+			createUserRecord( "alexander.keisse", profileImg1, "Alexander", "Keisse", "TEACHER" );
+			createUserRecord( "quinten.declerck", profileImg2, "Quinten", "De Clerck", "TEACHER" );
+
+			createUserRecord( "pearl.de.smet", profileImg2, "Pearl", "De Smet", "LEADER" );
+			createUserRecord( "wouter.vandenberge", profileImg2, "Wouter", "Van den Berge", "ADMIN" );
+
 
 		};
 	}

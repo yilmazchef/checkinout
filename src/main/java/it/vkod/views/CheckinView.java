@@ -142,15 +142,14 @@ public class CheckinView extends VerticalLayout {
 				final var check = checkRepository.save( checkEntity );
 
 
-
-
-				final var oEvent = eventRepository.findByAttendeeIdAndCheckId( attendee.getId(), check.getId() );
+				final var oEvent = eventRepository.findByAttendeeIdAndCheckIdAndCheckType( attendee.getId(),
+						check.getId(), "IN" );
 
 				final var eventBeingEdited = new Object() {
 					Event data = null;
 				};
 
-				if ( oEvent.isPresent() && oEvent.get().getCheckType().equalsIgnoreCase( "IN" ) ) {
+				if ( oEvent.isPresent()) {
 					eventBeingEdited.data = oEvent.get()
 							.withCheckId( check.getId() )
 							.withAttendeeId( attendee.getId() )
