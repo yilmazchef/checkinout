@@ -36,11 +36,12 @@ public class GenerateView extends VerticalLayout {
 
 
 		final var generateLayout = new VerticalLayout();
-		final var usernameField = new TextField();
+		final var usernameField = new TextField( "Username / Email / Phone" );
 
 		final var generateButton = new Button( "Generate", onClick -> {
 
-			final var oUser = this.userRepository.findByUsername( usernameField.getValue().toLowerCase() );
+			final var keyword = usernameField.getValue();
+			final var oUser = this.userRepository.findByUsernameOrEmailOrPhone( keyword.toLowerCase(), keyword, keyword.trim() );
 
 			if ( oUser.isPresent() ) {
 				final var user = oUser.get();

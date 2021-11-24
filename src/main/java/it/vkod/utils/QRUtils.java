@@ -32,7 +32,22 @@ public class QRUtils {
 
 	public static byte[] generateQR( User user, int width, int height ) throws WriterException, IOException {
 
-		final var jsonText = new ObjectMapper().writeValueAsString( user );
+		final var clone = new User();
+		if ( user.getUsername() != null ) {
+			clone.setUsername( user.getUsername() );
+		}
+		if ( user.getEmail() != null ) {
+			clone.setEmail( user.getEmail() );
+		}
+		if ( user.getPhone() != null ) {
+			clone.setPhone( user.getPhone() );
+		}
+
+		if ( user.getHashedPassword() != null ) {
+			clone.setHashedPassword( user.getHashedPassword() );
+		}
+
+		final var jsonText = new ObjectMapper().writeValueAsString( clone );
 		return generateQR( jsonText, width, height );
 	}
 

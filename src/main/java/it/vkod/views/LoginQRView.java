@@ -75,10 +75,10 @@ public class LoginQRView extends VerticalLayout {
 		scanLayout.add( reader );
 
 		final var splitLayout = new SplitLayout();
-		splitLayout.setOrientation( SplitLayout.Orientation.VERTICAL );
+		splitLayout.setOrientation( SplitLayout.Orientation.HORIZONTAL );
 		splitLayout.addToPrimary( loginForm );
 		splitLayout.addToSecondary( scanLayout );
-		splitLayout.setSplitterPosition( 40 );
+		splitLayout.setSplitterPosition( 50 );
 		splitLayout.setSizeFull();
 
 		add( splitLayout );
