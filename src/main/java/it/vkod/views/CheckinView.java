@@ -138,17 +138,35 @@ public class CheckinView extends VerticalLayout {
 						.withLat( 10.00F )
 						.withLon( 10.00F )
 						.withCheckedOn( Date.valueOf( LocalDate.now() ) );
+
 				final var check = checkRepository.save( checkEntity );
 
-				final var eventEntity = new Event()
-						.withCheckId( check.getId() )
-						.withAttendeeId( attendee.getId() )
-						.withOrganizerId( organizer.getId() )
-						.withCheckType( "IN" );
 
-				final var event = eventRepository.save( eventEntity );
 
-				final var foundUser = userRepository.findById( event.getAttendeeId() );
+
+				final var oEvent = eventRepository.findByAttendeeIdAndCheckId( attendee.getId(), check.getId() );
+
+				final var eventBeingEdited = new Object() {
+					Event data = null;
+				};
+
+				if ( oEvent.isPresent() && oEvent.get().getCheckType().equalsIgnoreCase( "IN" ) ) {
+					eventBeingEdited.data = oEvent.get()
+							.withCheckId( check.getId() )
+							.withAttendeeId( attendee.getId() )
+							.withOrganizerId( organizer.getId() )
+							.withCheckType( "IN" );
+				} else {
+					eventBeingEdited.data = new Event()
+							.withCheckId( check.getId() )
+							.withAttendeeId( attendee.getId() )
+							.withOrganizerId( organizer.getId() )
+							.withCheckType( "IN" );
+				}
+
+				final var savedOrUpdatedEvent = eventRepository.save( eventBeingEdited.data );
+
+				final var foundUser = userRepository.findById( savedOrUpdatedEvent.getAttendeeId() );
 				foundUser.ifPresent( userList::add );
 				attendeesGrid.setItems( userList );
 
