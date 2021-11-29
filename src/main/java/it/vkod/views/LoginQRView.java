@@ -2,6 +2,7 @@ package it.vkod.views;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.notification.Notification;
@@ -14,9 +15,9 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.data.entity.User;
+import it.vkod.repositories.UserRepository;
 import it.vkod.security.AuthenticatedUser;
 import it.vkod.services.EmailService;
-import it.vkod.utils.QRUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle( "Login with QR Code" )
@@ -26,6 +27,8 @@ public class LoginQRView extends VerticalLayout {
 
 	private final AuthenticatedUser authenticatedUser;
 	private final EmailService emailService;
+	private final UserRepository userRepository;
+	private final ObjectMapper objectMapper;
 
 	private final VerticalLayout scanLayout = new VerticalLayout();
 	private final VerticalLayout loginLayout = new VerticalLayout();
@@ -33,10 +36,12 @@ public class LoginQRView extends VerticalLayout {
 	private final LoginForm loginForm = new LoginForm(); // (1)
 
 
-	public LoginQRView( @Autowired AuthenticatedUser authenticatedUser, @Autowired EmailService emailService ) {
+	public LoginQRView( @Autowired AuthenticatedUser authenticatedUser, @Autowired EmailService emailService, @Autowired UserRepository userRepository ) {
 
 		this.authenticatedUser = authenticatedUser;
 		this.emailService = emailService;
+		this.userRepository = userRepository;
+		this.objectMapper = new ObjectMapper();
 
 		initStyle();
 
@@ -53,33 +58,42 @@ public class LoginQRView extends VerticalLayout {
 
 		loginLayout.add( loginForm );
 
-		final var reader = new ZXingVaadinReader();
+		final var scanner = new ZXingVaadinReader();
 
-		reader.setFrom( Constants.From.camera );
-		reader.setId( "video" ); //id needs to be 'video' if From.camera.
-		reader.setStyle( "object-fit: cover; width:100; height:100vh; max-height:100" );
+		scanner.setFrom( Constants.From.camera );
+		scanner.setId( "video" ); //id needs to be 'video' if From.camera.
+		scanner.setStyle( "object-fit:cover; max-width:100%; height:auto;" );
 
-		reader.addValueChangeListener( scannedQRCode -> {
-			final var scannedUser = new Object() {
-				User data = null;
-			};
+		scanner.addValueChangeListener( scannedQRCode -> {
+
+			Notification.show( scannedQRCode.getValue() );
+
 			try {
-				scannedUser.data = QRUtils.extractQR( scannedQRCode.getValue() );
-			} catch ( JsonProcessingException jsonProcessingException ) {
-				Notification.show( jsonProcessingException.getMessage(), 4000, Notification.Position.BOTTOM_CENTER ).open();
+				this.objectMapper.readValue( scannedQRCode.getValue(), User.class );
+			} catch ( JsonProcessingException jsonProcessingEx ) {
+				Notification.show( jsonProcessingEx.getMessage(), 4000, Notification.Position.BOTTOM_CENTER );
 			}
-			i18n.getForm().setUsername( scannedUser.data.getUsername() );
-			i18n.getForm().setPassword( scannedUser.data.getHashedPassword() );
+
+			final var oScannedUser = this.userRepository.findByUsernameOrEmailOrPhone( scannedQRCode.getValue(), scannedQRCode.getValue(), scannedQRCode.getValue() );
+
+			if ( oScannedUser.isPresent() ) {
+				final var scannedUser = oScannedUser.get();
+				i18n.getForm().setUsername( scannedUser.getUsername() );
+				i18n.getForm().setPassword( scannedUser.getHashedPassword() );
+			}
+
 		} );
 
-		scanLayout.add( reader );
+		scanLayout.add( scanner );
 
 		final var splitLayout = new SplitLayout();
 		splitLayout.setOrientation( SplitLayout.Orientation.HORIZONTAL );
 		splitLayout.addToPrimary( loginForm );
 		splitLayout.addToSecondary( scanLayout );
-		splitLayout.setSplitterPosition( 50 );
+		splitLayout.setSplitterPosition( 75 );
 		splitLayout.setSizeFull();
+
+		splitLayout.getStyle().set( "margin", "0" ).set( "padding", "0" );
 
 		add( splitLayout );
 
@@ -105,9 +119,11 @@ public class LoginQRView extends VerticalLayout {
 		loginLayout.setSpacing( false );
 		loginLayout.setWidthFull();
 
-		loginLayout.setJustifyContentMode( FlexComponent.JustifyContentMode.EVENLY );
-		loginLayout.setHorizontalComponentAlignment( FlexComponent.Alignment.STRETCH );
-		loginLayout.setAlignItems( FlexComponent.Alignment.STRETCH );
+
+		setSizeFull();
+		setMargin( false );
+		setPadding( false );
+		setSpacing( false );
 
 	}
 

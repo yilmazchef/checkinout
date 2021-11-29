@@ -28,7 +28,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Locale;
 
 import static com.vaadin.flow.component.notification.Notification.Position.BOTTOM_CENTER;
 import static com.vaadin.flow.component.notification.Notification.show;
@@ -63,7 +62,7 @@ public class RegisterView extends VerticalLayout {
 		usernameField.setRequired( true );
 
 		usernameField.addValueChangeListener( onChange -> {
-			emailField.setValue( onChange.getValue().concat( "@intecbrussel.be" ) );
+			emailField.setValue( onChange.getValue().toLowerCase().concat( "@intecbrussel.be" ) );
 			if ( emailField.isInvalid() ) {
 				usernameField.clear();
 			}
@@ -90,15 +89,17 @@ public class RegisterView extends VerticalLayout {
 		repeatField.setRequiredIndicatorVisible( true );
 
 		repeatField.addValueChangeListener( onChange -> {
-			final var passwordsMatch = passwordField.getValue().contentEquals( onChange.getValue() );
-			if ( passwordsMatch && ( !passwordField.isEmpty() && !repeatField.isEmpty() ) ) {
+			final var passwordsMatch = passwordField.getValue().equalsIgnoreCase( onChange.getValue() );
+			if ( !passwordsMatch && ( !passwordField.isEmpty() && !repeatField.isEmpty() ) ) {
 				passwordField.getStyle().set( "color", "red" );
 				passwordField.setInvalid( true );
 				repeatField.getStyle().set( "color", "red" );
 				repeatField.setInvalid( true );
 			} else {
 				passwordField.getStyle().set( "color", "green" );
+				passwordField.setInvalid( true );
 				repeatField.getStyle().set( "color", "green" );
+				repeatField.setInvalid( true );
 			}
 		} );
 
@@ -111,18 +112,17 @@ public class RegisterView extends VerticalLayout {
 		formLayout.addFormItem( phoneField, "Phone" );
 		formLayout.addFormItem( passwordField, "Password" );
 		formLayout.addFormItem( repeatField, "Repeat Password" );
-		formLayout.add( acceptCheck );
 
 		final var submitButton = new Button( "Submit Form", onClick -> {
 
-			final var exists = this.userRepository.existsByUsername( usernameField.getValue().toLowerCase() );
+			final var exists = this.userRepository.existsByUsername( usernameField.getValue() );
 
-			if ( Boolean.FALSE.equals( exists ) && !passwordField.isEmpty() && acceptCheck.getValue().equals( Boolean.TRUE ) ) {
+			if ( exists.equals( Boolean.FALSE ) ) {
 				final var user = new User()
-						.withFirstName( firstNameField.getValue().toLowerCase( Locale.ROOT ) )
-						.withLastName( lastNameField.getValue().toLowerCase( Locale.ROOT ) )
-						.withUsername( usernameField.getValue().toLowerCase( Locale.ROOT ) )
-						.withEmail( emailField.getValue().toLowerCase( Locale.ROOT ) )
+						.withFirstName( firstNameField.getValue().toLowerCase() )
+						.withLastName( lastNameField.getValue().toLowerCase() )
+						.withUsername( usernameField.getValue().toLowerCase() )
+						.withEmail( emailField.getValue().toLowerCase() )
 						.withHashedPassword( this.passwordEncoder.encode( passwordField.getValue() ) )
 						.withPhone( phoneField.getValue() )
 						.withRegisteredOn( Date.valueOf( LocalDate.now() ) )
@@ -157,10 +157,25 @@ public class RegisterView extends VerticalLayout {
 			}
 		} );
 
-		formLayout.add( submitButton );
+		submitButton.setEnabled( false );
 
-		add( formLayout );
+		acceptCheck.addValueChangeListener( onValueChange -> submitButton.setEnabled( onValueChange.getValue() ) );
 
+		add( formLayout, acceptCheck, submitButton );
+
+	}
+
+
+	public void initLayout() {
+
+		setPadding( false );
+		setMargin( false );
+		setSpacing( false );
+		setSizeFull();
+
+		setJustifyContentMode( JustifyContentMode.CENTER );
+		setHorizontalComponentAlignment( Alignment.CENTER );
+		setAlignItems( Alignment.CENTER );
 	}
 
 
@@ -170,7 +185,9 @@ public class RegisterView extends VerticalLayout {
 
 		try {
 
-			layout.add( convertToImage( generateQR( user, 512, 512 ), user.getUsername() ) );
+			final var userJson = String.format( "{ \"username\" : \"%s\", \"hashedPassword\" : \"%s\" }", user.getUsername(), user.getHashedPassword() );
+
+			layout.add( convertToImage( generateQR( userJson, 512, 512 ), user.getUsername() ) );
 
 			show( ( "Generated a QR Code for " + user.getUsername() ), 8000,
 					BOTTOM_CENTER ).open();
@@ -184,9 +201,7 @@ public class RegisterView extends VerticalLayout {
 		layout.setJustifyContentMode( JustifyContentMode.CENTER );
 		layout.setAlignItems( Alignment.CENTER );
 
-		setJustifyContentMode( JustifyContentMode.CENTER );
-		setHorizontalComponentAlignment( Alignment.CENTER );
-		setAlignItems( Alignment.CENTER );
+		add( layout );
 	}
 
 

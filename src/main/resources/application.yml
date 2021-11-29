@@ -30,7 +30,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/checkinoutdb?createDatabaseIfNotExist=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&autoReconnect=true&useSSL=false}
     username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:}
+    password: ${SPRING_DATASOURCE_PASSWORD:pass}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   security:
@@ -42,7 +42,7 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: chefsandbox@gmail.com
+    username: ${SPRING_MAIL_PASSWORD:chefsandbox@gmail.com}
     password: ${SPRING_MAIL_PASSWORD:1q2w3e4rP@ssw0rd}
     properties:
       mail:

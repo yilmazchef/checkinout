@@ -1,19 +1,21 @@
 package it.vkod.utils;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import it.vkod.data.entity.User;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class QRUtils {
+
+	private QRUtils() {
+
+	}
+
 
 	/**
 	 * This method takes the text to be encoded, the width and height of the QR Code,
@@ -27,34 +29,6 @@ public class QRUtils {
 		ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
 		MatrixToImageWriter.writeToStream( bitMatrix, "PNG", pngOutputStream );
 		return pngOutputStream.toByteArray();
-	}
-
-
-	public static byte[] generateQR( User user, int width, int height ) throws WriterException, IOException {
-
-		final var clone = new User();
-		if ( user.getUsername() != null ) {
-			clone.setUsername( user.getUsername() );
-		}
-		if ( user.getEmail() != null ) {
-			clone.setEmail( user.getEmail() );
-		}
-		if ( user.getPhone() != null ) {
-			clone.setPhone( user.getPhone() );
-		}
-
-		if ( user.getHashedPassword() != null ) {
-			clone.setHashedPassword( user.getHashedPassword() );
-		}
-
-		final var jsonText = new ObjectMapper().writeValueAsString( clone );
-		return generateQR( jsonText, width, height );
-	}
-
-
-	public static User extractQR( final String userJSON ) throws JsonProcessingException {
-
-		return new ObjectMapper().readValue( userJSON, User.class );
 	}
 
 }

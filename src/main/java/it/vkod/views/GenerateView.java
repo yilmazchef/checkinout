@@ -3,6 +3,7 @@ package it.vkod.views;
 
 import com.google.zxing.WriterException;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -46,9 +47,11 @@ public class GenerateView extends VerticalLayout {
 			if ( oUser.isPresent() ) {
 				final var user = oUser.get();
 				try {
-					generateLayout.add( convertToImage( generateQR( user, 512, 512 ), user.getUsername() ) );
-					Notification.show( ( "Generated a QR Code for " + user.getUsername() ), 8000,
-							Notification.Position.BOTTOM_CENTER ).open();
+
+					final var userJson = String.format( "{ \"username\" : \"%s\", \"hashedPassword\" : \"%s\" }", user.getUsername(), user.getHashedPassword() );
+
+					generateLayout.add( convertToImage( generateQR( userJson, 512, 512 ), user.getUsername() ) );
+					Notification.show( ( "Generated a QR Code for " + user.getUsername() ), 8000, Notification.Position.BOTTOM_CENTER ).open();
 
 				} catch ( WriterException | IOException fileEx ) {
 					Notification.show( fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER ).open();
