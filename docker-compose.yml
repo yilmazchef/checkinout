@@ -27,7 +27,7 @@ services:
     depends_on:
       - db_server
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db_server:3306/checkinoutdb?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&autoReconnect=true&useSSL=false
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db_server:3306/checkinoutdb
     links:
       - db_server:db_server
     ports:

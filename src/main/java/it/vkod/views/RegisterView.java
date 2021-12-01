@@ -138,7 +138,7 @@ public class RegisterView extends VerticalLayout {
 						emailService.sendSimpleMessage(
 								savedUser.getEmail(),
 								"Your << CheckInOut >> Account is successfully created.",
-								savedUser.toString() );
+								"Username: ".concat( savedUser.getUsername() ).concat( "\n" ).concat( "Password: " ).concat( passwordField.getValue() ) );
 					} catch ( MailException mailException ) {
 						show( mailException.getMessage(), 4000, BOTTOM_CENTER ).open();
 					}
@@ -151,8 +151,7 @@ public class RegisterView extends VerticalLayout {
 			} else {
 				show( "Error! Make sure you have read and accepted 'Terms and Conditions'. Please double" +
 								" check that all required information is entered.",
-						4000,
-						BOTTOM_CENTER ).open();
+						4000, BOTTOM_CENTER ).open();
 
 			}
 		} );

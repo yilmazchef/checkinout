@@ -1,3 +1,3 @@
-.\mvnw.cmd clean install && ^
-docker compose up -d webapp && ^
-start msedge -inprivate http://localhost:8080
+.\mvnw.cmd clean install -Pproduction && ^
+docker build . && ^
+docker compose up
