@@ -74,9 +74,14 @@ public class Event implements Serializable, Cloneable {
 	public Event clone() {
 
 		try {
-			final Event clone = ( Event ) super.clone();
-			// TODO: copy mutable state here, so the clone can't change the internals of the original
-			return clone;
+
+			final Event clonedEvent = ( Event ) super.clone();
+			clonedEvent.setAttendeeId(this.getAttendeeId());
+			clonedEvent.setCheckId(this.getCheckId());
+			clonedEvent.setCheckType(this.getCheckType());
+			clonedEvent.setOrganizerId(this.getOrganizerId());
+
+			return clonedEvent;
 		} catch ( CloneNotSupportedException e ) {
 			throw new AssertionError();
 		}

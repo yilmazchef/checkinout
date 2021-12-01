@@ -1,6 +1,5 @@
 package it.vkod.data.entity;
 
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -16,137 +15,126 @@ import java.sql.Time;
 @Setter
 @RequiredArgsConstructor
 @ToString
-@Table( "users" )
+@Table("users")
 public class User implements Serializable, Cloneable {
 
-	@Id
-	private Long id;
+  @Id private Long id;
 
-	private String username;
+  private String username;
 
-	private String phone;
+  private String phone;
 
-	private String email;
+  private String email;
 
-	private String firstName;
+  private String firstName;
 
-	private String lastName;
+  private String lastName;
 
-	private String hashedPassword;
+  private String hashedPassword;
 
-	private String roles;
+  private String roles;
 
-	private Date registeredOn;
+  private Date registeredOn;
 
-	private Time registeredAt;
+  private Time registeredAt;
 
-	private Time updatedAt;
+  private Time updatedAt;
 
-	private String profile;
+  private String profile;
 
+  public User withId(final Long id) {
 
-	public User withId( final Long id ) {
+    this.id = id;
+    return this;
+  }
 
-		this.id = id;
-		return this;
-	}
+  public User withUsername(final String username) {
 
+    this.username = username;
+    return this;
+  }
 
-	public User withUsername( final String username ) {
+  public User withEmail(final String email) {
 
-		this.username = username;
-		return this;
-	}
+    this.email = email;
+    return this;
+  }
 
+  public User withPhone(final String phone) {
 
-	public User withEmail( final String email ) {
+    this.phone = phone;
+    return this;
+  }
 
-		this.email = email;
-		return this;
-	}
+  public User withFirstName(final String firstName) {
 
+    this.firstName = firstName;
+    return this;
+  }
 
-	public User withPhone( final String phone ) {
+  public User withLastName(final String lastName) {
 
-		this.phone = phone;
-		return this;
-	}
+    this.lastName = lastName;
+    return this;
+  }
 
+  public User withHashedPassword(final String hashedPassword) {
 
-	public User withFirstName( final String firstName ) {
+    this.hashedPassword = hashedPassword;
+    return this;
+  }
 
-		this.firstName = firstName;
-		return this;
-	}
+  public User withRoles(final String roles) {
 
+    this.roles = roles;
+    return this;
+  }
 
-	public User withLastName( final String lastName ) {
+  public User withRegisteredOn(final Date registeredOn) {
 
-		this.lastName = lastName;
-		return this;
-	}
+    this.registeredOn = registeredOn;
+    return this;
+  }
 
+  public User withRegisteredAt(final Time registeredAt) {
 
-	public User withHashedPassword( final String hashedPassword ) {
+    this.registeredAt = registeredAt;
+    return this;
+  }
 
-		this.hashedPassword = hashedPassword;
-		return this;
-	}
+  public User withUpdatedAt(final Time updatedAt) {
 
+    this.updatedAt = updatedAt;
+    return this;
+  }
 
-	public User withRoles( final String roles ) {
-		
-		this.roles = roles;
-		return this;
-	}
+  public User withProfile(final String profile) {
 
+    this.profile = profile;
+    return this;
+  }
 
-	public User withRegisteredOn( final Date registeredOn ) {
+  public boolean isNew() {
 
-		this.registeredOn = registeredOn;
-		return this;
-	}
+    return this.username == null;
+  }
 
+  @Override
+  public User clone() {
 
-	public User withRegisteredAt( final Time registeredAt ) {
+    try {
+      final User clonedUser = (User) super.clone();
+      clonedUser.setEmail(this.getEmail());
+      clonedUser.setFirstName(this.getEmail());
+      clonedUser.setLastName(this.getEmail());
+      clonedUser.setPhone(this.getPhone());
+      clonedUser.setProfile(this.getProfile());
 
-		this.registeredAt = registeredAt;
-		return this;
-	}
+      // FIXME: Double check here..
 
-
-	public User withUpdatedAt( final Time updatedAt ) {
-
-		this.updatedAt = updatedAt;
-		return this;
-	}
-
-
-	public User withProfile( final String profile ) {
-
-		this.profile = profile;
-		return this;
-	}
-
-
-	public boolean isNew() {
-
-		return this.username == null;
-	}
-
-
-	@Override
-	public User clone() {
-
-		try {
-			final User clone = ( User ) super.clone();
-			// TODO: copy mutable state here, so the clone can't change the internals of the original
-			return clone;
-		} catch ( CloneNotSupportedException e ) {
-			throw new AssertionError();
-		}
-	}
-
+      return clonedUser;
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
+  }
 }
-
-
