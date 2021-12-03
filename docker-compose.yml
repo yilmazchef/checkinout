@@ -7,9 +7,9 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: 'checkinoutdb'
-      MYSQL_ROOT_PASSWORD: 'P@ssw0rd'
+      MYSQL_ROOT_PASSWORD: 'pass'
       MYSQL_USER: 'check'
-      MYSQL_PASSWORD: 'P@ssw0rd'
+      MYSQL_PASSWORD: 'check'
     ports:
       - "3306:3306"
 
@@ -22,12 +22,14 @@ services:
       - "9090:8080"
 
   webapp:
-    build: .
+    image: yilmazchef/checkinout-pwa:latest
     restart: on-failure
     depends_on:
       - db_server
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db_server:3306/checkinoutdb
+      - SPRING_DATASOURCE_USERNAME=check
+      - SPRING_DATASOURCE_PASSWORD=check
     links:
       - db_server:db_server
     ports:

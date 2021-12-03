@@ -152,7 +152,7 @@ public class CheckoutView extends VerticalLayout {
     }
 
     private Button sendExportRequest() {
-        return new Button("Export to CSV", onClick -> UI.getCurrent().getPage().open("export-checks"));
+        return new Button("Export to CSV", onClick -> UI.getCurrent().getPage().open("checks/csv"));
     }
 
     private Button createEmailButton() {

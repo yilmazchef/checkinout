@@ -14,7 +14,7 @@ spring:
   jpa:
     defer-datasource-initialization: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:

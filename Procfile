@@ -1,1 +1,0 @@
-web: java -jar target\checkinout-1.0-SNAPSHOT.jar $PORT

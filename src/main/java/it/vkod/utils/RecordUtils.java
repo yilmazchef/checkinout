@@ -75,7 +75,7 @@ public class RecordUtils {
         User user = new User().withUsername(username).withHashedPassword(passwordEncoder.encode("P@ssw0rd"))
                 .withProfile(profile)
                 .withFirstName(firstName).withLastName(lastName)
-                .withEmail(username.concat("@").concat("@intecbrussel.be"))
+                .withEmail(username.concat("@").concat("intecbrussel.be"))
                 .withPhone(String.format("0467334%d", username.length() * new Random().nextInt(1000)))
                 .withRoles(roles);
 
