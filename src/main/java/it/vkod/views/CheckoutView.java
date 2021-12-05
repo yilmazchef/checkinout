@@ -152,9 +152,7 @@ public class CheckoutView extends VerticalLayout {
                     failSafeLayout.add(usernameField, failSafeRegisterButton);
                     rightLayout.add(failSafeLayout, attendeesGrid);
 
-                    rightLayout.add(attendeesGrid);
-
-                    splitLayout.add(leftLayout);
+                    splitLayout.add(leftLayout, rightLayout);
 
                 });
 
