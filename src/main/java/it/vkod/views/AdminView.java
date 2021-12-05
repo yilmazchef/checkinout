@@ -6,7 +6,6 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteConfiguration;
 import it.vkod.services.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AdminView extends VerticalLayout {
 
     private final AdminService adminService;
-
+    private static final String BASE_URL = "http://localhost:8080/checks/";
 
     public AdminView(@Autowired AdminService adminService) {
 
@@ -39,20 +38,16 @@ public class AdminView extends VerticalLayout {
         final var actionLayout = new VerticalLayout();
 
 
-        String baseURL = RouteConfiguration.forSessionScope().getUrl(AdminView.class);
-        final var baseAbsoluteURL = baseURL.concat("/").concat("checks").concat("/")
-                .replace("adm/", "");
-        
         Anchor pdfAnchor = new Anchor(
-                baseAbsoluteURL.concat("pdf"),
+                BASE_URL.concat("pdf"),
                 "Exporteer als PDF");
 
         Anchor csvAnchor = new Anchor(
-                baseAbsoluteURL.concat("csv"),
+                BASE_URL.concat("csv"),
                 "Exporteer als CSV");
 
         Anchor excelAnchor = new Anchor(
-                baseAbsoluteURL.concat("excel"),
+                BASE_URL.concat("excel"),
                 "Exporteer als PDF");
 
         actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
