@@ -50,7 +50,7 @@ public class PDFExporter {
 
         final var table = new PdfPTable(6);
         table.setWidthPercentage(100f);
-        table.setWidths(new float[]{2.5f, 4.0f, 4f, 2f, 1.5f, 1.5f});
+        table.setWidths(new float[]{2.5f, 2.5f, 4.5f, 2f, 1.5f, 1.5f});
         table.setSpacingBefore(50F);
         table.setSpacingAfter(100F);
 
