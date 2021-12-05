@@ -3,6 +3,7 @@ package it.vkod.services;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import it.vkod.data.dto.CheckDTO;
+import it.vkod.data.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class ExportService {
 
     }
 
-    public void toPDF(HttpServletResponse response, List<CheckDTO> data) throws IOException {
+    public void toPDF(HttpServletResponse response, List<CheckDTO> data, User user) throws IOException {
 
         response.setContentType("application/pdf");
 
@@ -40,7 +41,7 @@ public class ExportService {
         final var headerValue = "attachment; filename=" + FILE_NAME + ".pdf";
         response.setHeader(headerKey, headerValue);
 
-        pdfExporter.export(response, data);
+        pdfExporter.export(response, data, user);
 
     }
 

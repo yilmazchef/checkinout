@@ -6,6 +6,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import it.vkod.data.dto.CheckDTO;
+import it.vkod.data.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -21,74 +22,67 @@ import java.util.List;
 @Component
 public class PDFExporter {
 
-    private final AuthenticationService authenticationService;
-
-    public void export(HttpServletResponse response, List<CheckDTO> data) throws IOException {
+    public void export(HttpServletResponse response, List<CheckDTO> data, User user) throws IOException {
 
         final var document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
 
         document.open();
-        final var font = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
-        font.setSize(9);
-        font.setColor(Color.BLUE);
+        final var hFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+        hFont.setSize(9);
+        hFont.setColor(Color.BLUE);
 
         final var hi = "Aanmelden van " + LocalDate.now();
-        final var h = new Header("Intec Brussel", hi);
+        final var h = new Paragraph(hi, hFont);
 
         document.add(h);
 
         var imageFile = new ClassPathResource("META-INF/resources/images/logo-for-pdf.png");
         var imgB = StreamUtils.copyToByteArray(imageFile.getInputStream());
         final var img = Image.getInstance(imgB);
-        img.setWidthPercentage(25F);
+        img.setSpacingBefore(40F);
 
+        img.scaleAbsolute(64f, 64f);
         document.add(img);
 
         final var table = new PdfPTable(6);
         table.setWidthPercentage(100f);
         table.setWidths(new float[]{2.5f, 2.5f, 4f, 2.5f, 2f, 2f});
-        table.setSpacingBefore(50);
+        table.setSpacingBefore(50F);
+        table.setSpacingAfter(100F);
 
         writeTableHeader(table);
         writeTableData(table, data);
 
         document.add(table);
 
-        final var oUser = authenticationService.get();
-        if (oUser.isPresent()) {
-            final var user = oUser.get();
-            final var name = user.getFirstName() + " " + user.getLastName();
-            final var email = user.getEmail();
+        final var name = user.getFirstName() + " " + user.getLastName();
+        final var email = user.getEmail();
 
-            final var pi = "Met vriendelijke groeten,\n" +
-                    "\n" +
-                    name + "\n" +
-                    email + " \n" +
-                    "\n" +
-                    "\n" +
-                    "INTEC BRUSSEL vzw\n" +
-                    "\n" +
-                    "Rouppeplein 16 te 1000 Brussel\n" +
-                    "Tel: 02 411 29 07\n" +
-                    "\n" +
-                    "Ondernemersnummer: 0475.319.893\n" +
-                    "\n" +
-                    "RPR Brussel\n" +
-                    "\n" +
-                    "www.intecbrussel.be  - meer kansen op werk!";
+        final var pi = "Met vriendelijke groeten,\n" +
+                "\n" +
+                "\n" +
+                name + "\n" +
+                email + " \n" +
+                "\n" +
+                "\n" +
+                "INTEC BRUSSEL vzw\n" +
+                "Rouppeplein 16 te 1000 Brussel\n" +
+                "Tel: 02 411 29 07\n" +
+                "\n" +
+                "\n" +
+                "Ondernemersnummer: 0475.319.893\n" +
+                "RPR Brussel\n" +
+                "www.intecbrussel.be  - meer kansen op werk!";
 
-            final var closingFont = FontFactory.getFont(FontFactory.TIMES_ROMAN);
-            closingFont.setSize(9);
-            closingFont.setColor(Color.BLACK);
+        final var fFont = FontFactory.getFont(FontFactory.TIMES_ROMAN);
+        fFont.setSize(10F);
+        fFont.setColor(Color.BLACK);
 
-            final var p = new Paragraph(pi, font);
-            p.setAlignment(Paragraph.ALIGN_LEFT);
+        final var p = new Paragraph(pi, fFont);
+        p.setAlignment(Paragraph.ALIGN_LEFT);
 
-            p.setSpacingBefore(200);
-
-            document.add(p);
-        }
+        document.add(p);
 
         document.close();
 

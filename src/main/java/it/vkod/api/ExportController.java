@@ -41,7 +41,7 @@ public class ExportController {
     @SneakyThrows
     @GetMapping("/checks/pdf")
     public void toPDF(HttpServletResponse response) {
-        exportService.toPDF(response, checkRepository.findAllChecksOfToday());
+        exportService.toPDF(response, checkRepository.findAllChecksOfToday(), authenticationService.get().get());
     }
 
     @SneakyThrows
