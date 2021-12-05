@@ -99,7 +99,7 @@ public class CheckoutView extends VerticalLayout {
 
                     reader.setFrom(Constants.From.camera);
                     reader.setId("video"); // id needs to be 'video' if From.camera.
-                    reader.setStyle("object-fit: cover; width:400px; height:100vh; max-height:500px");
+                    reader.setStyle("object-fit: cover; width:50%; height:100vh; max-height:90%");
 
                     reader.addValueChangeListener(scannedQRCode -> checkOutUser(scannedQRCode.getValue()));
 
@@ -108,6 +108,8 @@ public class CheckoutView extends VerticalLayout {
                     scanLayout.setJustifyContentMode(JustifyContentMode.CENTER);
                     scanLayout.setAlignItems(Alignment.CENTER);
                     scanLayout.add(reader);
+
+                    // TODO: Add GeoLocation Layout here..
 
                     final var changesLayout = new VerticalLayout();
                     final var failSafeLayout = new FormLayout();

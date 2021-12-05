@@ -1,7 +1,5 @@
 package it.vkod.views;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
@@ -29,18 +27,17 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@PageTitle("Inchecken")
-@Route(value = "in", layout = TemplateLayout.class)
-@RouteAlias("checkin")
-@RouteAlias("")
+@PageTitle("Inchecken-remote")
+@Route(value = "inrem", layout = TemplateLayout.class)
+@RouteAlias("checkin/remote")
 @PermitAll
-public class CheckinView extends VerticalLayout {
+public class RemoteCheckinView extends VerticalLayout {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final CheckService checkService;
 
-    public CheckinView(
+    public RemoteCheckinView(
             AuthenticationService authenticationService, UserService userService,
             CheckService checkService) {
 
@@ -55,7 +52,7 @@ public class CheckinView extends VerticalLayout {
         final var user = this.authenticationService.get();
 
         user.ifPresent(
-                organizer -> {
+                remoteUser -> {
                     final var attendeesGrid = new Grid<CheckDTO>();
                     attendeesGrid
                             .addColumn(CheckDTO::getFirstName)
@@ -96,17 +93,14 @@ public class CheckinView extends VerticalLayout {
                     leftLayout.setMargin(false);
                     leftLayout.setPadding(false);
                     leftLayout.setSpacing(false);
-                    leftLayout.getStyle().set("margin-top", "4vh");
-                    leftLayout.setWidth("45vw");
-                    leftLayout.setHeight("90vh");
                     final var reader = new ZXingVaadinReader();
 
                     reader.setFrom(Constants.From.camera);
                     reader.setId("video"); // id needs to be 'video' if From.camera.
-                    reader.setStyle("object-fit: cover; width:45vw; height:65vh; max-height:45vw");
+                    reader.setStyle("object-fit: cover; width:400px; height:100vh; max-height:500px");
 
                     reader.addValueChangeListener(
-                            scannedQRCode -> checkInUser(organizer, attendeesGrid, scannedQRCode.getValue(),
+                            scannedQRCode -> checkInUser(remoteUser, attendeesGrid, scannedQRCode.getValue(),
                                     Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue())));
 
                     leftLayout.add(reader, locationLayout);
@@ -115,25 +109,8 @@ public class CheckinView extends VerticalLayout {
                     rightLayout.setMargin(false);
                     rightLayout.setPadding(false);
                     rightLayout.setSpacing(false);
-                    rightLayout.getStyle().set("margin-top", "4vh");
-                    rightLayout.setWidth("45vw");
-                    rightLayout.setHeight("90vh");
 
-                    FormLayout failSafeForm = new FormLayout();
-
-                    TextField usernameField = new TextField();
-                    usernameField.setLabel("Gebruikersnaam cursist");
-                    usernameField.setRequired(true);
-
-                    final var failSafeRegisterButton =
-                            new Button(
-                                    "Manueel Inchecken",
-                                    onClick -> checkInUser(organizer, attendeesGrid, usernameField.getValue(),
-                                            Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue())));
-
-                    failSafeForm.add(usernameField, failSafeRegisterButton);
-
-                    rightLayout.add(failSafeForm, attendeesGrid);
+                    rightLayout.add(attendeesGrid);
 
                     splitLayout.add(leftLayout, rightLayout);
 
