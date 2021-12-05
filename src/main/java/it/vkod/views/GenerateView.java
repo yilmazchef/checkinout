@@ -11,6 +11,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -23,6 +24,7 @@ import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Genereer QR")
 @Route(value = "gen", layout = TemplateLayout.class)
+@RouteAlias(value = "generate", layout = TemplateLayout.class)
 @AnonymousAllowed
 public class GenerateView extends VerticalLayout {
 

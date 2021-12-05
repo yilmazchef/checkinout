@@ -31,8 +31,8 @@ import java.time.LocalTime;
 
 @PageTitle("Inchecken")
 @Route(value = "in", layout = TemplateLayout.class)
-@RouteAlias("checkin")
-@RouteAlias("")
+@RouteAlias(value = "checkin", layout = TemplateLayout.class)
+@RouteAlias(value = "", layout = TemplateLayout.class)
 @PermitAll
 public class CheckinView extends VerticalLayout {
 

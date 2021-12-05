@@ -12,6 +12,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -34,6 +35,7 @@ import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Inschrijven")
 @Route(value = "reg", layout = TemplateLayout.class)
+@RouteAlias(value = "register", layout = TemplateLayout.class)
 @AnonymousAllowed
 public class RegisterView extends VerticalLayout {
 

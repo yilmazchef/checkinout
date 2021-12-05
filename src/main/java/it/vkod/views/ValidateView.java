@@ -15,7 +15,7 @@ import javax.annotation.security.PermitAll;
 
 @PageTitle("Valideer QR")
 @Route(value = "val", layout = TemplateLayout.class)
-@RouteAlias("validate")
+@RouteAlias(value = "validate", layout = TemplateLayout.class)
 @PermitAll
 public class ValidateView extends VerticalLayout {
 

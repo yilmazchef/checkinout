@@ -29,7 +29,7 @@ import java.time.LocalTime;
 
 @PageTitle("Uitchecken")
 @Route(value = "out", layout = TemplateLayout.class)
-@RouteAlias("checkout")
+@RouteAlias(value = "checkout", layout = TemplateLayout.class)
 @PermitAll
 public class CheckoutView extends VerticalLayout {
 

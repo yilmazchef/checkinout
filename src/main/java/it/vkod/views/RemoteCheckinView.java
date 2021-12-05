@@ -29,7 +29,7 @@ import java.time.LocalTime;
 
 @PageTitle("Inchecken-remote")
 @Route(value = "inrem", layout = TemplateLayout.class)
-@RouteAlias("checkin/remote")
+@RouteAlias(value = "checkin/remote", layout = TemplateLayout.class)
 @PermitAll
 public class RemoteCheckinView extends VerticalLayout {
 

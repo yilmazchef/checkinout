@@ -10,6 +10,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.shared.util.SharedUtil;
 
 import java.io.IOException;
@@ -18,7 +19,8 @@ import java.io.InputStreamReader;
 import java.util.stream.IntStream;
 
 @PageTitle("Importeer CSV")
-@Route(value = "import/csv", layout = TemplateLayout.class)
+@Route(value = "icsv", layout = TemplateLayout.class)
+@RouteAlias(value = "import/csv", layout = TemplateLayout.class)
 public class ImportView extends VerticalLayout {
 
     private final Grid<String[]> grid = new Grid<>();
