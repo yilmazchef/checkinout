@@ -2,10 +2,7 @@ package it.vkod.views;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
@@ -36,13 +33,12 @@ public class TemplateLayout extends AppLayout {
     private Tabs getTabs() {
         Tabs tabs = new Tabs();
         tabs.add(
+                createTab("Inloggen", LoginView.class),
                 createTab("Inchecken", CheckinView.class),
                 createTab("Uitchecken", CheckoutView.class),
                 createTab("Inschrijving", RegisterView.class),
-                createTab("Instructeur", AdminView.class),
-                createTab("Teamleider", AdminView.class),
-                createTab("Tewerkstelling", AdminView.class),
-                createTab("Administrateur", AdminView.class)
+                createTab("Administrateur", AdminView.class),
+                new Tab(new Anchor("logout", "Uitloggen"))
         );
         tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL, TabsVariant.LUMO_EQUAL_WIDTH_TABS);
         return tabs;
