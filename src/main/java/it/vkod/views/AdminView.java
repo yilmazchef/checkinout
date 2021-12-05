@@ -18,7 +18,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AdminView extends VerticalLayout {
 
     private final AdminService adminService;
-    private static final String BASE_URL = "http://localhost:8080/checks/";
+    private static final String URL_PDF = "http://localhost:8080/checks/pdf";
+    private static final String URL_CSV = "http://localhost:8080/checks/csv";
+    private static final String URL_EXCEL = "http://localhost:8080/checks/excel";
 
     public AdminView(@Autowired AdminService adminService) {
 
@@ -37,18 +39,9 @@ public class AdminView extends VerticalLayout {
 
         final var actionLayout = new VerticalLayout();
 
-
-        Anchor pdfAnchor = new Anchor(
-                BASE_URL.concat("pdf"),
-                "Exporteer als PDF");
-
-        Anchor csvAnchor = new Anchor(
-                BASE_URL.concat("csv"),
-                "Exporteer als CSV");
-
-        Anchor excelAnchor = new Anchor(
-                BASE_URL.concat("excel"),
-                "Exporteer als PDF");
+        Anchor pdfAnchor = new Anchor(URL_PDF, "Exporteer als PDF");
+        Anchor csvAnchor = new Anchor(URL_CSV, "Exporteer als CSV");
+        Anchor excelAnchor = new Anchor(URL_EXCEL, "Exporteer als PDF");
 
         actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
 
