@@ -5,8 +5,8 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -20,6 +20,7 @@ import it.vkod.data.entity.User;
 import it.vkod.services.AuthenticationService;
 import it.vkod.services.CheckService;
 import it.vkod.services.UserService;
+import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
 import java.sql.Date;
@@ -37,7 +38,7 @@ public class CheckoutView extends VerticalLayout {
     private final UserService userService;
     private final CheckService checkService;
 
-    private final SplitLayout splitLayout = new SplitLayout();
+    private final HorizontalLayout splitLayout = new HorizontalLayout();
     private final Grid<CheckDTO> attendeesGrid = new Grid<>();
     private User organizer;
 
@@ -94,24 +95,51 @@ public class CheckoutView extends VerticalLayout {
                     final var checksGridDataList = this.checkService.findCheckoutDetailsOfToday();
                     attendeesGrid.setItems(checksGridDataList);
 
-                    final var scanLayout = new VerticalLayout();
+                    final var leftLayout = new VerticalLayout();
                     final var reader = new ZXingVaadinReader();
 
                     reader.setFrom(Constants.From.camera);
                     reader.setId("video"); // id needs to be 'video' if From.camera.
-                    reader.setStyle("object-fit: cover; width:50%; height:100vh; max-height:90%");
+                    reader.setStyle("object-fit: cover; width:45vw; height:65vh; max-height:45vw");
 
                     reader.addValueChangeListener(scannedQRCode -> checkOutUser(scannedQRCode.getValue()));
 
-                    scanLayout.setMargin(false);
-                    scanLayout.setPadding(false);
-                    scanLayout.setJustifyContentMode(JustifyContentMode.CENTER);
-                    scanLayout.setAlignItems(Alignment.CENTER);
-                    scanLayout.add(reader);
+                    leftLayout.setMargin(false);
+                    leftLayout.setPadding(false);
+                    leftLayout.setSpacing(false);
+                    leftLayout.getStyle().set("margin-top", "4vh");
+                    leftLayout.setWidth("45vw");
+                    leftLayout.setHeight("90vh");
 
-                    // TODO: Add GeoLocation Layout here..
+                    final var locationLayout = new VerticalLayout();
+                    locationLayout.setMargin(false);
+                    locationLayout.setPadding(false);
+                    locationLayout.setSpacing(false);
+                    final var latField = new TextField("Latitude");
+                    latField.setReadOnly(true);
+                    final var lonField = new TextField("Longitude");
+                    lonField.setReadOnly(true);
+                    final var geoLocation = new GeoLocation();
+                    geoLocation.setWatch(true);
+                    geoLocation.setHighAccuracy(true);
+                    geoLocation.setTimeout(100000);
+                    geoLocation.setMaxAge(200000);
+                    geoLocation.addValueChangeListener(onLocationChange -> {
+                        latField.setValue(String.valueOf(onLocationChange.getValue().getLatitude()));
+                        lonField.setValue(String.valueOf(onLocationChange.getValue().getLongitude()));
+                    });
+                    locationLayout.add(latField, lonField, geoLocation);
 
-                    final var changesLayout = new VerticalLayout();
+                    leftLayout.add(reader, locationLayout);
+
+                    final var rightLayout = new VerticalLayout();
+                    rightLayout.setMargin(false);
+                    rightLayout.setPadding(false);
+                    rightLayout.setSpacing(false);
+                    rightLayout.getStyle().set("margin-top", "4vh");
+                    rightLayout.setWidth("45vw");
+                    rightLayout.setHeight("90vh");
+
                     final var failSafeLayout = new FormLayout();
 
                     final var usernameField = new TextField();
@@ -122,15 +150,14 @@ public class CheckoutView extends VerticalLayout {
                             new Button("Manueel uitchecken", onClick -> checkOutUser(usernameField.getValue()));
 
                     failSafeLayout.add(usernameField, failSafeRegisterButton);
-                    changesLayout.add(failSafeLayout, attendeesGrid);
+                    rightLayout.add(failSafeLayout, attendeesGrid);
 
-                    changesLayout.add(attendeesGrid);
+                    rightLayout.add(attendeesGrid);
 
-                    splitLayout.addToPrimary(scanLayout);
-                    splitLayout.addToSecondary(changesLayout);
+                    splitLayout.add(leftLayout);
+
                 });
 
-        splitLayout.setSplitterPosition(80);
         add(splitLayout);
     }
 
