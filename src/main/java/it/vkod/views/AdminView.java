@@ -28,7 +28,6 @@ public class AdminView extends VerticalLayout {
 
         final var managementLayout = new VerticalLayout();
 
-
         final AtomicLong deleteCounter = new AtomicLong();
         final var flushButton = new Button("Flush Database", onClick -> {
             long deletedCount = adminService.flushDatabase();
