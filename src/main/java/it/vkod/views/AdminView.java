@@ -39,15 +39,15 @@ public class AdminView extends VerticalLayout {
         final var actionLayout = new VerticalLayout();
 
         final var pdfButton = new Button("Export PDF", onClick -> {
-            UI.getCurrent().navigate(ExportController.EXPORT_CHECKS_PDF_URI);
+            UI.getCurrent().navigate("/" + ExportController.EXPORT_CHECKS_PDF_URI);
         });
 
         final var csvButton = new Button("Export CSV", onClick -> {
-            UI.getCurrent().navigate(ExportController.EXPORT_CHECKS_CSV_URI);
+            UI.getCurrent().navigate("/" + ExportController.EXPORT_CHECKS_CSV_URI);
         });
 
         final var excelButton = new Button("Export EXCEL", onClick -> {
-            UI.getCurrent().navigate(ExportController.EXPORT_CHECKS_EXCEL_URI);
+            UI.getCurrent().navigate("/" + ExportController.EXPORT_CHECKS_EXCEL_URI);
         });
 
         actionLayout.add(pdfButton, csvButton, excelButton);
