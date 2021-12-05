@@ -29,11 +29,13 @@ public class PDFExporter {
 
         document.open();
         final var hFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
-        hFont.setSize(9);
+        hFont.setSize(14);
         hFont.setColor(Color.BLUE);
 
         final var hi = "Aanmelden van " + LocalDate.now();
         final var h = new Paragraph(hi, hFont);
+        h.setSpacingBefore(120F);
+        h.setSpacingAfter(40F);
 
         document.add(h);
 
@@ -41,13 +43,14 @@ public class PDFExporter {
         var imgB = StreamUtils.copyToByteArray(imageFile.getInputStream());
         final var img = Image.getInstance(imgB);
         img.setSpacingBefore(40F);
+        img.setAlignment(50);
 
         img.scaleAbsolute(64f, 64f);
         document.add(img);
 
         final var table = new PdfPTable(6);
         table.setWidthPercentage(100f);
-        table.setWidths(new float[]{2.5f, 2.5f, 4f, 2.5f, 2f, 2f});
+        table.setWidths(new float[]{2.5f, 4.0f, 4f, 2f, 1.5f, 1.5f});
         table.setSpacingBefore(50F);
         table.setSpacingAfter(100F);
 
@@ -94,6 +97,7 @@ public class PDFExporter {
         cell.setPadding(2);
 
         final var font = FontFactory.getFont(FontFactory.HELVETICA);
+        font.setSize(10F);
         font.setColor(Color.WHITE);
 
         cell.setPhrase(new Phrase("Familienaam", font));
@@ -117,13 +121,16 @@ public class PDFExporter {
 
     private void writeTableData(PdfPTable table, List<CheckDTO> data) {
 
+        final var cFont = FontFactory.getFont(FontFactory.TIMES_ROMAN);
+        cFont.setSize(10F);
+
         for (CheckDTO check : data) {
-            table.addCell(check.getLastName());
-            table.addCell(check.getFirstName());
-            table.addCell(check.getEmail().replaceAll("@intecbrussel.be", "@intec.."));
-            table.addCell(check.getCheckedOn().toString());
-            table.addCell(check.getCheckedInAt().toString());
-            table.addCell(check.getCheckedOutAt().toString());
+            table.addCell(new Phrase(check.getLastName(), cFont));
+            table.addCell(new Phrase(check.getFirstName(), cFont));
+            table.addCell(new Phrase(check.getEmail(), cFont));
+            table.addCell(new Phrase(check.getCheckedOn().toString(), cFont));
+            table.addCell(new Phrase(check.getCheckedInAt().toString(), cFont));
+            table.addCell(new Phrase(check.getCheckedOutAt().toString(), cFont));
         }
     }
 }
