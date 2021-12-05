@@ -1,7 +1,7 @@
 package it.vkod.services;
 
 
-import it.vkod.data.dto.ChecksGridData;
+import it.vkod.data.dto.CheckDTO;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -28,21 +30,22 @@ public class ExcelExporter {
 
     private void writeHeaderLine() {
 
-        sheet = workbook.createSheet("Users");
+        sheet = workbook.createSheet(LocalDate.now().toString());
 
         Row row = sheet.createRow(0);
 
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setBold(true);
-        font.setFontHeight(16);
+        font.setFontHeight(12);
         style.setFont(font);
 
-        createCell(row, 0, "User ID", style);
-        createCell(row, 1, "E-mail", style);
-        createCell(row, 2, "Full Name", style);
-        createCell(row, 3, "Roles", style);
-        createCell(row, 4, "Enabled", style);
+        createCell(row, 0, "Familienaam", style);
+        createCell(row, 1, "Voornaam", style);
+        createCell(row, 2, "Email", style);
+        createCell(row, 3, "Datum", style);
+        createCell(row, 4, "In", style);
+        createCell(row, 5, "Uit", style);
 
     }
 
@@ -54,28 +57,32 @@ public class ExcelExporter {
             cell.setCellValue((Integer) value);
         } else if (value instanceof Boolean) {
             cell.setCellValue((Boolean) value);
+        } else if (value instanceof LocalDate) {
+            cell.setCellValue(((LocalDate) value).toString());
+        } else if (value instanceof LocalTime) {
+            cell.setCellValue(((LocalTime) value).toString());
         } else {
             cell.setCellValue((String) value);
         }
         cell.setCellStyle(style);
     }
 
-    private void writeDataLines(List<ChecksGridData> data) {
+    private void writeDataLines(List<CheckDTO> data) {
 
         int rowCount = 1;
 
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
-        font.setFontHeight(12);
+        font.setFontHeight(10);
 
         style.setFont(font);
 
-        for (ChecksGridData cd : data) {
+        for (CheckDTO cd : data) {
             Row row = sheet.createRow(rowCount++);
             int columnCount = 0;
 
-            createCell(row, columnCount++, cd.getFirstName(), style);
             createCell(row, columnCount++, cd.getLastName(), style);
+            createCell(row, columnCount++, cd.getFirstName(), style);
             createCell(row, columnCount++, cd.getEmail(), style);
             createCell(row, columnCount++, cd.getCheckedOn(), style);
             createCell(row, columnCount++, cd.getCheckedInAt(), style);
@@ -84,7 +91,7 @@ public class ExcelExporter {
         }
     }
 
-    public void export(HttpServletResponse response, List<ChecksGridData> data) throws IOException {
+    public void export(HttpServletResponse response, List<CheckDTO> data) throws IOException {
         writeHeaderLine();
         writeDataLines(data);
 

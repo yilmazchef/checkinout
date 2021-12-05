@@ -1,6 +1,5 @@
 package it.vkod.views;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -15,59 +14,44 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.data.dto.ChecksGridData;
+import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Event;
 import it.vkod.data.entity.User;
-import it.vkod.repositories.CheckRepository;
-import it.vkod.repositories.EventRepository;
-import it.vkod.repositories.UserRepository;
-import it.vkod.security.AuthenticatedUser;
-import it.vkod.services.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
+import it.vkod.services.AuthenticationService;
+import it.vkod.services.CheckService;
+import it.vkod.services.UserService;
 
 import javax.annotation.security.PermitAll;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Arrays;
 
-import static com.vaadin.flow.component.notification.Notification.Position.BOTTOM_CENTER;
-import static com.vaadin.flow.component.notification.Notification.show;
-
-@PageTitle("Check-out")
-@Route("out")
+@PageTitle("Uitchecken")
+@Route(value = "out", layout = TemplateLayout.class)
 @RouteAlias("checkout")
 @PermitAll
 public class CheckoutView extends VerticalLayout {
 
-    private final AuthenticatedUser authenticatedUser;
-    private final UserRepository userRepository;
-    private final CheckRepository checkRepository;
-    private final EventRepository eventRepository;
-    private final EmailService emailService;
+    private final AuthenticationService authenticationService;
+    private final UserService userService;
+    private final CheckService checkService;
 
     private final SplitLayout splitLayout = new SplitLayout();
-    private final Grid<ChecksGridData> attendeesGrid = new Grid<>();
+    private final Grid<CheckDTO> attendeesGrid = new Grid<>();
     private User organizer;
 
     public CheckoutView(
-            @Autowired AuthenticatedUser authenticatedUser,
-            @Autowired UserRepository userRepository,
-            @Autowired CheckRepository checkRepository,
-            @Autowired EventRepository eventRepository,
-            @Autowired EmailService emailService) {
+            AuthenticationService authenticationService, UserService userService,
+            CheckService checkService) {
+
+        this.userService = userService;
+        this.checkService = checkService;
+        this.authenticationService = authenticationService;
 
         initStyle();
 
-        this.authenticatedUser = authenticatedUser;
-        this.userRepository = userRepository;
-        this.checkRepository = checkRepository;
-        this.eventRepository = eventRepository;
-        this.emailService = emailService;
-
-        final var user = authenticatedUser.get();
+        final var user = this.authenticationService.get();
 
         user.ifPresent(
                 u -> {
@@ -77,29 +61,29 @@ public class CheckoutView extends VerticalLayout {
                     attendeesGrid.setHeightFull();
 
                     attendeesGrid
-                            .addColumn(ChecksGridData::getFirstName)
-                            .setHeader("First Name")
+                            .addColumn(CheckDTO::getFirstName)
+                            .setHeader("Voornaam")
                             .setKey("firstName");
 
                     attendeesGrid
-                            .addColumn(ChecksGridData::getLastName)
-                            .setHeader("LastName")
+                            .addColumn(CheckDTO::getLastName)
+                            .setHeader("Familienaam")
                             .setKey("lastName");
-                    attendeesGrid.addColumn(ChecksGridData::getEmail).setHeader("Email").setKey("email");
+                    attendeesGrid.addColumn(CheckDTO::getEmail).setHeader("Email").setKey("email");
 
                     attendeesGrid
-                            .addColumn(ChecksGridData::getCheckedOn)
-                            .setHeader("CheckedOn")
+                            .addColumn(CheckDTO::getCheckedOn)
+                            .setHeader("Gecheckt op")
                             .setKey("checked_on");
 
                     attendeesGrid
-                            .addColumn(ChecksGridData::getCheckedInAt)
-                            .setHeader("CheckedInAt")
+                            .addColumn(CheckDTO::getCheckedInAt)
+                            .setHeader("Ingecheckt om")
                             .setKey("checked_in_at");
 
                     attendeesGrid
-                            .addColumn(ChecksGridData::getCheckedOutAt)
-                            .setHeader("CheckedOutAt")
+                            .addColumn(CheckDTO::getCheckedOutAt)
+                            .setHeader("Uitgecheckt om")
                             .setKey("checked_out_at");
 
                     attendeesGrid.addThemeVariants(
@@ -107,7 +91,7 @@ public class CheckoutView extends VerticalLayout {
                             GridVariant.LUMO_NO_ROW_BORDERS,
                             GridVariant.LUMO_ROW_STRIPES);
 
-                    final var checksGridDataList = checkRepository.findAllCheckoutsOfToday();
+                    final var checksGridDataList = this.checkService.findCheckoutDetailsOfToday();
                     attendeesGrid.setItems(checksGridDataList);
 
                     final var scanLayout = new VerticalLayout();
@@ -115,7 +99,7 @@ public class CheckoutView extends VerticalLayout {
 
                     reader.setFrom(Constants.From.camera);
                     reader.setId("video"); // id needs to be 'video' if From.camera.
-                    reader.setStyle("object-fit: cover; width:100; height:100vh; max-height:100");
+                    reader.setStyle("object-fit: cover; width:400px; height:100vh; max-height:500px");
 
                     reader.addValueChangeListener(scannedQRCode -> checkOutUser(scannedQRCode.getValue()));
 
@@ -129,19 +113,16 @@ public class CheckoutView extends VerticalLayout {
                     final var failSafeLayout = new FormLayout();
 
                     final var usernameField = new TextField();
-                    usernameField.setLabel("Student Username");
+                    usernameField.setLabel("Gebruikersnaam cursist");
                     usernameField.setRequired(true);
 
                     final var failSafeRegisterButton =
-                            new Button("Check OUT Manually", onClick -> checkOutUser(usernameField.getValue()));
+                            new Button("Manueel uitchecken", onClick -> checkOutUser(usernameField.getValue()));
 
                     failSafeLayout.add(usernameField, failSafeRegisterButton);
                     changesLayout.add(failSafeLayout, attendeesGrid);
 
-                    final var sendMailButton = createEmailButton();
-                    final var exportToApiButton = sendExportRequest();
-
-                    changesLayout.add(attendeesGrid, sendMailButton, exportToApiButton);
+                    changesLayout.add(attendeesGrid);
 
                     splitLayout.addToPrimary(scanLayout);
                     splitLayout.addToSecondary(changesLayout);
@@ -151,44 +132,19 @@ public class CheckoutView extends VerticalLayout {
         add(splitLayout);
     }
 
-    private Button sendExportRequest() {
-        return new Button("Export to CSV", onClick -> UI.getCurrent().getPage().open("checks/csv"));
-    }
-
-    private Button createEmailButton() {
-        return
-                new Button(
-                        "Send Mail",
-                        onClick -> {
-                            try {
-                                final var mailContent =
-                                        Arrays.deepToString(checkRepository.findAllChecksOfToday().toArray());
-                                this.emailService.sendSimpleMessage(
-                                        "yilmaz.brievenbus@gmail.com",
-                                        "Aanwezigheidslijst " + LocalDate.now(),
-                                        mailContent);
-
-                                Notification.show(mailContent, 5000, Notification.Position.BOTTOM_CENTER)
-                                        .open();
-                            } catch (MailException mailException) {
-                                show(mailException.getMessage(), 4000, BOTTOM_CENTER).open();
-                            }
-                        });
-    }
-
     private void checkOutUser(final String scannedQRCode) {
 
-        final var oAttendee = userRepository.findByUsername(scannedQRCode);
+        final var oAttendee = this.userService.findByUsername(scannedQRCode);
         if (oAttendee.isPresent()) {
             final var attendee = oAttendee.get();
 
             final var foundCheck =
-                    checkRepository.findByCheckedOnAndQrcode(Date.valueOf(LocalDate.now()), scannedQRCode);
+                    this.checkService.findChecksByCheckedOnAndQrcode(Date.valueOf(LocalDate.now()), scannedQRCode);
 
             if (foundCheck.isPresent()) {
 
                 final var check =
-                        checkRepository.save(
+                        this.checkService.createCheck(
                                 foundCheck
                                         .get()
                                         .withCurrentSession(VaadinSession.getCurrent().getSession().getId())
@@ -198,7 +154,7 @@ public class CheckoutView extends VerticalLayout {
                                         .withLon(20.00F));
 
                 final var oEvent =
-                        eventRepository.findByAttendeeIdAndCheckIdAndCheckType(
+                        this.checkService.findByAttendeeIdAndCheckIdAndCheckType(
                                 attendee.getId(), check.getId(), "OUT");
 
                 final var eventBeingEdited =
@@ -223,17 +179,17 @@ public class CheckoutView extends VerticalLayout {
                                     .withCheckType("OUT");
                 }
 
-                final var savedOrUpdatedEvent = eventRepository.save(eventBeingEdited.data);
+                final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
                 if (!savedOrUpdatedEvent.isNew())
-                    attendeesGrid.setItems(checkRepository.findAllCheckoutsOfToday());
+                    attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
 
                 Notification.show(
                                 attendee.getFirstName()
                                         + " "
                                         + attendee.getLastName()
-                                        + " has checked OUT"
+                                        + " heeft gecheckt"
                                         + "."
-                                        + "Organized by "
+                                        + "Verantwoordelijk: "
                                         + organizer.getFirstName()
                                         + " "
                                         + organizer.getLastName(),
@@ -243,7 +199,7 @@ public class CheckoutView extends VerticalLayout {
 
             } else {
                 Notification.show(
-                                ("Rejected (Invalid or Unregistered QR): " + scannedQRCode),
+                                ("Geannuleerd, GEEN valid QR-code: " + scannedQRCode),
                                 4000,
                                 Notification.Position.BOTTOM_CENTER)
                         .open();
@@ -251,7 +207,7 @@ public class CheckoutView extends VerticalLayout {
 
         } else {
             Notification.show(
-                            ("The following user has NOT checked in (?): " + scannedQRCode),
+                            (scannedQRCode + " heeft nog NIET gecheckt."),
                             4000,
                             Notification.Position.BOTTOM_CENTER)
                     .open();

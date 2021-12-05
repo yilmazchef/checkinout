@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ChecksGridData implements Serializable, Cloneable {
+public class CheckDTO implements Serializable, Cloneable {
 
     @CsvBindByPosition(position = 0)
     private String firstName;
@@ -30,9 +30,9 @@ public class ChecksGridData implements Serializable, Cloneable {
     private LocalTime checkedOutAt;
 
     @Override
-    public ChecksGridData clone() {
+    public CheckDTO clone() {
         try {
-            ChecksGridData clone = (ChecksGridData) super.clone();
+            CheckDTO clone = (CheckDTO) super.clone();
             clone.setEmail(this.getEmail());
             clone.setFirstName(this.getFirstName());
             clone.setLastName(this.getLastName());

@@ -14,96 +14,95 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import it.vkod.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import it.vkod.services.UserService;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import static it.vkod.utils.QRUtils.generateQR;
 
-@PageTitle("Generate")
-@Route(value = "gen")
+@PageTitle("Genereer QR")
+@Route(value = "gen", layout = TemplateLayout.class)
 @AnonymousAllowed
 public class GenerateView extends VerticalLayout {
 
-  private final UserRepository userRepository;
+    private final UserService userService;
 
-  public GenerateView(@Autowired UserRepository userRepository) {
+    public GenerateView(UserService userService) {
 
-    this.userRepository = userRepository;
+        this.userService = userService;
 
-    addClassNames("flex", "flex-col", "h-full");
+        addClassNames("flex", "flex-col", "h-full");
 
-    final var generateLayout = new VerticalLayout();
+        final var generateLayout = new VerticalLayout();
 
-    final var formLayout = new FormLayout();
+        final var formLayout = new FormLayout();
 
-    final var usernameField = new TextField("Username / Email / Phone");
-    usernameField.setRequired(true);
-    usernameField.setRequiredIndicatorVisible(true);
-    final var passwordField = new PasswordField("Password");
-    passwordField.setRequired(true);
-    passwordField.setRequiredIndicatorVisible(true);
-    passwordField.setClearButtonVisible(true);
+        final var usernameField = new TextField("Username / Email / Phone");
+        usernameField.setRequired(true);
+        usernameField.setRequiredIndicatorVisible(true);
+        final var passwordField = new PasswordField("Password");
+        passwordField.setRequired(true);
+        passwordField.setRequiredIndicatorVisible(true);
+        passwordField.setClearButtonVisible(true);
 
-    final var generateButton =
-        new Button(
-            "Generate",
-            onClick -> {
-              final var keyword = usernameField.getValue();
-              final var oUser =
-                  this.userRepository.findByUsernameOrEmailOrPhone(
-                      keyword.toLowerCase(), keyword, keyword.trim());
+        final var generateButton =
+                new Button(
+                        "Generate",
+                        onClick -> {
+                            final var keyword = usernameField.getValue();
+                            final var oUser =
+                                    this.userService.findByUsernameOrEmailOrPhone(
+                                            keyword.toLowerCase(), keyword, keyword.trim());
 
-              if (oUser.isPresent()) {
-                final var user = oUser.get();
-                try {
+                            if (oUser.isPresent()) {
+                                final var user = oUser.get();
+                                try {
 
-                  generateLayout.add(
-                      convertToImage(generateQR(user.getUsername(), 512, 512), user.getUsername()));
-                  Notification.show(
-                          ("Generated a QR Code for " + user.getUsername()),
-                          8000,
-                          Notification.Position.BOTTOM_CENTER)
-                      .open();
+                                    generateLayout.add(
+                                            convertToImage(generateQR(user.getUsername(), 512, 512), user.getUsername()));
+                                    Notification.show(
+                                                    ("Generated a QR Code for " + user.getUsername()),
+                                                    8000,
+                                                    Notification.Position.BOTTOM_CENTER)
+                                            .open();
 
-                } catch (WriterException | IOException fileEx) {
-                  Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER)
-                      .open();
-                }
-              } else {
-                Notification.show(
-                        "USER DOES NOT EXIST !! ", 3000, Notification.Position.BOTTOM_CENTER)
-                    .open();
-              }
-            });
+                                } catch (WriterException | IOException fileEx) {
+                                    Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER)
+                                            .open();
+                                }
+                            } else {
+                                Notification.show(
+                                                "USER DOES NOT EXIST !! ", 3000, Notification.Position.BOTTOM_CENTER)
+                                        .open();
+                            }
+                        });
 
-    formLayout.addFormItem(usernameField, "Username");
-    formLayout.addFormItem(passwordField, "Password");
+        formLayout.addFormItem(usernameField, "Username");
+        formLayout.addFormItem(passwordField, "Password");
 
-    final var confirmCheck =
-        new Checkbox("I confirm that the event organizer can change my password in this session.");
-    formLayout.addFormItem(confirmCheck, "Confirmation");
+        final var confirmCheck =
+                new Checkbox("I confirm that the event organizer can change my password in this session.");
+        formLayout.addFormItem(confirmCheck, "Confirmation");
 
-    generateLayout.setMargin(false);
-    generateLayout.setPadding(false);
-    generateLayout.setJustifyContentMode(JustifyContentMode.CENTER);
-    generateLayout.setAlignItems(Alignment.CENTER);
-    generateLayout.add(formLayout, generateButton);
+        generateLayout.setMargin(false);
+        generateLayout.setPadding(false);
+        generateLayout.setJustifyContentMode(JustifyContentMode.CENTER);
+        generateLayout.setAlignItems(Alignment.CENTER);
+        generateLayout.add(formLayout, generateButton);
 
-    setJustifyContentMode(JustifyContentMode.CENTER);
-    setHorizontalComponentAlignment(Alignment.CENTER);
-    setAlignItems(Alignment.CENTER);
-    add(generateLayout);
-  }
+        setJustifyContentMode(JustifyContentMode.CENTER);
+        setHorizontalComponentAlignment(Alignment.CENTER);
+        setAlignItems(Alignment.CENTER);
+        add(generateLayout);
+    }
 
-  private Image convertToImage(final byte[] imageData, final String username) {
+    private Image convertToImage(final byte[] imageData, final String username) {
 
-    return new Image(
-        new StreamResource(
-            username.concat("_QR.png"),
-            (InputStreamFactory) () -> new ByteArrayInputStream(imageData)),
-        username);
-  }
+        return new Image(
+                new StreamResource(
+                        username.concat("_QR.png"),
+                        (InputStreamFactory) () -> new ByteArrayInputStream(imageData)),
+                username);
+    }
 }

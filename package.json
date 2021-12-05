@@ -2,7 +2,6 @@
   "name": "no-name",
   "license": "UNLICENSED",
   "dependencies": {
-    "@granite-elements/granite-qrcode-scanner": "3.0.3",
     "@polymer/iron-a11y-announcer": "3.0.2",
     "@polymer/iron-a11y-keys-behavior": "3.0.1",
     "@polymer/iron-fit-behavior": "3.0.2",
@@ -110,7 +109,6 @@
   },
   "vaadin": {
     "dependencies": {
-      "@granite-elements/granite-qrcode-scanner": "3.0.3",
       "@polymer/iron-a11y-announcer": "3.0.2",
       "@polymer/iron-a11y-keys-behavior": "3.0.1",
       "@polymer/iron-fit-behavior": "3.0.2",
@@ -208,6 +206,6 @@
       "workbox-precaching": "6.2.0",
       "workbox-webpack-plugin": "6.2.0"
     },
-    "hash": "806425d0b0bebe28272943a2d9571f44caba9b4d69d348e80113deb8d6cf7a34"
+    "hash": "51b7e1d0e04162b119c1bc30738968c35a3549bd98892d6b73c5e937651ea554"
   }
 }

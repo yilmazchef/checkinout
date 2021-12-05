@@ -7,8 +7,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-@PageTitle("Login")
-@Route(value = "login")
+@PageTitle("Inloggen")
+@Route(value = "login", layout = TemplateLayout.class)
 @AnonymousAllowed
 public class LoginView extends LoginOverlay {
 

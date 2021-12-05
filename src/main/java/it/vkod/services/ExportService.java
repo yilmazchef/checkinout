@@ -2,7 +2,7 @@ package it.vkod.services;
 
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import it.vkod.data.dto.ChecksGridData;
+import it.vkod.data.dto.CheckDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class ExportService {
     private final PDFExporter pdfExporter;
     private final CSVExporter csvExporter;
 
-    public void toCSV(HttpServletResponse response, List<ChecksGridData> data) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
+    public void toCSV(HttpServletResponse response, List<CheckDTO> data) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
 
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + FILE_NAME + ".csv" + "\"");
@@ -32,7 +32,7 @@ public class ExportService {
 
     }
 
-    public void toPDF(HttpServletResponse response, List<ChecksGridData> data) throws IOException {
+    public void toPDF(HttpServletResponse response, List<CheckDTO> data) throws IOException {
 
         response.setContentType("application/pdf");
 
@@ -44,7 +44,7 @@ public class ExportService {
 
     }
 
-    public void toExcel(HttpServletResponse response, List<ChecksGridData> data) throws IOException {
+    public void toExcel(HttpServletResponse response, List<CheckDTO> data) throws IOException {
         response.setContentType("application/octet-stream");
 
         final var headerKey = "Content-Disposition";

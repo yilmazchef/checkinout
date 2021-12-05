@@ -1,10 +1,8 @@
 package it.vkod.data.entity;
 
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -12,132 +10,130 @@ import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
-@ToString
-@Table( "checks" )
+@Data
+@Accessors(chain = true)
+@Table("checks")
 public class Check implements Serializable, Cloneable {
 
-	@Id
-	private Long id;
+    @Id
+    private Long id;
 
-	private Integer pincode;
+    private Integer pincode;
 
-	private Date checkedOn;
+    private Date checkedOn;
 
-	private Time checkedInAt;
+    private Time checkedInAt;
 
-	private Time checkedOutAt;
+    private Time checkedOutAt;
 
-	private String currentSession;
+    private String currentSession;
 
-	private Boolean isActive;
+    private Boolean isActive;
 
-	private String qrcode;
+    private String qrcode;
 
-	private Float lat;
+    private Float lat;
 
-	private Float lon;
-
-
-	public Check withId( final Long id ) {
-
-		this.id = id;
-		return this;
-	}
+    private Float lon;
 
 
-	public Check withPincode( final Integer pincode ) {
+    public Check withId(final Long id) {
 
-		this.pincode = pincode;
-		return this;
-	}
-
-
-	public Check withCheckedOn( final Date checkedOn ) {
-
-		this.checkedOn = checkedOn;
-		return this;
-	}
+        this.id = id;
+        return this;
+    }
 
 
-	public Check withCheckedInAt( final Time checkedInAt ) {
+    public Check withPincode(final Integer pincode) {
 
-		this.checkedInAt = checkedInAt;
-		return this;
-	}
-
-
-	public Check withCheckedOutAt( final Time checkedOutAt ) {
-
-		this.checkedOutAt = checkedOutAt;
-		return this;
-	}
+        this.pincode = pincode;
+        return this;
+    }
 
 
-	public Check withCurrentSession( final String currentSession ) {
+    public Check withCheckedOn(final Date checkedOn) {
 
-		this.currentSession = currentSession;
-		return this;
-	}
-
-
-	public Check withActive( final Boolean active ) {
-
-		isActive = active;
-		return this;
-	}
+        this.checkedOn = checkedOn;
+        return this;
+    }
 
 
-	public Check withQrcode( final String qrcode ) {
+    public Check withCheckedInAt(final Time checkedInAt) {
 
-		this.qrcode = qrcode;
-		return this;
-	}
-
-
-	public Check withLat( final Float lat ) {
-
-		this.lat = lat;
-		return this;
-	}
+        this.checkedInAt = checkedInAt;
+        return this;
+    }
 
 
-	public Check withLon( final Float lon ) {
+    public Check withCheckedOutAt(final Time checkedOutAt) {
 
-		this.lon = lon;
-		return this;
-	}
-
-
-	public boolean isNew() {
-
-		return this.id == null;
-	}
+        this.checkedOutAt = checkedOutAt;
+        return this;
+    }
 
 
-	@Override
-	public Check clone() {
+    public Check withCurrentSession(final String currentSession) {
 
-		try {
-			final Check clone = ( Check ) super.clone();
-			clone.setPincode( this.getPincode() );
-			clone.setCheckedOutAt( this.getCheckedOutAt() );
-			clone.setCheckedInAt( this.getCheckedInAt() );
-			clone.setCurrentSession( this.getCurrentSession() );
-			clone.setQrcode( this.getQrcode() );
-			clone.setId( this.getId() );
-			clone.setCheckedOn( this.getCheckedOn() );
-			clone.setIsActive( this.getIsActive() );
-			clone.setLat( this.getLat() );
-			clone.setLon( this.getLon() );
+        this.currentSession = currentSession;
+        return this;
+    }
 
-			return clone;
 
-		} catch ( CloneNotSupportedException e ) {
-			throw new AssertionError();
-		}
-	}
+    public Check withActive(final Boolean active) {
+
+        isActive = active;
+        return this;
+    }
+
+
+    public Check withQrcode(final String qrcode) {
+
+        this.qrcode = qrcode;
+        return this;
+    }
+
+
+    public Check withLat(final Float lat) {
+
+        this.lat = lat;
+        return this;
+    }
+
+
+    public Check withLon(final Float lon) {
+
+        this.lon = lon;
+        return this;
+    }
+
+
+    public boolean isNew() {
+
+        return this.id == null;
+    }
+
+
+    @Override
+    public Check clone() {
+
+        try {
+            final Check clone = (Check) super.clone();
+            clone.setPincode(this.getPincode());
+            clone.setCheckedOutAt(this.getCheckedOutAt());
+            clone.setCheckedInAt(this.getCheckedInAt());
+            clone.setCurrentSession(this.getCurrentSession());
+            clone.setQrcode(this.getQrcode());
+            clone.setId(this.getId());
+            clone.setCheckedOn(this.getCheckedOn());
+            clone.setIsActive(this.getIsActive());
+            clone.setLat(this.getLat());
+            clone.setLon(this.getLon());
+
+            return clone;
+
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 
 }

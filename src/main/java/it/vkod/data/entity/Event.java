@@ -1,90 +1,86 @@
 package it.vkod.data.entity;
 
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
-@ToString
-@Table( "events" )
+@Data
+@Accessors(chain = true)
+@Table("events")
 public class Event implements Serializable, Cloneable {
 
-	@Id
-	private Long id;
+    @Id
+    private Long id;
 
-	private Long attendeeId;
+    private Long attendeeId;
 
-	private Long organizerId;
+    private Long organizerId;
 
-	private Long checkId;
+    private Long checkId;
 
-	private String checkType;
-
-
-	public Event withCheckType( final String checkType ) {
-
-		this.checkType = checkType;
-		return this;
-	}
+    private String checkType;
 
 
-	public Event withId( final Long id ) {
+    public Event withCheckType(final String checkType) {
 
-		this.id = id;
-		return this;
-	}
-
-
-	public Event withAttendeeId( final Long attendeeId ) {
-
-		this.attendeeId = attendeeId;
-		return this;
-	}
+        this.checkType = checkType;
+        return this;
+    }
 
 
-	public Event withOrganizerId( final Long organizerId ) {
+    public Event withId(final Long id) {
 
-		this.organizerId = organizerId;
-		return this;
-	}
-
-
-	public Event withCheckId( final Long checkId ) {
-
-		this.checkId = checkId;
-		return this;
-	}
+        this.id = id;
+        return this;
+    }
 
 
-	public boolean isNew() {
+    public Event withAttendeeId(final Long attendeeId) {
 
-		return this.id == null;
-	}
+        this.attendeeId = attendeeId;
+        return this;
+    }
 
 
-	@Override
-	public Event clone() {
+    public Event withOrganizerId(final Long organizerId) {
 
-		try {
+        this.organizerId = organizerId;
+        return this;
+    }
 
-			final Event clonedEvent = ( Event ) super.clone();
-			clonedEvent.setAttendeeId(this.getAttendeeId());
-			clonedEvent.setCheckId(this.getCheckId());
-			clonedEvent.setCheckType(this.getCheckType());
-			clonedEvent.setOrganizerId(this.getOrganizerId());
 
-			return clonedEvent;
-		} catch ( CloneNotSupportedException e ) {
-			throw new AssertionError();
-		}
-	}
+    public Event withCheckId(final Long checkId) {
+
+        this.checkId = checkId;
+        return this;
+    }
+
+
+    public boolean isNew() {
+
+        return this.id == null;
+    }
+
+
+    @Override
+    public Event clone() {
+
+        try {
+
+            final Event clonedEvent = (Event) super.clone();
+            clonedEvent.setAttendeeId(this.getAttendeeId());
+            clonedEvent.setCheckId(this.getCheckId());
+            clonedEvent.setCheckType(this.getCheckType());
+            clonedEvent.setOrganizerId(this.getOrganizerId());
+
+            return clonedEvent;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 
 }

@@ -8,88 +8,83 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.repositories.UserRepository;
-import it.vkod.security.AuthenticatedUser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import it.vkod.services.AuthenticationService;
+import it.vkod.services.UserService;
 
 import javax.annotation.security.PermitAll;
 
-@PageTitle( "Check-in" )
-@Route( "val" )
-@RouteAlias( "validate" )
+@PageTitle("Valideer QR")
+@Route(value = "val", layout = TemplateLayout.class)
+@RouteAlias("validate")
 @PermitAll
 public class ValidateView extends VerticalLayout {
 
-	private final AuthenticatedUser authenticatedUser;
-	private final UserRepository userRepository;
-	private final BCryptPasswordEncoder passwordEncoder;
+    private final AuthenticationService authenticationService;
+    private final UserService userService;
 
 
-	public ValidateView( @Autowired AuthenticatedUser authenticatedUser,
-	                     @Autowired UserRepository userRepository,
-	                     @Autowired BCryptPasswordEncoder passwordEncoder ) {
+    public ValidateView(AuthenticationService authenticationService,
+                        UserService userService) {
 
-		this.authenticatedUser = authenticatedUser;
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
+        this.authenticationService = authenticationService;
+        this.userService = userService;
 
-		initStyle();
+        initStyle();
 
 
-		final var user = authenticatedUser.get();
+        final var user = this.authenticationService.get();
 
-		user.ifPresent( organizer -> {
+        user.ifPresent(organizer -> {
 
-			final var scanLayout = new VerticalLayout();
-			final var reader = new ZXingVaadinReader();
+            final var scanLayout = new VerticalLayout();
+            final var reader = new ZXingVaadinReader();
 
-			reader.setFrom( Constants.From.camera );
-			reader.setId( "video" ); //id needs to be 'video' if From.camera.
-			reader.setStyle( "object-fit: cover; width:100; height:100vh; max-height:100" );
+            reader.setFrom(Constants.From.camera);
+            reader.setId("video"); //id needs to be 'video' if From.camera.
+            reader.setStyle("object-fit: cover; width:100; height:100vh; max-height:100");
 
-			reader.addValueChangeListener( scannedQRCode -> validateUser( scannedQRCode.getValue() ) );
+            reader.addValueChangeListener(scannedQRCode -> validateUser(scannedQRCode.getValue()));
 
-			scanLayout.setMargin( false );
-			scanLayout.setPadding( false );
-			scanLayout.setJustifyContentMode( JustifyContentMode.CENTER );
-			scanLayout.setAlignItems( Alignment.CENTER );
-			scanLayout.add( reader );
+            scanLayout.setMargin(false);
+            scanLayout.setPadding(false);
+            scanLayout.setJustifyContentMode(JustifyContentMode.CENTER);
+            scanLayout.setAlignItems(Alignment.CENTER);
+            scanLayout.add(reader);
 
-			add( scanLayout );
+            add(scanLayout);
 
-		} );
-
-
-	}
+        });
 
 
-	private void validateUser( final String scannedQRCode ) {
-
-		final var oAttendee = userRepository.findByUsername( scannedQRCode );
-		if ( oAttendee.isPresent() ) {
-			Notification.show( ( "QR Code is valid !" ),
-					4000,
-					Notification.Position.BOTTOM_CENTER ).open();
-		} else {
-			Notification.show( ( "Invalid or Unregistered QR ! ->  " + scannedQRCode ),
-					4000,
-					Notification.Position.BOTTOM_CENTER ).open();
-		}
-	}
+    }
 
 
-	private void initStyle() {
+    private void validateUser(final String scannedQRCode) {
 
-		addClassNames( "flex", "flex-col", "h-full" );
-		setMargin( false );
-		setPadding( false );
-		setSpacing( false );
-		setWidthFull();
+        final var oAttendee = this.userService.findByUsername(scannedQRCode);
+        if (oAttendee.isPresent()) {
+            Notification.show(("QR-code is valid!"),
+                    4000,
+                    Notification.Position.BOTTOM_CENTER).open();
+        } else {
+            Notification.show(("QR-code is GEEN valid: " + scannedQRCode),
+                    4000,
+                    Notification.Position.BOTTOM_CENTER).open();
+        }
+    }
 
-		setJustifyContentMode( JustifyContentMode.CENTER );
-		setHorizontalComponentAlignment( Alignment.CENTER );
-		setAlignItems( Alignment.CENTER );
-	}
+
+    private void initStyle() {
+
+        addClassNames("flex", "flex-col", "h-full");
+        setMargin(false);
+        setPadding(false);
+        setSpacing(false);
+        setWidthFull();
+
+        setJustifyContentMode(JustifyContentMode.CENTER);
+        setHorizontalComponentAlignment(Alignment.CENTER);
+        setAlignItems(Alignment.CENTER);
+    }
 
 }

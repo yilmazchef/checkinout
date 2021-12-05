@@ -4,7 +4,7 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import it.vkod.data.dto.ChecksGridData;
+import it.vkod.data.dto.CheckDTO;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class PDFExporter {
 
-    public void export(HttpServletResponse response, List<ChecksGridData> data) throws IOException {
+    public void export(HttpServletResponse response, List<CheckDTO> data) throws IOException {
 
         final var document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
@@ -72,9 +72,9 @@ public class PDFExporter {
         table.addCell(cell);
     }
 
-    private void writeTableData(PdfPTable table, List<ChecksGridData> data) {
+    private void writeTableData(PdfPTable table, List<CheckDTO> data) {
 
-        for (ChecksGridData check : data) {
+        for (CheckDTO check : data) {
             table.addCell(check.getFirstName());
             table.addCell(check.getLastName());
             table.addCell(check.getEmail());

@@ -3,7 +3,7 @@ package it.vkod.api;
 import it.vkod.repositories.CheckRepository;
 import it.vkod.repositories.EventRepository;
 import it.vkod.repositories.UserRepository;
-import it.vkod.security.AuthenticatedUser;
+import it.vkod.services.AuthenticationService;
 import it.vkod.services.ExportService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -23,13 +23,13 @@ public class ExportController {
     public static final String EXPORT_CHECKS_PDF_URI = "/checks/pdf";
     public static final String EXPORT_CHECKS_EXCEL_URI = "/checks/xlsx";
 
-    private final AuthenticatedUser authenticatedUser;
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final CheckRepository checkRepository;
     private final EventRepository eventRepository;
     private final ExportService exportService;
 
-    private final String filename = "Aanwezigheidslijst " + LocalDate.now();
+    private static final String FILE_NAME = "Aanwezigheidslijst " + LocalDate.now();
 
 
     @SneakyThrows

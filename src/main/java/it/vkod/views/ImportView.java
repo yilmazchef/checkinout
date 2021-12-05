@@ -8,6 +8,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.util.SharedUtil;
 
@@ -16,7 +17,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.IntStream;
 
-@Route("import/csv")
+@PageTitle("Importeer CSV")
+@Route(value = "import/csv", layout = TemplateLayout.class)
 public class ImportView extends VerticalLayout {
 
     private final Grid<String[]> grid = new Grid<>();
