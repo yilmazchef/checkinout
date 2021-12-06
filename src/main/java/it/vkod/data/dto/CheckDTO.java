@@ -1,46 +1,46 @@
 package it.vkod.data.dto;
 
 import com.opencsv.bean.CsvBindByPosition;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@Data
+@Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CheckDTO implements Serializable, Cloneable {
 
     @CsvBindByPosition(position = 0)
-    private String firstName;
+    String firstName;
     @CsvBindByPosition(position = 1)
-    private String lastName;
+    String lastName;
     @CsvBindByPosition(position = 2)
     @EqualsAndHashCode.Include
-    private String email;
+    String email;
     @CsvBindByPosition(position = 3)
-    private LocalDate checkedOn;
+    LocalDate checkedOn;
     @CsvBindByPosition(position = 4)
-    private LocalTime checkedInAt;
+    LocalTime checkedInAt;
     @CsvBindByPosition(position = 5)
-    private LocalTime checkedOutAt;
+    LocalTime checkedOutAt;
 
     @Override
     public CheckDTO clone() {
         try {
-            CheckDTO clone = (CheckDTO) super.clone();
-            clone.setEmail(this.getEmail());
-            clone.setFirstName(this.getFirstName());
-            clone.setLastName(this.getLastName());
-            clone.setCheckedOn(this.getCheckedOn());
-            clone.setCheckedInAt(this.getCheckedInAt());
-            clone.setCheckedOutAt(this.getCheckedOutAt());
-
-            return clone;
+            return ((CheckDTO) super.clone())
+                    .setEmail(this.getEmail())
+                    .setFirstName(this.getFirstName())
+                    .setLastName(this.getLastName())
+                    .setCheckedOn(this.getCheckedOn())
+                    .setCheckedInAt(this.getCheckedInAt())
+                    .setCheckedOutAt(this.getCheckedOutAt());
 
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

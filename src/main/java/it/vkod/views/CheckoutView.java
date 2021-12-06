@@ -174,11 +174,11 @@ public class CheckoutView extends VerticalLayout {
                         this.checkService.createCheck(
                                 foundCheck
                                         .get()
-                                        .withCurrentSession(VaadinSession.getCurrent().getSession().getId())
-                                        .withQrcode(scannedQRCode)
-                                        .withCheckedOutAt(Time.valueOf(LocalTime.now()))
-                                        .withLat(20.00F)
-                                        .withLon(20.00F));
+                                        .setCurrentSession(VaadinSession.getCurrent().getSession().getId())
+                                        .setQrcode(scannedQRCode)
+                                        .setCheckedOutAt(Time.valueOf(LocalTime.now()))
+                                        .setLat(20.00F)
+                                        .setLon(20.00F));
 
                 final var oEvent =
                         this.checkService.findByAttendeeIdAndCheckIdAndCheckType(
@@ -193,17 +193,17 @@ public class CheckoutView extends VerticalLayout {
                     eventBeingEdited.data =
                             oEvent
                                     .get()
-                                    .withCheckId(check.getId())
-                                    .withAttendeeId(attendee.getId())
-                                    .withOrganizerId(this.organizer.getId())
-                                    .withCheckType("OUT");
+                                    .setCheckId(check.getId())
+                                    .setAttendeeId(attendee.getId())
+                                    .setOrganizerId(this.organizer.getId())
+                                    .setCheckType("OUT");
                 } else {
                     eventBeingEdited.data =
                             new Event()
-                                    .withCheckId(check.getId())
-                                    .withAttendeeId(attendee.getId())
-                                    .withOrganizerId(this.organizer.getId())
-                                    .withCheckType("OUT");
+                                    .setCheckId(check.getId())
+                                    .setAttendeeId(attendee.getId())
+                                    .setOrganizerId(this.organizer.getId())
+                                    .setCheckType("OUT");
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);

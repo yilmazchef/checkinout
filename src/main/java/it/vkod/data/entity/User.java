@@ -18,29 +18,33 @@ import java.sql.Time;
 public class User implements Serializable, Cloneable {
 
     @Id
-    private Long id;
+    Long id;
 
-    private String username;
+    String username;
 
-    private String phone;
+    String phone;
 
-    private String email;
+    String email;
 
-    private String firstName;
+    String firstName;
 
-    private String lastName;
+    String lastName;
 
-    private String hashedPassword;
+    String hashedPassword;
 
-    private String roles;
+    String roles;
 
-    private Date registeredOn;
+    Date registeredOn;
 
-    private Time registeredAt;
+    Time registeredAt;
 
-    private Time updatedAt;
+    Time updatedAt;
 
-    private String profile;
+    String profile;
+
+    public boolean isNew() {
+        return this.id == null;
+    }
 
     @Override
     public User clone() {

@@ -18,9 +18,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AdminView extends VerticalLayout {
 
     private final AdminService adminService;
-    private static final String URL_PDF = "http://localhost:8080/checks/pdf";
-    private static final String URL_CSV = "http://localhost:8080/checks/csv";
-    private static final String URL_EXCEL = "http://localhost:8080/checks/excel";
+    private static final String HOST_URL = System.getenv("CHECKINOUT_HOST_URL");
+    private static final String URL_PDF = HOST_URL + "/checks/pdf";
+    private static final String URL_CSV = HOST_URL + "/checks/csv";
+    private static final String URL_EXCEL = HOST_URL + "/checks/excel";
 
     public AdminView(@Autowired AdminService adminService) {
 

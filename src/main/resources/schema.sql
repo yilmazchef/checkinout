@@ -1,4 +1,4 @@
-create table checks
+create table if not exists checks
 (
 
     id              bigint auto_increment primary key,
@@ -14,7 +14,7 @@ create table checks
 
 ) charset = utf8;
 
-create table users
+create table if not exists users
 (
 
     id              bigint auto_increment primary key,
@@ -36,7 +36,7 @@ create table users
 
 ) charset = utf8;
 
-create table events
+create table if not exists events
 (
 
     id           bigint auto_increment primary key,

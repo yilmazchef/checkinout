@@ -72,12 +72,13 @@ public class RecordUtils {
 
     private void createUserRecord(String username, String profile, String firstName, String lastName, String roles) {
 
-        User user = new User().withUsername(username).withHashedPassword(passwordEncoder.encode("P@ssw0rd"))
-                .withProfile(profile)
-                .withFirstName(firstName).withLastName(lastName)
-                .withEmail(username.concat("@").concat("intecbrussel.be"))
-                .withPhone(String.format("0467334%d", username.length() * new Random().nextInt(1000)))
-                .withRoles(roles);
+        User user = new User()
+                .setUsername(username).setHashedPassword(passwordEncoder.encode("P@ssw0rd"))
+                .setProfile(profile)
+                .setFirstName(firstName).setLastName(lastName)
+                .setEmail(username.concat("@").concat("intecbrussel.be"))
+                .setPhone(String.format("0467334%d", username.length() * new Random().nextInt(1000)))
+                .setRoles(roles);
 
         final var savedUser = userRepository.save(user);
         logger.info("New record is added: " + savedUser);

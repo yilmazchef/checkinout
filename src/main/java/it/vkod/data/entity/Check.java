@@ -39,6 +39,10 @@ public class Check implements Serializable, Cloneable {
 
     Float lon;
 
+    public boolean isNew() {
+        return this.id == null;
+    }
+
 
     @Override
     public Check clone() {

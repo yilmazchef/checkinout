@@ -17,15 +17,19 @@ import java.io.Serializable;
 public class Event implements Serializable, Cloneable {
 
     @Id
-    private Long id;
+    Long id;
 
-    private Long attendeeId;
+    Long attendeeId;
 
-    private Long organizerId;
+    Long organizerId;
 
-    private Long checkId;
+    Long checkId;
 
-    private String checkType;
+    String checkType;
+
+    public boolean isNew() {
+        return this.id == null;
+    }
 
     @Override
     public Event clone() {

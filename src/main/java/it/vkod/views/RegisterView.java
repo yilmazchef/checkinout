@@ -121,16 +121,16 @@ public class RegisterView extends VerticalLayout {
 
             if (exists.equals(Boolean.FALSE)) {
                 final var user = new User()
-                        .withFirstName(firstNameField.getValue().toLowerCase())
-                        .withLastName(lastNameField.getValue().toLowerCase())
-                        .withUsername(usernameField.getValue().toLowerCase())
-                        .withEmail(emailField.getValue().toLowerCase())
-                        .withHashedPassword(this.passwordEncoder.encode(passwordField.getValue()))
-                        .withPhone(phoneField.getValue())
-                        .withRegisteredOn(Date.valueOf(LocalDate.now()))
-                        .withRegisteredAt(Time.valueOf(LocalTime.now()))
-                        .withUpdatedAt(Time.valueOf(LocalTime.now()))
-                        .withRoles("USER");
+                        .setFirstName(firstNameField.getValue().toLowerCase())
+                        .setLastName(lastNameField.getValue().toLowerCase())
+                        .setUsername(usernameField.getValue().toLowerCase())
+                        .setEmail(emailField.getValue().toLowerCase())
+                        .setHashedPassword(this.passwordEncoder.encode(passwordField.getValue()))
+                        .setPhone(phoneField.getValue())
+                        .setRegisteredOn(Date.valueOf(LocalDate.now()))
+                        .setRegisteredAt(Time.valueOf(LocalTime.now()))
+                        .setUpdatedAt(Time.valueOf(LocalTime.now()))
+                        .setRoles("USER");
 
                 final var savedUser = this.userService.createUser(user);
 
