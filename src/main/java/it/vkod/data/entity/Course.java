@@ -1,6 +1,5 @@
 package it.vkod.data.entity;
 
-
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -13,35 +12,28 @@ import java.io.Serializable;
 @Data
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table("events")
-public class Event implements Serializable, Cloneable {
+@Table("courses")
+public class Course implements Serializable, Cloneable {
 
     @Id
     Long id;
 
-    Long attendeeId;
+    String title;
 
-    Long organizerId;
-
-    Long checkId;
-
-    Long courseId;
-
-    String checkType;
+    String description;
 
     public boolean isNew() {
         return this.id == null;
     }
 
     @Override
-    public Event clone() {
+    public Course clone() {
+
         try {
-            return ((Event) super.clone())
-                    .setAttendeeId(this.getAttendeeId())
-                    .setCheckId(this.getCheckId())
-                    .setCourseId(this.getCourseId())
-                    .setCheckType(this.getCheckType())
-                    .setOrganizerId(this.getOrganizerId());
+            return ((Course) super.clone())
+                    .setTitle(this.getTitle())
+                    .setDescription(this.getDescription());
+
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }

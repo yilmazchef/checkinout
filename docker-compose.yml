@@ -1,37 +1,36 @@
-version: "3.9"
+version: "3.3"
 
 services:
 
-  db_server:
-    image: mysql:latest
+  checkinout_database_server:
+    image: mysql:8
     restart: always
     environment:
       MYSQL_DATABASE: 'checkinoutdb'
       MYSQL_ROOT_PASSWORD: 'pass'
-      MYSQL_USER: 'check'
-      MYSQL_PASSWORD: 'check'
     ports:
-      - "3306:3306"
+      - "3333:3306"
 
-  db_admin:
+  checkinout_database_admin:
     image: adminer:latest
     restart: always
     depends_on:
-      - db_server
+      - checkinout_database_server
     ports:
       - "9090:8080"
 
   webapp:
-    build: .
+    image: yilmazchef/checkinout
     restart: on-failure
     depends_on:
-      - db_server
+      - checkinout_database_server
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db_server:3306/checkinoutdb
+      - SPRING_DATASOURCE_URL=jdbc:mysql://checkinout_database_server:3306/checkinoutdb
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=pass
     links:
-      - db_server:db_server
+      - checkinout_database_server
     ports:
-      - "8080:8080"
+      - "443:8443"
+
 

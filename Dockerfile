@@ -6,12 +6,10 @@ WORKDIR /usr/src/app/
 COPY src src
 COPY frontend frontend
 COPY pom.xml .
-RUN mvn clean package -DskipTests -Pproduction
-
+RUN mvn dependency:go-offline
+RUN mvn clean package -DskipTests -Pproduction -T 2C
 # Run stage
 FROM openjdk:11
 COPY --from=build /usr/src/app/target/*.jar /usr/app/app.jar
-RUN useradd -m myuser
-USER myuser
-EXPOSE 8080
+EXPOSE 8443
 CMD java -jar /usr/app/app.jar

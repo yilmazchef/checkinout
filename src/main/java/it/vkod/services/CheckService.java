@@ -2,14 +2,17 @@ package it.vkod.services;
 
 import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Check;
+import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
 import it.vkod.repositories.CheckRepository;
+import it.vkod.repositories.CourseRepository;
 import it.vkod.repositories.EventRepository;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +24,7 @@ public class CheckService {
     private final UserRepository userRepository;
     private final CheckRepository checkRepository;
     private final EventRepository eventRepository;
+    private final CourseRepository courseRepository;
 
     public List<Check> findChecksByCheckedOn(final Date checkedOn) {
         return checkRepository.findByCheckedOn(checkedOn);
@@ -73,5 +77,28 @@ public class CheckService {
 
     public Event createEvent(Event eventEntity) {
         return eventRepository.save(eventEntity);
+    }
+
+    public Course createOrUpdateCourse(Course courseEntity) {
+        return courseRepository.save(courseEntity);
+    }
+
+    public Optional<Course> fetchCourse(Long id) {
+        return courseRepository.findById(id);
+    }
+
+    public List<Course> fetchCourse() {
+        final var cIterator = courseRepository.findAll().iterator();
+        final var cList = new ArrayList<Course>();
+
+        while (cIterator.hasNext()) {
+            cList.add(cIterator.next());
+        }
+
+        return cList;
+    }
+
+    public List<Course> fetchCourse(String keyword) {
+        return courseRepository.findAllByTitleMatchesOrDescriptionContaining(keyword, keyword);
     }
 }

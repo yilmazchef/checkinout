@@ -36,17 +36,32 @@ create table if not exists users
 
 ) charset = utf8;
 
+create table if not exists courses
+(
+
+    id          bigint auto_increment primary key,
+    title       varchar(255)  null,
+    description varchar(2000) null,
+
+    constraint title unique (title)
+
+) charset = utf8;
+
 create table if not exists events
 (
 
     id           bigint auto_increment primary key,
     check_id     bigint             not null,
+    course_id    bigint             not null,
     attendee_id  bigint             not null,
     organizer_id bigint             null,
     check_type   enum ('IN', 'OUT') not null,
 
     constraint check_to_attendee_fk
         foreign key (check_id) references checks (id),
+
+    constraint course_to_event_fk
+        foreign key (course_id) references courses (id),
 
     constraint user_to_attendee_fk
         foreign key (attendee_id) references users (id),

@@ -30,6 +30,8 @@ public class CheckDTO implements Serializable, Cloneable {
     LocalTime checkedInAt;
     @CsvBindByPosition(position = 5)
     LocalTime checkedOutAt;
+    @CsvBindByPosition(position = 6)
+    String course;
 
     @Override
     public CheckDTO clone() {
@@ -40,7 +42,8 @@ public class CheckDTO implements Serializable, Cloneable {
                     .setLastName(this.getLastName())
                     .setCheckedOn(this.getCheckedOn())
                     .setCheckedInAt(this.getCheckedInAt())
-                    .setCheckedOutAt(this.getCheckedOutAt());
+                    .setCheckedOutAt(this.getCheckedOutAt())
+                    .setCourse(this.getCourse());
 
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

@@ -1,5 +1,9 @@
 server:
-  port: ${PORT:8080}
+  port: ${PORT:8443}
+  ssl:
+    key-store: classpath:checkinout.p12
+    key-store-password: P@ssw0rd
+    keyStoreType: PKCS12
 
 logging.level:
   org.atmosphere: warn
@@ -38,7 +42,7 @@ spring:
       name: ${SPRING_SECURITY_USERNAME}
       password: ${SPRING_SECURITY_PASSWORD}
       roles: ${SPRING_SECURITY_ROLES}
-
+  
   mail:
     host: smtp.gmail.com
     port: 587
