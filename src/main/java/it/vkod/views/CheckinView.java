@@ -129,7 +129,7 @@ public class CheckinView extends VerticalLayout {
                     final var failSafeRegisterButton = new Button("Manueel Inchecken");
 
 
-                    final var activateFaileSafeButton = new Button(VaadinIcon.CONNECT);
+                    final var activateFaileSafeButton = new Button(VaadinIcon.CONNECT.create());
 
                     failSafeRegisterButton.addClickListener(onRegisterClick -> {
                         checkInUser(organizer, attendeesGrid, usernameField.getValue(),
