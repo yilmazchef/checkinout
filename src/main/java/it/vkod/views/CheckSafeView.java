@@ -56,17 +56,13 @@ public class CheckSafeView extends VerticalLayout {
         user.ifPresent(
                 organizer -> {
 
-                    this.attendeesGrid
-                            .addColumn(CheckDTO::getFirstName)
-                            .setHeader("Voornaam")
-                            .setKey("firstName");
-                    this.attendeesGrid
-                            .addColumn(CheckDTO::getLastName)
-                            .setHeader("Familienaam")
-                            .setKey("lastName");
+                    this.attendeesGrid.addColumn(CheckDTO::getFirstName).setHeader("Voornaam").setKey("firstName");
+                    this.attendeesGrid.addColumn(CheckDTO::getLastName).setHeader("Familienaam").setKey("lastName");
                     this.attendeesGrid.addColumn(CheckDTO::getEmail).setHeader("Email").setKey("email");
+                    this.attendeesGrid.addColumn(CheckDTO::getCheckedOn).setHeader("Datum").setKey("checked_on");
+                    this.attendeesGrid.addColumn(CheckDTO::getCheckedInAt).setHeader("In").setKey("checked_in_at");
+                    this.attendeesGrid.addColumn(CheckDTO::getCheckedOutAt).setHeader("Uit").setKey("checked_out_at");
                     this.attendeesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-
                     this.attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
 
                     final var geoLocation = new GeoLocation();
