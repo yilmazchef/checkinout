@@ -1,21 +1,15 @@
 package it.vkod.views;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Check;
 import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
@@ -43,7 +37,7 @@ public class CheckinView extends VerticalLayout {
     private final UserService userService;
     private final CheckService checkService;
 
-    private final Grid<CheckDTO> attendeesGrid = new Grid<>();
+    private ChecksGrid attendeesGrid;
 
     public CheckinView(
             AuthenticationService authenticationService, UserService userService,
@@ -62,21 +56,7 @@ public class CheckinView extends VerticalLayout {
         user.ifPresent(
                 organizer -> {
 
-                    attendeesGrid
-                            .addColumn(CheckDTO::getFirstName)
-                            .setHeader("Voornaam")
-                            .setKey("firstName");
-                    attendeesGrid
-                            .addColumn(CheckDTO::getLastName)
-                            .setHeader("Familienaam")
-                            .setKey("lastName");
-                    attendeesGrid.addColumn(CheckDTO::getEmail).setHeader("Email").setKey("email");
-                    attendeesGrid.addThemeVariants(
-                            GridVariant.LUMO_NO_BORDER,
-                            GridVariant.LUMO_NO_ROW_BORDERS,
-                            GridVariant.LUMO_ROW_STRIPES);
-
-                    attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+                    this.attendeesGrid = new ChecksGrid(this.checkService.findAllCheckinDetailsOfToday());
 
                     final var courseSelect = new Select<Course>();
                     courseSelect.setLabel("Selecteer een course");
@@ -87,20 +67,17 @@ public class CheckinView extends VerticalLayout {
                     locationLayout.setMargin(false);
                     locationLayout.setPadding(false);
                     locationLayout.setSpacing(false);
+
                     final var geoLocation = new GeoLocation();
                     geoLocation.setWatch(true);
                     geoLocation.setHighAccuracy(true);
                     geoLocation.setTimeout(100000);
                     geoLocation.setMaxAge(200000);
+
                     locationLayout.add(geoLocation);
 
                     final var leftLayout = new VerticalLayout();
-                    leftLayout.setMargin(false);
-                    leftLayout.setPadding(false);
-                    leftLayout.setSpacing(false);
-                    leftLayout.getStyle().set("margin-top", "4vh");
-                    leftLayout.setWidth("35vw");
-                    leftLayout.setHeight("90vh");
+                    initLayoutStyle(leftLayout, "35vw");
                     final var reader = new ZXingVaadinReader();
 
                     reader.setFrom(Constants.From.camera);
@@ -115,43 +92,24 @@ public class CheckinView extends VerticalLayout {
                     leftLayout.add(reader, locationLayout);
 
                     final var rightLayout = new VerticalLayout();
-                    rightLayout.setMargin(false);
-                    rightLayout.setPadding(false);
-                    rightLayout.setSpacing(false);
-                    rightLayout.getStyle().set("margin-top", "4vh");
-                    rightLayout.setWidth("55vw");
-                    rightLayout.setHeight("90vh");
+                    initLayoutStyle(rightLayout, "55vw");
 
-                    final var failSafeForm = new FormLayout();
-
-                    final var usernameField = new TextField();
-                    usernameField.setLabel("Gebruikersnaam cursist");
-                    usernameField.setRequired(true);
-
-                    final var failSafeRegisterButton = new Button("Manueel Inchecken");
-
-
-                    failSafeRegisterButton.addClickListener(onRegisterClick -> checkInUser(
-                            usernameField.getValue(),
-                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
-                            courseSelect.getValue(), organizer));
-
-                    usernameField.addValueChangeListener(onValueChange -> {
-                        failSafeRegisterButton.setEnabled(
-                                !onValueChange.getValue().isEmpty()
-                        );
-                    });
-
-                    failSafeForm.add(courseSelect, usernameField, failSafeRegisterButton);
-
-                    rightLayout.add(failSafeForm, attendeesGrid);
-
+                    rightLayout.add(courseSelect, attendeesGrid);
                     splitLayout.add(leftLayout, rightLayout);
 
                 });
 
 
         add(splitLayout);
+    }
+
+    private void initLayoutStyle(VerticalLayout layout, String width) {
+        layout.setMargin(false);
+        layout.setPadding(false);
+        layout.setSpacing(false);
+        layout.getStyle().set("margin-top", "4vh");
+        layout.setWidth(width);
+        layout.setHeight("90vh");
     }
 
     private void checkInUser(final String username, final Double lat, final Double lon, final Course course, final User organizer) {
@@ -209,7 +167,9 @@ public class CheckinView extends VerticalLayout {
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
 
                 final var foundUser = this.userService.findUserById(savedOrUpdatedEvent.getAttendeeId());
-                if (foundUser.isPresent()) attendeesGrid.setItems(checkService.findAllCheckinDetailsOfToday());
+                if (foundUser.isPresent() && this.attendeesGrid != null) {
+                    this.attendeesGrid.setItems(checkService.findAllCheckinDetailsOfToday());
+                }
 
                 Notification.show(
                                 attendee.getFirstName()

@@ -2,8 +2,6 @@ package it.vkod.views;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -12,7 +10,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
-import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Check;
 import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
@@ -39,7 +36,7 @@ public class CheckSafeView extends VerticalLayout {
     private final UserService userService;
     private final CheckService checkService;
 
-    private final Grid<CheckDTO> attendeesGrid = new Grid<>();
+    private ChecksGrid attendeesGrid;
 
     public CheckSafeView(
             AuthenticationService authenticationService, UserService userService,
@@ -56,14 +53,7 @@ public class CheckSafeView extends VerticalLayout {
         user.ifPresent(
                 organizer -> {
 
-                    this.attendeesGrid.addColumn(CheckDTO::getFirstName).setHeader("Voornaam").setKey("firstName");
-                    this.attendeesGrid.addColumn(CheckDTO::getLastName).setHeader("Familienaam").setKey("lastName");
-                    this.attendeesGrid.addColumn(CheckDTO::getEmail).setHeader("Email").setKey("email");
-                    this.attendeesGrid.addColumn(CheckDTO::getCheckedOn).setHeader("Datum").setKey("checked_on");
-                    this.attendeesGrid.addColumn(CheckDTO::getCheckedInAt).setHeader("In").setKey("checked_in_at");
-                    this.attendeesGrid.addColumn(CheckDTO::getCheckedOutAt).setHeader("Uit").setKey("checked_out_at");
-                    this.attendeesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-                    this.attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+                    this.attendeesGrid = new ChecksGrid(this.checkService.findAllCheckinDetailsOfToday());
 
                     final var geoLocation = new GeoLocation();
                     geoLocation.setWatch(true);
@@ -158,7 +148,7 @@ public class CheckSafeView extends VerticalLayout {
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
 
                 final var foundUser = this.userService.findUserById(savedOrUpdatedEvent.getAttendeeId());
-                if (foundUser.isPresent())
+                if (foundUser.isPresent() && this.attendeesGrid != null)
                     this.attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
 
                 Notification.show(
@@ -241,8 +231,8 @@ public class CheckSafeView extends VerticalLayout {
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
-                if (!savedOrUpdatedEvent.isNew())
-                    attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
+                if (!savedOrUpdatedEvent.isNew() && this.attendeesGrid != null)
+                    this.attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
 
                 Notification.show(
                                 attendee.getFirstName()

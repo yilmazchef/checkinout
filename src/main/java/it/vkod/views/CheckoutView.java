@@ -1,21 +1,15 @@
 package it.vkod.views;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
 import it.vkod.data.entity.User;
@@ -41,7 +35,7 @@ public class CheckoutView extends VerticalLayout {
     private final CheckService checkService;
 
     private final HorizontalLayout splitLayout = new HorizontalLayout();
-    private final Grid<CheckDTO> attendeesGrid = new Grid<>();
+    private ChecksGrid attendeesGrid;
 
     public CheckoutView(
             AuthenticationService authenticationService, UserService userService,
@@ -51,45 +45,13 @@ public class CheckoutView extends VerticalLayout {
         this.checkService = checkService;
         this.authenticationService = authenticationService;
 
-        initStyle();
+        initParentStyle();
 
         final var user = this.authenticationService.get();
 
-        user.ifPresent(organizer -> {
+        user.ifPresentOrElse(organizer -> {
 
-            this.attendeesGrid.setWidthFull();
-            this.attendeesGrid.setHeightFull();
-
-            this.attendeesGrid
-                    .addColumn(CheckDTO::getFirstName)
-                    .setHeader("Voornaam")
-                    .setKey("firstName");
-
-            this.attendeesGrid
-                    .addColumn(CheckDTO::getLastName)
-                    .setHeader("Familienaam")
-                    .setKey("lastName");
-            this.attendeesGrid.addColumn(CheckDTO::getEmail).setHeader("Email").setKey("email");
-
-            this.attendeesGrid
-                    .addColumn(CheckDTO::getCheckedOn)
-                    .setHeader("Gecheckt op")
-                    .setKey("checked_on");
-
-            this.attendeesGrid
-                    .addColumn(CheckDTO::getCheckedInAt)
-                    .setHeader("Ingecheckt om")
-                    .setKey("checked_in_at");
-
-            this.attendeesGrid
-                    .addColumn(CheckDTO::getCheckedOutAt)
-                    .setHeader("Uitgecheckt om")
-                    .setKey("checked_out_at");
-
-            this.attendeesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-
-            final var checksGridDataList = this.checkService.findCheckoutDetailsOfToday();
-            this.attendeesGrid.setItems(checksGridDataList);
+            attendeesGrid = new ChecksGrid(this.checkService.findCheckoutDetailsOfToday());
 
             final var coursesBox = new ComboBox<Course>("Courses");
             coursesBox.setItemLabelGenerator(course -> course.getTitle());
@@ -106,11 +68,13 @@ public class CheckoutView extends VerticalLayout {
             locationLayout.setMargin(false);
             locationLayout.setPadding(false);
             locationLayout.setSpacing(false);
+
             final var geoLocation = new GeoLocation();
             geoLocation.setWatch(true);
             geoLocation.setHighAccuracy(true);
             geoLocation.setTimeout(100000);
             geoLocation.setMaxAge(200000);
+
             locationLayout.add(geoLocation);
 
             reader.addValueChangeListener(scannedQRCode -> checkOutUser(
@@ -119,48 +83,22 @@ public class CheckoutView extends VerticalLayout {
                     geoLocation.getValue().getLongitude(),
                     coursesBox.getValue(), organizer));
 
-            leftLayout.setMargin(false);
-            leftLayout.setPadding(false);
-            leftLayout.setSpacing(false);
-            leftLayout.getStyle().set("margin-top", "4vh");
-            leftLayout.setWidth("35vw");
-            leftLayout.setHeight("90vh");
+            initLayoutStyle(leftLayout, "35vw");
 
             leftLayout.add(reader, locationLayout);
 
             final var rightLayout = new VerticalLayout();
-            rightLayout.setMargin(false);
-            rightLayout.setPadding(false);
-            rightLayout.setSpacing(false);
-            rightLayout.getStyle().set("margin-top", "4vh");
-            rightLayout.setWidth("55vw");
-            rightLayout.setHeight("90vh");
-
-            final var failSafeLayout = new FormLayout();
-
-            final var usernameField = new TextField();
-            usernameField.setLabel("Gebruikersnaam cursist");
-            usernameField.setRequired(true);
+            initLayoutStyle(rightLayout, "55vw");
 
 
-            final var failSafeRegisterButton = new Button("Manueel uitchecken", onClick ->
-                    checkOutUser(usernameField.getValue(),
-                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
-                            coursesBox.getValue(), organizer));
-
-            usernameField.addValueChangeListener(onValueChange -> {
-                failSafeRegisterButton.setEnabled(
-                        !onValueChange.getValue().isEmpty()
-                );
-            });
-
-            failSafeLayout.add(coursesBox, usernameField, failSafeRegisterButton);
-            rightLayout.add(failSafeLayout, attendeesGrid);
+            rightLayout.add(coursesBox, attendeesGrid);
 
             splitLayout.add(leftLayout, rightLayout);
 
             add(splitLayout);
 
+        }, () -> {
+            Notification.show("Er is GEEN check-data.").open();
         });
 
     }
@@ -215,8 +153,8 @@ public class CheckoutView extends VerticalLayout {
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
-                if (!savedOrUpdatedEvent.isNew())
-                    attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
+                if (!savedOrUpdatedEvent.isNew() && this.attendeesGrid != null)
+                    this.attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
 
                 Notification.show(
                                 attendee.getFirstName()
@@ -249,7 +187,7 @@ public class CheckoutView extends VerticalLayout {
         }
     }
 
-    private void initStyle() {
+    private void initParentStyle() {
 
         addClassNames("flex", "flex-col", "h-full");
         setMargin(false);
@@ -260,5 +198,14 @@ public class CheckoutView extends VerticalLayout {
         setJustifyContentMode(JustifyContentMode.CENTER);
         setHorizontalComponentAlignment(Alignment.CENTER);
         setAlignItems(Alignment.CENTER);
+    }
+
+    private void initLayoutStyle(VerticalLayout layout, String width) {
+        layout.setMargin(false);
+        layout.setPadding(false);
+        layout.setSpacing(false);
+        layout.getStyle().set("margin-top", "4vh");
+        layout.setWidth(width);
+        layout.setHeight("90vh");
     }
 }
