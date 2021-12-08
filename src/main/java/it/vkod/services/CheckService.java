@@ -10,6 +10,7 @@ import it.vkod.repositories.EventRepository;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -71,14 +72,17 @@ public class CheckService {
         return eventRepository.findByAttendeeIdAndCheckIdAndCheckType(attendeeId, checkId, checkType);
     }
 
+    @Transactional
     public Check createCheck(Check checkEntity) {
         return checkRepository.save(checkEntity);
     }
 
+    @Transactional
     public Event createEvent(Event eventEntity) {
         return eventRepository.save(eventEntity);
     }
 
+    @Transactional
     public Course createOrUpdateCourse(Course courseEntity) {
         return courseRepository.save(courseEntity);
     }

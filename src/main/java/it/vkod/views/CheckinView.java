@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -97,13 +98,13 @@ public class CheckinView extends VerticalLayout {
                     leftLayout.setPadding(false);
                     leftLayout.setSpacing(false);
                     leftLayout.getStyle().set("margin-top", "4vh");
-                    leftLayout.setWidth("45vw");
+                    leftLayout.setWidth("35vw");
                     leftLayout.setHeight("90vh");
                     final var reader = new ZXingVaadinReader();
 
                     reader.setFrom(Constants.From.camera);
                     reader.setId("video"); // id needs to be 'video' if From.camera.
-                    reader.setStyle("object-fit: cover; width:45vw; height:65vh; max-height:45vw");
+                    reader.setStyle("object-fit: cover; width:35vw; height:65vh; max-height:35vw");
 
                     reader.addValueChangeListener(
                             scannedQRCode -> checkInUser(organizer, attendeesGrid, scannedQRCode.getValue(),
@@ -116,7 +117,7 @@ public class CheckinView extends VerticalLayout {
                     rightLayout.setPadding(false);
                     rightLayout.setSpacing(false);
                     rightLayout.getStyle().set("margin-top", "4vh");
-                    rightLayout.setWidth("45vw");
+                    rightLayout.setWidth("55vw");
                     rightLayout.setHeight("90vh");
 
                     FormLayout failSafeForm = new FormLayout();
@@ -125,13 +126,24 @@ public class CheckinView extends VerticalLayout {
                     usernameField.setLabel("Gebruikersnaam cursist");
                     usernameField.setRequired(true);
 
-                    final var failSafeRegisterButton =
-                            new Button(
-                                    "Manueel Inchecken",
-                                    onClick -> checkInUser(organizer, attendeesGrid, usernameField.getValue(),
-                                            Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue())));
+                    final var failSafeRegisterButton = new Button("Manueel Inchecken");
 
-                    failSafeForm.add(usernameField, failSafeRegisterButton);
+
+                    final var activateFaileSafeButton = new Button(VaadinIcon.CONNECT);
+
+                    failSafeRegisterButton.addClickListener(onRegisterClick -> {
+                        checkInUser(organizer, attendeesGrid, usernameField.getValue(),
+                                Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue()));
+                        failSafeRegisterButton.setEnabled(false);
+                        activateFaileSafeButton.setEnabled(false);
+                    });
+
+                    activateFaileSafeButton.addClickListener(, onActivateClick -> {
+                        failSafeRegisterButton.setEnabled(true);
+                        activateFaileSafeButton.setEnabled(false);
+                    });
+
+                    failSafeForm.add(usernameField, activateFaileSafeButton, failSafeRegisterButton);
 
                     rightLayout.add(failSafeForm, attendeesGrid);
 
