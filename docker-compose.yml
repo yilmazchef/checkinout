@@ -19,7 +19,7 @@ services:
     ports:
       - "9090:8080"
 
-  webapp:
+  checkinout_web_app:
     image: yilmazchef/checkinout
     restart: on-failure
     depends_on:

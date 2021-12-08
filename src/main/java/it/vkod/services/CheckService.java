@@ -1,5 +1,9 @@
 package it.vkod.services;
 
+import com.grum.geocalc.BoundingArea;
+import com.grum.geocalc.Coordinate;
+import com.grum.geocalc.EarthCalc;
+import com.grum.geocalc.Point;
 import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Check;
 import it.vkod.data.entity.Course;
@@ -74,7 +78,33 @@ public class CheckService {
 
     @Transactional
     public Check createCheck(Check checkEntity) {
-        return checkRepository.save(checkEntity);
+
+        final var oUser = userRepository.findByUsername(checkEntity.getQrcode());
+
+        if (oUser.isPresent()) {
+
+            Coordinate lat = Coordinate.fromDegrees(51.4843774);
+            Coordinate lng = Coordinate.fromDegrees(-0.2912044);
+            Point userLocation = Point.at(lat, lng);
+
+
+            Coordinate intecLat = Coordinate.fromDegrees(50.8426647248452);
+            Coordinate intecLon = Coordinate.fromDegrees(4.346442528782073);
+            Point intecLocation = Point.at(intecLat, intecLon);
+            BoundingArea intecBoundingArea = EarthCalc.gcd.around(intecLocation, 10);
+
+            boolean sameLocation = intecBoundingArea.contains(userLocation);
+
+            if (sameLocation) {
+                return checkRepository.save(checkEntity);
+
+            }
+
+            return null;
+
+        }
+
+        return null;
     }
 
     @Transactional
