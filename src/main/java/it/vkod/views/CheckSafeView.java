@@ -1,12 +1,12 @@
 package it.vkod.views;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -74,32 +74,35 @@ public class CheckSafeView extends VerticalLayout {
                     geoLocation.setHighAccuracy(true);
                     geoLocation.setTimeout(100000);
                     geoLocation.setMaxAge(200000);
-                    add(geoLocation);
 
+                    final var failsafeLayout = new VerticalLayout();
                     final var failSafeForm = new FormLayout();
 
                     final var usernameField = new TextField();
                     usernameField.setLabel("Gebruikersnaam");
                     usernameField.setRequired(true);
 
-                    final var coursesBox = new ComboBox<Course>("Courses");
-                    coursesBox.setItemLabelGenerator(course -> course.getTitle());
-                    coursesBox.setItems(checkService.fetchCourse());
+                    final var coursesSelect = new Select<Course>();
+                    coursesSelect.setLabel("Selecteer een course");
+                    coursesSelect.setEmptySelectionAllowed(false);
+                    coursesSelect.setItemLabelGenerator(course -> course.getTitle());
+                    coursesSelect.setItems(checkService.fetchCourse());
 
-                    final var checkInButton = new Button("Inchecken",
-                            onClick -> checkInUser(usernameField.getValue(), geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(), coursesBox.getValue(), organizer));
+                    final var checkInButton = new Button("Inchecken", onClick ->
+                            checkInUser(usernameField.getValue(), geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(), coursesSelect.getValue(), organizer));
 
-                    final var checkOutButton = new Button("Uitchecken",
-                            onClick -> checkOutUser(usernameField.getValue(), geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(), coursesBox.getValue(), organizer));
+                    final var checkOutButton = new Button("Uitchecken", onClick -> checkOutUser(
+                            usernameField.getValue(), geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(), coursesSelect.getValue(), organizer));
 
                     usernameField.addValueChangeListener(onValueChange -> {
                         checkInButton.setEnabled(!onValueChange.getValue().isEmpty());
                         checkOutButton.setEnabled(!onValueChange.getValue().isEmpty());
                     });
 
-                    failSafeForm.add(coursesBox, usernameField, checkInButton, checkOutButton);
+                    failSafeForm.add(coursesSelect, usernameField, checkInButton, checkOutButton);
+                    failsafeLayout.add(failSafeForm);
 
-                    add(failSafeForm, attendeesGrid);
+                    add(failsafeLayout, attendeesGrid, geoLocation);
 
                 });
 

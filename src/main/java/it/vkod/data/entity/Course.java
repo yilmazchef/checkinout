@@ -41,4 +41,8 @@ public class Course implements Serializable, Cloneable {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.title;
+    }
 }

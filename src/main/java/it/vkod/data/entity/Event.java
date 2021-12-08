@@ -47,4 +47,8 @@ public class Event implements Serializable, Cloneable {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.checkType;
+    }
 }

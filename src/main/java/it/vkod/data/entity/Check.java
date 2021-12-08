@@ -39,6 +39,8 @@ public class Check implements Serializable, Cloneable {
 
     Float lon;
 
+    Boolean validLocation;
+
     public Check setLat(Float lat) {
         this.lat = lat;
         return this;
@@ -95,4 +97,8 @@ public class Check implements Serializable, Cloneable {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.checkedOn + " - " + this.qrcode;
+    }
 }

@@ -61,4 +61,9 @@ public class User implements Serializable, Cloneable {
             throw new AssertionError();
         }
     }
+
+    @Override
+    public String toString() {
+        return this.username;
+    }
 }

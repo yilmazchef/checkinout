@@ -9,6 +9,7 @@ create table if not exists checks
     is_active       bit          not null default 1,
     lat             float        null,
     lon             float        null,
+    valid_location  bit          not null default 0,
     pincode         int          null,
     qrcode          varchar(255) not null
 
@@ -45,7 +46,7 @@ create table if not exists courses
     parent_id   bigint        null,
 
     constraint title unique (title),
-    
+
     constraint parent_to_child_fk
         foreign key (parent_id) references courses (id)
 

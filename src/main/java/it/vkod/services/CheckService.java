@@ -83,28 +83,20 @@ public class CheckService {
 
         if (oUser.isPresent()) {
 
-            Coordinate lat = Coordinate.fromDegrees(51.4843774);
-            Coordinate lng = Coordinate.fromDegrees(-0.2912044);
+            Coordinate lat = Coordinate.fromDegrees(checkEntity.getLat());
+            Coordinate lng = Coordinate.fromDegrees(checkEntity.getLon());
             Point userLocation = Point.at(lat, lng);
-
 
             Coordinate intecLat = Coordinate.fromDegrees(50.8426647248452);
             Coordinate intecLon = Coordinate.fromDegrees(4.346442528782073);
             Point intecLocation = Point.at(intecLat, intecLon);
             BoundingArea intecBoundingArea = EarthCalc.gcd.around(intecLocation, 10);
 
-            boolean sameLocation = intecBoundingArea.contains(userLocation);
-
-            if (sameLocation) {
-                return checkRepository.save(checkEntity);
-
-            }
-
-            return null;
+            checkEntity.setValidLocation(intecBoundingArea.contains(userLocation));
 
         }
 
-        return null;
+        return checkRepository.save(checkEntity);
     }
 
     @Transactional

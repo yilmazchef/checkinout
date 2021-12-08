@@ -1,13 +1,13 @@
 package it.vkod.views;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -30,6 +30,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Random;
 
 @PageTitle("Inchecken")
 @Route(value = "in", layout = TemplateLayout.class)
@@ -77,9 +78,10 @@ public class CheckinView extends VerticalLayout {
 
                     attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
 
-                    final var coursesBox = new ComboBox<Course>("Courses");
-                    coursesBox.setItemLabelGenerator(course -> course.getTitle());
-                    coursesBox.setItems(checkService.fetchCourse());
+                    final var courseSelect = new Select<Course>();
+                    courseSelect.setLabel("Selecteer een course");
+                    courseSelect.setItemLabelGenerator(course -> course.getTitle());
+                    courseSelect.setItems(checkService.fetchCourse());
 
                     final var locationLayout = new VerticalLayout();
                     locationLayout.setMargin(false);
@@ -108,7 +110,7 @@ public class CheckinView extends VerticalLayout {
                     reader.addValueChangeListener(scannedQRCode -> checkInUser(
                             scannedQRCode.getValue(),
                             geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
-                            coursesBox.getValue(), organizer));
+                            courseSelect.getValue(), organizer));
 
                     leftLayout.add(reader, locationLayout);
 
@@ -132,7 +134,7 @@ public class CheckinView extends VerticalLayout {
                     failSafeRegisterButton.addClickListener(onRegisterClick -> checkInUser(
                             usernameField.getValue(),
                             geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
-                            coursesBox.getValue(), organizer));
+                            courseSelect.getValue(), organizer));
 
                     usernameField.addValueChangeListener(onValueChange -> {
                         failSafeRegisterButton.setEnabled(
@@ -140,7 +142,7 @@ public class CheckinView extends VerticalLayout {
                         );
                     });
 
-                    failSafeForm.add(coursesBox, usernameField, failSafeRegisterButton);
+                    failSafeForm.add(courseSelect, usernameField, failSafeRegisterButton);
 
                     rightLayout.add(failSafeForm, attendeesGrid);
 
@@ -166,7 +168,7 @@ public class CheckinView extends VerticalLayout {
                         new Check()
                                 .setIsActive(true)
                                 .setCurrentSession(VaadinSession.getCurrent().getSession().getId())
-                                .setPincode(111111)
+                                .setPincode(new Random().nextInt(9999))
                                 .setCheckedInAt(Time.valueOf(LocalTime.now()))
                                 .setCheckedOutAt(Time.valueOf(LocalTime.now()))
                                 .setQrcode(username)
