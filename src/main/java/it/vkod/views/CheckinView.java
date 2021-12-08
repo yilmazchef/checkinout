@@ -86,7 +86,8 @@ public class CheckinView extends VerticalLayout {
                     reader.addValueChangeListener(scannedQRCode -> checkInUser(
                             scannedQRCode.getValue(),
                             geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
-                            courseSelect.getValue(), organizer));
+                            courseSelect.getValue(), organizer,
+                            attendeesGrid));
 
                     leftLayout.add(reader, locationLayout);
 
@@ -111,7 +112,10 @@ public class CheckinView extends VerticalLayout {
         layout.setHeight("90vh");
     }
 
-    private void checkInUser(final String username, final Double lat, final Double lon, final Course course, final User organizer) {
+    private void checkInUser(final String username,
+                             final Double lat, final Double lon,
+                             final Course course, final User organizer,
+                             final ChecksGrid attendeesGrid) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
@@ -166,8 +170,8 @@ public class CheckinView extends VerticalLayout {
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
 
                 final var foundUser = this.userService.findUserById(savedOrUpdatedEvent.getAttendeeId());
-                if (foundUser.isPresent() && this.attendeesGrid != null) {
-                    this.attendeesGrid.setItems(checkService.findAllCheckinDetailsOfToday());
+                if (foundUser.isPresent() && attendeesGrid != null) {
+                    attendeesGrid.setItems(checkService.findAllCheckinDetailsOfToday());
                 }
 
                 Notification.show(

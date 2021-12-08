@@ -70,13 +70,10 @@ public class GenerateView extends VerticalLayout {
                                             .open();
 
                                 } catch (WriterException | IOException fileEx) {
-                                    Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER)
-                                            .open();
+                                    Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER).open();
                                 }
                             } else {
-                                Notification.show(
-                                                "USER DOES NOT EXIST !! ", 3000, Notification.Position.BOTTOM_CENTER)
-                                        .open();
+                                Notification.show("USER DOES NOT EXIST !! ", 3000, Notification.Position.BOTTOM_CENTER).open();
                             }
                         });
 
@@ -101,10 +98,9 @@ public class GenerateView extends VerticalLayout {
 
     private Image convertToImage(final byte[] imageData, final String username) {
 
-        return new Image(
-                new StreamResource(
-                        username.concat("_QR.png"),
-                        (InputStreamFactory) () -> new ByteArrayInputStream(imageData)),
+        return new Image(new StreamResource(
+                username.concat("_QR.png"),
+                (InputStreamFactory) () -> new ByteArrayInputStream(imageData)),
                 username);
     }
 }

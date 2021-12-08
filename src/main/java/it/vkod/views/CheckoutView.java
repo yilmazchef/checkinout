@@ -80,7 +80,8 @@ public class CheckoutView extends VerticalLayout {
                     scannedQRCode.getValue(),
                     geoLocation.getValue().getLatitude(),
                     geoLocation.getValue().getLongitude(),
-                    coursesBox.getValue(), organizer));
+                    coursesBox.getValue(), organizer,
+                    attendeesGrid));
 
             initLayoutStyle(leftLayout, "35vw");
 
@@ -102,7 +103,10 @@ public class CheckoutView extends VerticalLayout {
 
     }
 
-    private void checkOutUser(final String scannedQRCode, final Double lat, final Double lon, final Course course, final User organizer) {
+    private void checkOutUser(final String scannedQRCode,
+                              final Double lat, final Double lon,
+                              final Course course, final User organizer,
+                              final ChecksGrid attendeesGrid) {
 
         final var oAttendee = this.userService.findByUsername(scannedQRCode);
         if (oAttendee.isPresent()) {
@@ -152,8 +156,9 @@ public class CheckoutView extends VerticalLayout {
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
-                if (!savedOrUpdatedEvent.isNew() && this.attendeesGrid != null)
-                    this.attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
+                if (!savedOrUpdatedEvent.isNew() && attendeesGrid != null) {
+                    attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
+                }
 
                 Notification.show(
                                 attendee.getFirstName()

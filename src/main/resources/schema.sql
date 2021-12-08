@@ -52,6 +52,23 @@ create table if not exists courses
 
 ) charset = utf8;
 
+create table if not exists trainings
+(
+
+    id         bigint auto_increment primary key,
+    course_id  bigint not null,
+    student_id bigint not null,
+    start_date date   not null,
+    end_date   date   not null,
+
+    constraint course_to_training_fk
+        foreign key (course_id) references courses (id),
+
+    constraint user_to_training_fk
+        foreign key (student_id) references users (id)
+
+) charset = utf8;
+
 create table if not exists events
 (
 

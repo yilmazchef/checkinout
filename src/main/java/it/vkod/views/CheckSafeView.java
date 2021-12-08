@@ -1,5 +1,6 @@
 package it.vkod.views;
 
+import com.flowingcode.vaadin.addons.twincolgrid.TwinColGrid;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
@@ -10,6 +11,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
+import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Check;
 import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
@@ -52,7 +54,17 @@ public class CheckSafeView extends VerticalLayout {
         user.ifPresent(
                 organizer -> {
 
-                    final var attendeesGrid = new ChecksGrid(this.checkService);
+                    final var availableBooks = this.userService.findAll();
+
+                    final var twinColGrid = new TwinColGrid<CheckDTO>("Cursisten", availableBooks)
+                            .addColumn(CheckDTO::getCheckId, "ID")
+                            .addColumn(CheckDTO::getFirstName, "First Name")
+                            .withSelectionGridCaption("Available books")
+                            .withAvailableGridCaption("Added books")
+                            .withoutAddAllButton()
+                            .withSizeFull()
+                            .withDragAndDropSupport();
+                    twinColGrid.setValue(selectedBooks);
 
                     final var geoLocation = new GeoLocation();
                     geoLocation.setWatch(true);

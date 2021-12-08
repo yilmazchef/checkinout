@@ -16,23 +16,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.security.RolesAllowed;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static it.vkod.api.ExportController.*;
+
 @PageTitle("System Admin - Full Access")
 @Route(value = "adm", layout = TemplateLayout.class)
 @RolesAllowed({"ADMIN", "MANAGER", "LEADER"})
 public class AdminView extends VerticalLayout {
 
 
-    private final String hostname;
     private final AdminService adminService;
 
-    private static final String URL_PDF = "/checks/pdf";
-    private static final String URL_CSV = "/checks/csv";
-    private static final String URL_EXCEL = "/checks/excel";
 
     public AdminView(@Autowired AdminService adminService) {
 
         this.adminService = adminService;
-        this.hostname = System.getenv("hostname");
+
+        final var env = System.getenv("hostname");
+        final var hostname = env.contains("localhost")
+                ? env.replaceFirst("/null", "")
+                : "https://checkinout.intecbrussel.be";
 
         Notification.show("The app is running on " + hostname, 5000, Notification.Position.TOP_CENTER).open();
 
@@ -69,9 +71,9 @@ public class AdminView extends VerticalLayout {
 
         final var actionLayout = new VerticalLayout();
 
-        Anchor pdfAnchor = new Anchor(hostname.replaceFirst("/null", "") + URL_PDF, "Exporteer als PDF");
-        Anchor csvAnchor = new Anchor(hostname.replaceFirst("/null", "") + URL_CSV, "Exporteer als CSV");
-        Anchor excelAnchor = new Anchor(hostname.replaceFirst("/null", "") + URL_EXCEL, "Exporteer als PDF");
+        Anchor pdfAnchor = new Anchor(hostname + EXPORT_USERS_PDF_URI, "Exporteer als PDF");
+        Anchor csvAnchor = new Anchor(hostname + EXPORT_CHECKS_CSV_URI, "Exporteer als CSV");
+        Anchor excelAnchor = new Anchor(hostname + EXPORT_CHECKS_EXCEL_URI, "Exporteer als PDF");
 
         actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
 
