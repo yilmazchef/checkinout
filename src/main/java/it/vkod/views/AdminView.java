@@ -69,9 +69,9 @@ public class AdminView extends VerticalLayout {
 
         final var actionLayout = new VerticalLayout();
 
-        Anchor pdfAnchor = new Anchor(hostname + URL_PDF, "Exporteer als PDF");
-        Anchor csvAnchor = new Anchor(hostname + URL_CSV, "Exporteer als CSV");
-        Anchor excelAnchor = new Anchor(hostname + URL_EXCEL, "Exporteer als PDF");
+        Anchor pdfAnchor = new Anchor(hostname.replaceFirst("/null", "") + URL_PDF, "Exporteer als PDF");
+        Anchor csvAnchor = new Anchor(hostname.replaceFirst("/null", "") + URL_CSV, "Exporteer als CSV");
+        Anchor excelAnchor = new Anchor(hostname.replaceFirst("/null", "") + URL_EXCEL, "Exporteer als PDF");
 
         actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
 
