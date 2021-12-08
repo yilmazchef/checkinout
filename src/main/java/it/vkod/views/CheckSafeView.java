@@ -40,7 +40,6 @@ public class CheckSafeView extends VerticalLayout {
     private final CheckService checkService;
 
     private final Grid<CheckDTO> attendeesGrid = new Grid<>();
-    private User organizer;
 
     public CheckSafeView(
             AuthenticationService authenticationService, UserService userService,
@@ -55,9 +54,7 @@ public class CheckSafeView extends VerticalLayout {
         final var user = this.authenticationService.get();
 
         user.ifPresent(
-                u -> {
-
-                    this.organizer = u;
+                organizer -> {
 
                     this.attendeesGrid
                             .addColumn(CheckDTO::getFirstName)
@@ -77,10 +74,6 @@ public class CheckSafeView extends VerticalLayout {
                     geoLocation.setHighAccuracy(true);
                     geoLocation.setTimeout(100000);
                     geoLocation.setMaxAge(200000);
-                    geoLocation.addValueChangeListener(onLocationChange -> {
-                        VaadinSession.getCurrent().getSession().setAttribute("lat", onLocationChange.getValue().getLatitude());
-                        VaadinSession.getCurrent().getSession().setAttribute("lon", onLocationChange.getValue().getLongitude());
-                    });
                     add(geoLocation);
 
                     final var failSafeForm = new FormLayout();
@@ -90,13 +83,14 @@ public class CheckSafeView extends VerticalLayout {
                     usernameField.setRequired(true);
 
                     final var coursesBox = new ComboBox<Course>("Courses");
+                    coursesBox.setItemLabelGenerator(course -> course.getTitle());
                     coursesBox.setItems(checkService.fetchCourse());
 
                     final var checkInButton = new Button("Inchecken",
-                            onClick -> checkInUser(usernameField.getValue(), coursesBox.getValue().getId()));
+                            onClick -> checkInUser(usernameField.getValue(), geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(), coursesBox.getValue(), organizer));
 
                     final var checkOutButton = new Button("Uitchecken",
-                            onClick -> checkOutUser(usernameField.getValue(), coursesBox.getValue().getId()));
+                            onClick -> checkOutUser(usernameField.getValue(), geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(), coursesBox.getValue(), organizer));
 
                     usernameField.addValueChangeListener(onValueChange -> {
                         checkInButton.setEnabled(!onValueChange.getValue().isEmpty());
@@ -111,7 +105,7 @@ public class CheckSafeView extends VerticalLayout {
 
     }
 
-    private void checkInUser(final String username, final Long courseId) {
+    private void checkInUser(final String username, final Double lat, final Double lon, final Course course, final User organizer) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
@@ -129,8 +123,8 @@ public class CheckSafeView extends VerticalLayout {
                                 .setCheckedInAt(Time.valueOf(LocalTime.now()))
                                 .setCheckedOutAt(Time.valueOf(LocalTime.now()))
                                 .setQrcode(username)
-                                .setLat((Float) VaadinSession.getCurrent().getSession().getAttribute("lat"))
-                                .setLon((Float) VaadinSession.getCurrent().getSession().getAttribute("lon"))
+                                .setLat(lat)
+                                .setLon(lon)
                                 .setCheckedOn(Date.valueOf(LocalDate.now()));
 
                 final var check = this.checkService.createCheck(checkEntity);
@@ -149,17 +143,17 @@ public class CheckSafeView extends VerticalLayout {
                                     .get()
                                     .setCheckId(check.getId())
                                     .setAttendeeId(attendee.getId())
-                                    .setOrganizerId(this.organizer.getId())
+                                    .setOrganizerId(organizer.getId())
                                     .setCheckType("IN")
-                                    .setCourseId(courseId);
+                                    .setCourseId(course.getId());
                 } else {
                     eventBeingEdited.data =
                             new Event()
                                     .setCheckId(check.getId())
                                     .setAttendeeId(attendee.getId())
-                                    .setOrganizerId(this.organizer.getId())
+                                    .setOrganizerId(organizer.getId())
                                     .setCheckType("IN")
-                                    .setCourseId(courseId);
+                                    .setCourseId(course.getId());
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
@@ -175,9 +169,9 @@ public class CheckSafeView extends VerticalLayout {
                                         + " heeft ingecheckt "
                                         + "."
                                         + "Org: "
-                                        + this.organizer.getFirstName()
+                                        + organizer.getFirstName()
                                         + " "
-                                        + this.organizer.getLastName(),
+                                        + organizer.getLastName(),
                                 4000,
                                 Notification.Position.BOTTOM_CENTER)
                         .open();
@@ -198,7 +192,7 @@ public class CheckSafeView extends VerticalLayout {
         }
     }
 
-    private void checkOutUser(final String username, final Long courseId) {
+    private void checkOutUser(final String username, final Double lat, final Double lon, final Course course, final User organizer) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
@@ -216,8 +210,8 @@ public class CheckSafeView extends VerticalLayout {
                                         .setCurrentSession(VaadinSession.getCurrent().getSession().getId())
                                         .setQrcode(username)
                                         .setCheckedOutAt(Time.valueOf(LocalTime.now()))
-                                        .setLat(20.00F)
-                                        .setLon(20.00F));
+                                        .setLat(lat)
+                                        .setLon(lon));
 
                 final var oEvent =
                         this.checkService.findByAttendeeIdAndCheckIdAndCheckType(
@@ -234,17 +228,17 @@ public class CheckSafeView extends VerticalLayout {
                                     .get()
                                     .setCheckId(check.getId())
                                     .setAttendeeId(attendee.getId())
-                                    .setOrganizerId(this.organizer.getId())
+                                    .setOrganizerId(organizer.getId())
                                     .setCheckType("OUT")
-                                    .setCourseId(courseId);
+                                    .setCourseId(course.getId());
                 } else {
                     eventBeingEdited.data =
                             new Event()
                                     .setCheckId(check.getId())
                                     .setAttendeeId(attendee.getId())
-                                    .setOrganizerId(this.organizer.getId())
+                                    .setOrganizerId(organizer.getId())
                                     .setCheckType("OUT")
-                                    .setCourseId(courseId);
+                                    .setCourseId(course.getId());
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);

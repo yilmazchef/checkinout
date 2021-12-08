@@ -1,6 +1,7 @@
 package it.vkod.views;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -15,6 +16,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.data.dto.CheckDTO;
+import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
 import it.vkod.data.entity.User;
 import it.vkod.services.AuthenticationService;
@@ -40,7 +42,6 @@ public class CheckoutView extends VerticalLayout {
 
     private final HorizontalLayout splitLayout = new HorizontalLayout();
     private final Grid<CheckDTO> attendeesGrid = new Grid<>();
-    private User organizer;
 
     public CheckoutView(
             AuthenticationService authenticationService, UserService userService,
@@ -54,118 +55,117 @@ public class CheckoutView extends VerticalLayout {
 
         final var user = this.authenticationService.get();
 
-        user.ifPresent(
-                u -> {
-                    this.organizer = u;
+        user.ifPresent(organizer -> {
 
-                    attendeesGrid.setWidthFull();
-                    attendeesGrid.setHeightFull();
+            this.attendeesGrid.setWidthFull();
+            this.attendeesGrid.setHeightFull();
 
-                    attendeesGrid
-                            .addColumn(CheckDTO::getFirstName)
-                            .setHeader("Voornaam")
-                            .setKey("firstName");
+            this.attendeesGrid
+                    .addColumn(CheckDTO::getFirstName)
+                    .setHeader("Voornaam")
+                    .setKey("firstName");
 
-                    attendeesGrid
-                            .addColumn(CheckDTO::getLastName)
-                            .setHeader("Familienaam")
-                            .setKey("lastName");
-                    attendeesGrid.addColumn(CheckDTO::getEmail).setHeader("Email").setKey("email");
+            this.attendeesGrid
+                    .addColumn(CheckDTO::getLastName)
+                    .setHeader("Familienaam")
+                    .setKey("lastName");
+            this.attendeesGrid.addColumn(CheckDTO::getEmail).setHeader("Email").setKey("email");
 
-                    attendeesGrid
-                            .addColumn(CheckDTO::getCheckedOn)
-                            .setHeader("Gecheckt op")
-                            .setKey("checked_on");
+            this.attendeesGrid
+                    .addColumn(CheckDTO::getCheckedOn)
+                    .setHeader("Gecheckt op")
+                    .setKey("checked_on");
 
-                    attendeesGrid
-                            .addColumn(CheckDTO::getCheckedInAt)
-                            .setHeader("Ingecheckt om")
-                            .setKey("checked_in_at");
+            this.attendeesGrid
+                    .addColumn(CheckDTO::getCheckedInAt)
+                    .setHeader("Ingecheckt om")
+                    .setKey("checked_in_at");
 
-                    attendeesGrid
-                            .addColumn(CheckDTO::getCheckedOutAt)
-                            .setHeader("Uitgecheckt om")
-                            .setKey("checked_out_at");
+            this.attendeesGrid
+                    .addColumn(CheckDTO::getCheckedOutAt)
+                    .setHeader("Uitgecheckt om")
+                    .setKey("checked_out_at");
 
-                    attendeesGrid.addThemeVariants(
-                            GridVariant.LUMO_NO_BORDER,
-                            GridVariant.LUMO_NO_ROW_BORDERS,
-                            GridVariant.LUMO_ROW_STRIPES);
+            this.attendeesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
 
-                    final var checksGridDataList = this.checkService.findCheckoutDetailsOfToday();
-                    attendeesGrid.setItems(checksGridDataList);
+            final var checksGridDataList = this.checkService.findCheckoutDetailsOfToday();
+            this.attendeesGrid.setItems(checksGridDataList);
 
-                    final var leftLayout = new VerticalLayout();
-                    final var reader = new ZXingVaadinReader();
+            final var coursesBox = new ComboBox<Course>("Courses");
+            coursesBox.setItemLabelGenerator(course -> course.getTitle());
+            coursesBox.setItems(checkService.fetchCourse());
 
-                    reader.setFrom(Constants.From.camera);
-                    reader.setId("video"); // id needs to be 'video' if From.camera.
-                    reader.setStyle("object-fit: cover; width:35vw; height:65vh; max-height:45vw");
+            final var leftLayout = new VerticalLayout();
+            final var reader = new ZXingVaadinReader();
 
-                    reader.addValueChangeListener(scannedQRCode -> checkOutUser(scannedQRCode.getValue()));
+            reader.setFrom(Constants.From.camera);
+            reader.setId("video"); // id needs to be 'video' if From.camera.
+            reader.setStyle("object-fit: cover; width:35vw; height:65vh; max-height:45vw");
 
-                    leftLayout.setMargin(false);
-                    leftLayout.setPadding(false);
-                    leftLayout.setSpacing(false);
-                    leftLayout.getStyle().set("margin-top", "4vh");
-                    leftLayout.setWidth("35vw");
-                    leftLayout.setHeight("90vh");
+            final var locationLayout = new VerticalLayout();
+            locationLayout.setMargin(false);
+            locationLayout.setPadding(false);
+            locationLayout.setSpacing(false);
+            final var geoLocation = new GeoLocation();
+            geoLocation.setWatch(true);
+            geoLocation.setHighAccuracy(true);
+            geoLocation.setTimeout(100000);
+            geoLocation.setMaxAge(200000);
+            locationLayout.add(geoLocation);
 
-                    final var locationLayout = new VerticalLayout();
-                    locationLayout.setMargin(false);
-                    locationLayout.setPadding(false);
-                    locationLayout.setSpacing(false);
-                    final var latField = new TextField("Latitude");
-                    latField.setReadOnly(true);
-                    final var lonField = new TextField("Longitude");
-                    lonField.setReadOnly(true);
-                    final var geoLocation = new GeoLocation();
-                    geoLocation.setWatch(true);
-                    geoLocation.setHighAccuracy(true);
-                    geoLocation.setTimeout(100000);
-                    geoLocation.setMaxAge(200000);
-                    geoLocation.addValueChangeListener(onLocationChange -> {
-                        latField.setValue(String.valueOf(onLocationChange.getValue().getLatitude()));
-                        lonField.setValue(String.valueOf(onLocationChange.getValue().getLongitude()));
-                    });
-                    locationLayout.add(latField, lonField, geoLocation);
+            reader.addValueChangeListener(scannedQRCode -> checkOutUser(
+                    scannedQRCode.getValue(),
+                    geoLocation.getValue().getLatitude(),
+                    geoLocation.getValue().getLongitude(),
+                    coursesBox.getValue(), organizer));
 
-                    leftLayout.add(reader, locationLayout);
+            leftLayout.setMargin(false);
+            leftLayout.setPadding(false);
+            leftLayout.setSpacing(false);
+            leftLayout.getStyle().set("margin-top", "4vh");
+            leftLayout.setWidth("35vw");
+            leftLayout.setHeight("90vh");
 
-                    final var rightLayout = new VerticalLayout();
-                    rightLayout.setMargin(false);
-                    rightLayout.setPadding(false);
-                    rightLayout.setSpacing(false);
-                    rightLayout.getStyle().set("margin-top", "4vh");
-                    rightLayout.setWidth("55vw");
-                    rightLayout.setHeight("90vh");
+            leftLayout.add(reader, locationLayout);
 
-                    final var failSafeLayout = new FormLayout();
+            final var rightLayout = new VerticalLayout();
+            rightLayout.setMargin(false);
+            rightLayout.setPadding(false);
+            rightLayout.setSpacing(false);
+            rightLayout.getStyle().set("margin-top", "4vh");
+            rightLayout.setWidth("55vw");
+            rightLayout.setHeight("90vh");
 
-                    final var usernameField = new TextField();
-                    usernameField.setLabel("Gebruikersnaam cursist");
-                    usernameField.setRequired(true);
+            final var failSafeLayout = new FormLayout();
 
-                    final var failSafeRegisterButton = new Button("Manueel uitchecken", onClick ->
-                            checkOutUser(usernameField.getValue()));
+            final var usernameField = new TextField();
+            usernameField.setLabel("Gebruikersnaam cursist");
+            usernameField.setRequired(true);
 
-                    usernameField.addValueChangeListener(onValueChange -> {
-                        failSafeRegisterButton.setEnabled(
-                                !onValueChange.getValue().isEmpty()
-                        );
-                    });
 
-                    failSafeLayout.add(usernameField, failSafeRegisterButton);
-                    rightLayout.add(failSafeLayout, attendeesGrid);
+            final var failSafeRegisterButton = new Button("Manueel uitchecken", onClick ->
+                    checkOutUser(usernameField.getValue(),
+                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
+                            coursesBox.getValue(), organizer));
 
-                    splitLayout.add(leftLayout, rightLayout);
+            usernameField.addValueChangeListener(onValueChange -> {
+                failSafeRegisterButton.setEnabled(
+                        !onValueChange.getValue().isEmpty()
+                );
+            });
 
-                });
+            failSafeLayout.add(coursesBox, usernameField, failSafeRegisterButton);
+            rightLayout.add(failSafeLayout, attendeesGrid);
 
-        add(splitLayout);
+            splitLayout.add(leftLayout, rightLayout);
+
+            add(splitLayout);
+
+        });
+
     }
 
-    private void checkOutUser(final String scannedQRCode) {
+    private void checkOutUser(final String scannedQRCode, final Double lat, final Double lon, final Course course, final User organizer) {
 
         final var oAttendee = this.userService.findByUsername(scannedQRCode);
         if (oAttendee.isPresent()) {
@@ -183,8 +183,8 @@ public class CheckoutView extends VerticalLayout {
                                         .setCurrentSession(VaadinSession.getCurrent().getSession().getId())
                                         .setQrcode(scannedQRCode)
                                         .setCheckedOutAt(Time.valueOf(LocalTime.now()))
-                                        .setLat(20.00F)
-                                        .setLon(20.00F));
+                                        .setLat(lat)
+                                        .setLon(lon));
 
                 final var oEvent =
                         this.checkService.findByAttendeeIdAndCheckIdAndCheckType(
@@ -201,15 +201,17 @@ public class CheckoutView extends VerticalLayout {
                                     .get()
                                     .setCheckId(check.getId())
                                     .setAttendeeId(attendee.getId())
-                                    .setOrganizerId(this.organizer.getId())
-                                    .setCheckType("OUT");
+                                    .setOrganizerId(organizer.getId())
+                                    .setCheckType("OUT")
+                                    .setCourseId(course.getId());
                 } else {
                     eventBeingEdited.data =
                             new Event()
                                     .setCheckId(check.getId())
                                     .setAttendeeId(attendee.getId())
-                                    .setOrganizerId(this.organizer.getId())
-                                    .setCheckType("OUT");
+                                    .setOrganizerId(organizer.getId())
+                                    .setCheckType("OUT")
+                                    .setCourseId(course.getId());
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);

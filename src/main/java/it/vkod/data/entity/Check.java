@@ -39,6 +39,36 @@ public class Check implements Serializable, Cloneable {
 
     Float lon;
 
+    public Check setLat(Float lat) {
+        this.lat = lat;
+        return this;
+    }
+
+    public Check setLat(Double lat) {
+        this.lat = lat.floatValue();
+        return this;
+    }
+
+    public Check setLat(String lat) {
+        this.lat = Float.parseFloat(lat);
+        return this;
+    }
+
+    public Check setLon(Float lon) {
+        this.lon = lon;
+        return this;
+    }
+
+    public Check setLon(Double lon) {
+        this.lon = lon.floatValue();
+        return this;
+    }
+
+    public Check setLon(String lon) {
+        this.lon = Float.parseFloat(lon);
+        return this;
+    }
+
     public boolean isNew() {
         return this.id == null;
     }

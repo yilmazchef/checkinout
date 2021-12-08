@@ -43,7 +43,6 @@ public class CheckinView extends VerticalLayout {
     private final CheckService checkService;
 
     private final Grid<CheckDTO> attendeesGrid = new Grid<>();
-    private User organizer;
 
     public CheckinView(
             AuthenticationService authenticationService, UserService userService,
@@ -60,9 +59,7 @@ public class CheckinView extends VerticalLayout {
         final var user = this.authenticationService.get();
 
         user.ifPresent(
-                u -> {
-
-                    this.organizer = u;
+                organizer -> {
 
                     attendeesGrid
                             .addColumn(CheckDTO::getFirstName)
@@ -81,26 +78,19 @@ public class CheckinView extends VerticalLayout {
                     attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
 
                     final var coursesBox = new ComboBox<Course>("Courses");
+                    coursesBox.setItemLabelGenerator(course -> course.getTitle());
                     coursesBox.setItems(checkService.fetchCourse());
 
                     final var locationLayout = new VerticalLayout();
                     locationLayout.setMargin(false);
                     locationLayout.setPadding(false);
                     locationLayout.setSpacing(false);
-                    final var latField = new TextField("Latitude");
-                    latField.setReadOnly(true);
-                    final var lonField = new TextField("Longitude");
-                    lonField.setReadOnly(true);
                     final var geoLocation = new GeoLocation();
                     geoLocation.setWatch(true);
                     geoLocation.setHighAccuracy(true);
                     geoLocation.setTimeout(100000);
                     geoLocation.setMaxAge(200000);
-                    geoLocation.addValueChangeListener(onLocationChange -> {
-                        latField.setValue(String.valueOf(onLocationChange.getValue().getLatitude()));
-                        lonField.setValue(String.valueOf(onLocationChange.getValue().getLongitude()));
-                    });
-                    locationLayout.add(latField, lonField, geoLocation);
+                    locationLayout.add(geoLocation);
 
                     final var leftLayout = new VerticalLayout();
                     leftLayout.setMargin(false);
@@ -117,8 +107,8 @@ public class CheckinView extends VerticalLayout {
 
                     reader.addValueChangeListener(scannedQRCode -> checkInUser(
                             scannedQRCode.getValue(),
-                            Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue()),
-                            coursesBox.getValue().getId()));
+                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
+                            coursesBox.getValue(), organizer));
 
                     leftLayout.add(reader, locationLayout);
 
@@ -141,8 +131,8 @@ public class CheckinView extends VerticalLayout {
 
                     failSafeRegisterButton.addClickListener(onRegisterClick -> checkInUser(
                             usernameField.getValue(),
-                            Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue()),
-                            coursesBox.getValue().getId()));
+                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
+                            coursesBox.getValue(), organizer));
 
                     usernameField.addValueChangeListener(onValueChange -> {
                         failSafeRegisterButton.setEnabled(
@@ -162,7 +152,7 @@ public class CheckinView extends VerticalLayout {
         add(splitLayout);
     }
 
-    private void checkInUser(final String username, final Float lat, final Float lon, final Long courseId) {
+    private void checkInUser(final String username, final Double lat, final Double lon, final Course course, final User organizer) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
@@ -203,7 +193,7 @@ public class CheckinView extends VerticalLayout {
                                     .setAttendeeId(attendee.getId())
                                     .setOrganizerId(organizer.getId())
                                     .setCheckType("IN")
-                                    .setCourseId(courseId);
+                                    .setCourseId(course.getId());
                 } else {
                     eventBeingEdited.data =
                             new Event()
@@ -211,7 +201,7 @@ public class CheckinView extends VerticalLayout {
                                     .setAttendeeId(attendee.getId())
                                     .setOrganizerId(organizer.getId())
                                     .setCheckType("IN")
-                                    .setCourseId(courseId);
+                                    .setCourseId(course.getId());
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
