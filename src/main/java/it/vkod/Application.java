@@ -7,12 +7,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-/**
- * The entry point of the Spring Boot application.
- *
- * <p>Use the @PWA annotation make the application installable on
- * phones, tablets and some desktop browsers.
- */
 @SpringBootApplication
 @PWA(
         name = "checkinout", shortName = "checkinout",

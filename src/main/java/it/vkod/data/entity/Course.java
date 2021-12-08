@@ -22,6 +22,8 @@ public class Course implements Serializable, Cloneable {
 
     String description;
 
+    Long parentId;
+
     public boolean isNew() {
         return this.id == null;
     }

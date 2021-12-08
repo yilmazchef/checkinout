@@ -50,5 +50,12 @@ public class ExportController {
         exportService.toExcel(response, checkRepository.findAllChecksOfToday());
     }
 
+    @SneakyThrows
+    @GetMapping("/checks/qr")
+    public void toQRPrint() {
+
+
+    }
+
 
 }

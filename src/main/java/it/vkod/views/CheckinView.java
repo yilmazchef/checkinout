@@ -1,10 +1,10 @@
 package it.vkod.views;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -17,6 +17,7 @@ import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Check;
+import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
 import it.vkod.data.entity.User;
 import it.vkod.services.AuthenticationService;
@@ -41,6 +42,9 @@ public class CheckinView extends VerticalLayout {
     private final UserService userService;
     private final CheckService checkService;
 
+    private final Grid<CheckDTO> attendeesGrid = new Grid<>();
+    private User organizer;
+
     public CheckinView(
             AuthenticationService authenticationService, UserService userService,
             CheckService checkService) {
@@ -56,8 +60,10 @@ public class CheckinView extends VerticalLayout {
         final var user = this.authenticationService.get();
 
         user.ifPresent(
-                organizer -> {
-                    final var attendeesGrid = new Grid<CheckDTO>();
+                u -> {
+
+                    this.organizer = u;
+
                     attendeesGrid
                             .addColumn(CheckDTO::getFirstName)
                             .setHeader("Voornaam")
@@ -73,6 +79,9 @@ public class CheckinView extends VerticalLayout {
                             GridVariant.LUMO_ROW_STRIPES);
 
                     attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+
+                    final var coursesBox = new ComboBox<Course>("Courses");
+                    coursesBox.setItems(checkService.fetchCourse());
 
                     final var locationLayout = new VerticalLayout();
                     locationLayout.setMargin(false);
@@ -106,9 +115,10 @@ public class CheckinView extends VerticalLayout {
                     reader.setId("video"); // id needs to be 'video' if From.camera.
                     reader.setStyle("object-fit: cover; width:35vw; height:65vh; max-height:35vw");
 
-                    reader.addValueChangeListener(
-                            scannedQRCode -> checkInUser(organizer, attendeesGrid, scannedQRCode.getValue(),
-                                    Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue())));
+                    reader.addValueChangeListener(scannedQRCode -> checkInUser(
+                            scannedQRCode.getValue(),
+                            Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue()),
+                            coursesBox.getValue().getId()));
 
                     leftLayout.add(reader, locationLayout);
 
@@ -120,30 +130,27 @@ public class CheckinView extends VerticalLayout {
                     rightLayout.setWidth("55vw");
                     rightLayout.setHeight("90vh");
 
-                    FormLayout failSafeForm = new FormLayout();
+                    final var failSafeForm = new FormLayout();
 
-                    TextField usernameField = new TextField();
+                    final var usernameField = new TextField();
                     usernameField.setLabel("Gebruikersnaam cursist");
                     usernameField.setRequired(true);
 
                     final var failSafeRegisterButton = new Button("Manueel Inchecken");
 
 
-                    final var activateFaileSafeButton = new Button(VaadinIcon.CONNECT.create());
+                    failSafeRegisterButton.addClickListener(onRegisterClick -> checkInUser(
+                            usernameField.getValue(),
+                            Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue()),
+                            coursesBox.getValue().getId()));
 
-                    failSafeRegisterButton.addClickListener(onRegisterClick -> {
-                        checkInUser(organizer, attendeesGrid, usernameField.getValue(),
-                                Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue()));
-                        failSafeRegisterButton.setEnabled(false);
-                        activateFaileSafeButton.setEnabled(false);
+                    usernameField.addValueChangeListener(onValueChange -> {
+                        failSafeRegisterButton.setEnabled(
+                                !onValueChange.getValue().isEmpty()
+                        );
                     });
 
-                    activateFaileSafeButton.addClickListener(onActivateClick -> {
-                        failSafeRegisterButton.setEnabled(true);
-                        activateFaileSafeButton.setEnabled(false);
-                    });
-
-                    failSafeForm.add(usernameField, activateFaileSafeButton, failSafeRegisterButton);
+                    failSafeForm.add(coursesBox, usernameField, failSafeRegisterButton);
 
                     rightLayout.add(failSafeForm, attendeesGrid);
 
@@ -155,15 +162,14 @@ public class CheckinView extends VerticalLayout {
         add(splitLayout);
     }
 
-    private void checkInUser(
-            final User organizer, final Grid<CheckDTO> attendeesGrid, final String scannedQRCode, final Float lat, final Float lon) {
+    private void checkInUser(final String username, final Float lat, final Float lon, final Long courseId) {
 
-        final var oAttendee = this.userService.findByUsername(scannedQRCode);
+        final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
             final var attendee = oAttendee.get();
 
             final var hasCheckedInBefore =
-                    this.checkService.findChecksByCheckedOnAndQrcode(Date.valueOf(LocalDate.now()), scannedQRCode);
+                    this.checkService.findChecksByCheckedOnAndQrcode(Date.valueOf(LocalDate.now()), username);
 
             if (hasCheckedInBefore.isEmpty()) {
                 final var checkEntity =
@@ -173,7 +179,7 @@ public class CheckinView extends VerticalLayout {
                                 .setPincode(111111)
                                 .setCheckedInAt(Time.valueOf(LocalTime.now()))
                                 .setCheckedOutAt(Time.valueOf(LocalTime.now()))
-                                .setQrcode(scannedQRCode)
+                                .setQrcode(username)
                                 .setLat(lat)
                                 .setLon(lon)
                                 .setCheckedOn(Date.valueOf(LocalDate.now()));
@@ -196,14 +202,16 @@ public class CheckinView extends VerticalLayout {
                                     .setCheckId(check.getId())
                                     .setAttendeeId(attendee.getId())
                                     .setOrganizerId(organizer.getId())
-                                    .setCheckType("IN");
+                                    .setCheckType("IN")
+                                    .setCourseId(courseId);
                 } else {
                     eventBeingEdited.data =
                             new Event()
                                     .setCheckId(check.getId())
                                     .setAttendeeId(attendee.getId())
                                     .setOrganizerId(organizer.getId())
-                                    .setCheckType("IN");
+                                    .setCheckType("IN")
+                                    .setCourseId(courseId);
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
@@ -226,7 +234,7 @@ public class CheckinView extends VerticalLayout {
                         .open();
             } else {
                 Notification.show(
-                                (scannedQRCode + " heeft vroeger al gecheckt."),
+                                (username + " heeft vroeger al gecheckt."),
                                 4000,
                                 Notification.Position.BOTTOM_CENTER)
                         .open();
@@ -234,7 +242,7 @@ public class CheckinView extends VerticalLayout {
 
         } else {
             Notification.show(
-                            (scannedQRCode + " is GEEN valid QR-code."),
+                            (username + " is GEEN valid QR-code."),
                             4000,
                             Notification.Position.BOTTOM_CENTER)
                     .open();

@@ -9,7 +9,7 @@ services:
       MYSQL_DATABASE: 'checkinoutdb'
       MYSQL_ROOT_PASSWORD: 'pass'
     ports:
-      - "3333:3306"
+      - "3303:3306"
 
   checkinout_database_admin:
     image: adminer:latest
@@ -17,7 +17,7 @@ services:
     depends_on:
       - checkinout_database_server
     ports:
-      - "9090:8080"
+      - "9003:8080"
 
   checkinout_web_app:
     image: yilmazchef/checkinout

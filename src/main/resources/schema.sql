@@ -42,6 +42,7 @@ create table if not exists courses
     id          bigint auto_increment primary key,
     title       varchar(255)  null,
     description varchar(2000) null,
+    parent_id   bigint        null,
 
     constraint title unique (title)
 

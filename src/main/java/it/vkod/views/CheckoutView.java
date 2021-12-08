@@ -100,7 +100,7 @@ public class CheckoutView extends VerticalLayout {
 
                     reader.setFrom(Constants.From.camera);
                     reader.setId("video"); // id needs to be 'video' if From.camera.
-                    reader.setStyle("object-fit: cover; width:45vw; height:65vh; max-height:45vw");
+                    reader.setStyle("object-fit: cover; width:35vw; height:65vh; max-height:45vw");
 
                     reader.addValueChangeListener(scannedQRCode -> checkOutUser(scannedQRCode.getValue()));
 
@@ -108,7 +108,7 @@ public class CheckoutView extends VerticalLayout {
                     leftLayout.setPadding(false);
                     leftLayout.setSpacing(false);
                     leftLayout.getStyle().set("margin-top", "4vh");
-                    leftLayout.setWidth("45vw");
+                    leftLayout.setWidth("35vw");
                     leftLayout.setHeight("90vh");
 
                     final var locationLayout = new VerticalLayout();
@@ -137,7 +137,7 @@ public class CheckoutView extends VerticalLayout {
                     rightLayout.setPadding(false);
                     rightLayout.setSpacing(false);
                     rightLayout.getStyle().set("margin-top", "4vh");
-                    rightLayout.setWidth("45vw");
+                    rightLayout.setWidth("55vw");
                     rightLayout.setHeight("90vh");
 
                     final var failSafeLayout = new FormLayout();
@@ -146,8 +146,14 @@ public class CheckoutView extends VerticalLayout {
                     usernameField.setLabel("Gebruikersnaam cursist");
                     usernameField.setRequired(true);
 
-                    final var failSafeRegisterButton =
-                            new Button("Manueel uitchecken", onClick -> checkOutUser(usernameField.getValue()));
+                    final var failSafeRegisterButton = new Button("Manueel uitchecken", onClick ->
+                            checkOutUser(usernameField.getValue()));
+
+                    usernameField.addValueChangeListener(onValueChange -> {
+                        failSafeRegisterButton.setEnabled(
+                                !onValueChange.getValue().isEmpty()
+                        );
+                    });
 
                     failSafeLayout.add(usernameField, failSafeRegisterButton);
                     rightLayout.add(failSafeLayout, attendeesGrid);
