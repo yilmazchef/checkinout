@@ -138,7 +138,7 @@ public class CheckinView extends VerticalLayout {
                         activateFaileSafeButton.setEnabled(false);
                     });
 
-                    activateFaileSafeButton.addClickListener(, onActivateClick -> {
+                    activateFaileSafeButton.addClickListener(onActivateClick -> {
                         failSafeRegisterButton.setEnabled(true);
                         activateFaileSafeButton.setEnabled(false);
                     });
