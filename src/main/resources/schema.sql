@@ -44,7 +44,10 @@ create table if not exists courses
     description varchar(2000) null,
     parent_id   bigint        null,
 
-    constraint title unique (title)
+    constraint title unique (title),
+    
+    constraint parent_to_child_fk
+        foreign key (parent_id) references courses (id)
 
 ) charset = utf8;
 
