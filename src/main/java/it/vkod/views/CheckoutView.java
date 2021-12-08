@@ -35,7 +35,6 @@ public class CheckoutView extends VerticalLayout {
     private final CheckService checkService;
 
     private final HorizontalLayout splitLayout = new HorizontalLayout();
-    private final ChecksGrid attendeesGrid = new ChecksGrid();
 
     public CheckoutView(
             AuthenticationService authenticationService, UserService userService,
@@ -51,7 +50,7 @@ public class CheckoutView extends VerticalLayout {
 
         user.ifPresentOrElse(organizer -> {
 
-            this.attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+            final var attendeesGrid = new ChecksGrid(this.checkService);
 
             final var coursesBox = new ComboBox<Course>("Courses");
             coursesBox.setItemLabelGenerator(course -> course.getTitle());

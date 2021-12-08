@@ -37,7 +37,6 @@ public class CheckinView extends VerticalLayout {
     private final UserService userService;
     private final CheckService checkService;
 
-    private final ChecksGrid attendeesGrid = new ChecksGrid();
 
     public CheckinView(
             AuthenticationService authenticationService, UserService userService,
@@ -56,7 +55,7 @@ public class CheckinView extends VerticalLayout {
         user.ifPresent(
                 organizer -> {
 
-                    this.attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+                    final ChecksGrid attendeesGrid = new ChecksGrid(this.checkService);
 
                     final var courseSelect = new Select<Course>();
                     courseSelect.setLabel("Selecteer een course");

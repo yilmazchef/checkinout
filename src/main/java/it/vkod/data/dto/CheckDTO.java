@@ -18,19 +18,28 @@ import java.time.LocalTime;
 public class CheckDTO implements Serializable, Cloneable {
 
     @CsvBindByPosition(position = 0)
-    String firstName;
+    Long checkId;
+
     @CsvBindByPosition(position = 1)
-    String lastName;
+    String firstName;
+
     @CsvBindByPosition(position = 2)
+    String lastName;
+
+    @CsvBindByPosition(position = 3)
     @EqualsAndHashCode.Include
     String email;
-    @CsvBindByPosition(position = 3)
-    LocalDate checkedOn;
+
     @CsvBindByPosition(position = 4)
-    LocalTime checkedInAt;
+    LocalDate checkedOn;
+
     @CsvBindByPosition(position = 5)
-    LocalTime checkedOutAt;
+    LocalTime checkedInAt;
+
     @CsvBindByPosition(position = 6)
+    LocalTime checkedOutAt;
+
+    @CsvBindByPosition(position = 7)
     String course;
 
     @Override

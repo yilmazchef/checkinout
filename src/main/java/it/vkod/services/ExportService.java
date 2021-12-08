@@ -1,5 +1,6 @@
 package it.vkod.services;
 
+import com.google.zxing.WriterException;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import it.vkod.data.dto.CheckDTO;
@@ -23,6 +24,7 @@ public class ExportService {
     private final ExcelExporter excelExporter;
     private final PDFExporter pdfExporter;
     private final CSVExporter csvExporter;
+    private final QRExporter qrExporter;
 
     public void toCSV(HttpServletResponse response, List<CheckDTO> data) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
 
@@ -42,6 +44,18 @@ public class ExportService {
         response.setHeader(headerKey, headerValue);
 
         pdfExporter.export(response, data, user);
+
+    }
+
+    public void toPDF(HttpServletResponse response, String... usernames) throws IOException, WriterException {
+
+        response.setContentType("application/pdf");
+
+        final var headerKey = "Content-Disposition";
+        final var headerValue = "attachment; filename=" + FILE_NAME + ".pdf";
+        response.setHeader(headerKey, headerValue);
+
+        qrExporter.export(response, usernames);
 
     }
 

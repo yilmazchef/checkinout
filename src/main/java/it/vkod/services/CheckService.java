@@ -77,6 +77,11 @@ public class CheckService {
     }
 
     @Transactional
+    public void deleteCheckById(Long checkId) {
+        checkRepository.deleteById(checkId);
+    }
+
+    @Transactional
     public Check createCheck(Check checkEntity) {
 
         final var oUser = userRepository.findByUsername(checkEntity.getQrcode());

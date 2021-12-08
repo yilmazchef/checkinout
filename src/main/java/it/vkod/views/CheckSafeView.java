@@ -36,7 +36,6 @@ public class CheckSafeView extends VerticalLayout {
     private final UserService userService;
     private final CheckService checkService;
 
-    private final ChecksGrid attendeesGrid = new ChecksGrid();
 
     public CheckSafeView(
             AuthenticationService authenticationService, UserService userService,
@@ -53,7 +52,7 @@ public class CheckSafeView extends VerticalLayout {
         user.ifPresent(
                 organizer -> {
 
-                    this.attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+                    final var attendeesGrid = new ChecksGrid(this.checkService);
 
                     final var geoLocation = new GeoLocation();
                     geoLocation.setWatch(true);
@@ -73,11 +72,20 @@ public class CheckSafeView extends VerticalLayout {
                     coursesSelect.setEmptySelectionAllowed(false);
                     coursesSelect.setItemLabelGenerator(course -> course.getTitle());
 
-                    final var checkInButton = new Button("Inchecken", onClick ->
-                            checkInUser(usernameField.getValue(), geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(), coursesSelect.getValue(), organizer));
+                    final var checkInButton = new Button("Inchecken",
+                            onClick -> checkInUser(usernameField.getValue(),
+                                    geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
+                                    coursesSelect.getValue(),
+                                    organizer,
+                                    attendeesGrid));
 
-                    final var checkOutButton = new Button("Uitchecken", onClick -> checkOutUser(
-                            usernameField.getValue(), geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(), coursesSelect.getValue(), organizer));
+                    final var checkOutButton = new Button("Uitchecken",
+                            onClick -> checkOutUser(
+                                    usernameField.getValue(),
+                                    geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
+                                    coursesSelect.getValue(),
+                                    organizer,
+                                    attendeesGrid));
 
                     usernameField.addValueChangeListener(onValueChange -> {
                         checkInButton.setEnabled(!onValueChange.getValue().isEmpty());
@@ -93,7 +101,10 @@ public class CheckSafeView extends VerticalLayout {
 
     }
 
-    private void checkInUser(final String username, final Double lat, final Double lon, final Course course, final User organizer) {
+    private void checkInUser(final String username,
+                             final Double lat, final Double lon,
+                             final Course course, final User organizer,
+                             final ChecksGrid attendeesGrid) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
@@ -148,7 +159,7 @@ public class CheckSafeView extends VerticalLayout {
 
                 final var foundUser = this.userService.findUserById(savedOrUpdatedEvent.getAttendeeId());
                 if (foundUser.isPresent())
-                    this.attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+                    attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
 
                 Notification.show(
                                 attendee.getFirstName()
@@ -180,7 +191,10 @@ public class CheckSafeView extends VerticalLayout {
         }
     }
 
-    private void checkOutUser(final String username, final Double lat, final Double lon, final Course course, final User organizer) {
+    private void checkOutUser(final String username,
+                              final Double lat, final Double lon,
+                              final Course course, final User organizer,
+                              final ChecksGrid attendeesGrid) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
@@ -231,7 +245,7 @@ public class CheckSafeView extends VerticalLayout {
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
                 if (!savedOrUpdatedEvent.isNew())
-                    this.attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
+                    attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
 
                 Notification.show(
                                 attendee.getFirstName()

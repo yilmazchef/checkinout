@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @Controller
@@ -21,6 +20,7 @@ public class ExportController {
 
     public static final String EXPORT_CHECKS_CSV_URI = "/checks/csv";
     public static final String EXPORT_CHECKS_PDF_URI = "/checks/pdf";
+    public static final String EXPORT_USERS_PDF_URI = "/users/pdf";
     public static final String EXPORT_CHECKS_EXCEL_URI = "/checks/xlsx";
 
     private final AuthenticationService authenticationService;
@@ -28,8 +28,6 @@ public class ExportController {
     private final CheckRepository checkRepository;
     private final EventRepository eventRepository;
     private final ExportService exportService;
-
-    private static final String FILE_NAME = "Aanwezigheidslijst " + LocalDate.now();
 
 
     @SneakyThrows
@@ -39,21 +37,21 @@ public class ExportController {
     }
 
     @SneakyThrows
-    @GetMapping("/checks/pdf")
+    @GetMapping(EXPORT_CHECKS_PDF_URI)
     public void toPDF(HttpServletResponse response) {
         exportService.toPDF(response, checkRepository.findAllChecksOfToday(), authenticationService.get().get());
     }
 
     @SneakyThrows
-    @GetMapping("/checks/xlsx")
-    public void exportToExcel(HttpServletResponse response) {
+    @GetMapping(EXPORT_CHECKS_EXCEL_URI)
+    public void toExcel(HttpServletResponse response) {
         exportService.toExcel(response, checkRepository.findAllChecksOfToday());
     }
 
     @SneakyThrows
-    @GetMapping("/checks/qr")
-    public void toQRPrint() {
-
+    @GetMapping(EXPORT_USERS_PDF_URI)
+    public void toQRPrint(HttpServletResponse response) {
+        exportService.toPDF(response, userRepository.findAllUsernames().toArray(String[]::new));
 
     }
 
