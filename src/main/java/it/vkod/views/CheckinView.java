@@ -67,8 +67,9 @@ public class CheckinView extends VerticalLayout {
                     courseSelect.setLabel("Selecteer een opleiding");
                     courseSelect.setItemLabelGenerator(course -> course.getTitle());
                     courseSelect.setItems(this.courseService.fetchCourse());
-                    courseSelect.addValueChangeListener(onValueChange ->
-                            attendeesGrid.setItems(this.checkService.fetchInDetailsToday(onValueChange.getValue().getId())));
+                    courseSelect.addValueChangeListener(onValueChange -> {
+                        attendeesGrid.setItems(this.checkService.fetchInDetailsToday(onValueChange.getValue().getId()));
+                    });
 
                     final var locationLayout = new VerticalLayout();
                     locationLayout.setMargin(false);
