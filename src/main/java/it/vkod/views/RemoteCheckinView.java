@@ -68,7 +68,7 @@ public class RemoteCheckinView extends VerticalLayout {
                             GridVariant.LUMO_NO_ROW_BORDERS,
                             GridVariant.LUMO_ROW_STRIPES);
 
-                    attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+                    attendeesGrid.setItems(this.checkService.fetchInDetailsToday());
 
                     final var locationLayout = new VerticalLayout();
                     locationLayout.setMargin(false);
@@ -128,7 +128,7 @@ public class RemoteCheckinView extends VerticalLayout {
             final var attendee = oAttendee.get();
 
             final var hasCheckedInBefore =
-                    this.checkService.findChecksByCheckedOnAndQrcode(Date.valueOf(LocalDate.now()), scannedQRCode);
+                    this.checkService.fetchByDate(Date.valueOf(LocalDate.now()), scannedQRCode);
 
             if (hasCheckedInBefore.isEmpty()) {
                 final var checkEntity =
@@ -146,7 +146,7 @@ public class RemoteCheckinView extends VerticalLayout {
                 final var check = this.checkService.createCheck(checkEntity);
 
                 final var oEvent =
-                        this.checkService.findByAttendeeIdAndCheckIdAndCheckType(
+                        this.checkService.fetchByAttendeeIdAndCheckId(
                                 attendee.getId(), check.getId(), "IN");
 
                 final var eventBeingEdited =
@@ -174,7 +174,7 @@ public class RemoteCheckinView extends VerticalLayout {
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
 
                 final var foundUser = this.userService.findUserById(savedOrUpdatedEvent.getAttendeeId());
-                if (foundUser.isPresent()) attendeesGrid.setItems(checkService.findAllCheckinDetailsOfToday());
+                if (foundUser.isPresent()) attendeesGrid.setItems(checkService.fetchInDetailsToday());
 
                 Notification.show(
                                 attendee.getFirstName()

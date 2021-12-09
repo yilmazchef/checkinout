@@ -25,13 +25,25 @@ public interface CheckRepository extends CrudRepository<Check, Long> {
     Optional<Check> findByCheckedOnTodayAndQrcode(@Param("qrcode") final String qrcode);
 
     @Query(
-            "SELECT u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at, c.checked_out_at FROM checks c INNER JOIN users u ON c.qrcode = u.username WHERE c.checked_on = CURRENT_DATE")
+            "SELECT c.id, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at, c.checked_out_at FROM checks c INNER JOIN users u ON c.qrcode = u.username WHERE c.checked_on = CURRENT_DATE")
     List<CheckDTO> findAllChecksOfToday();
 
-    @Query("SELECT u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at, c.checked_out_at FROM checks c INNER JOIN users u ON c.qrcode = u.username INNER JOIN events e ON e.check_id = c.id WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'OUT'")
+    @Query("SELECT c.id, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at, c.checked_out_at FROM checks c INNER JOIN users u ON c.qrcode = u.username INNER JOIN events e ON e.check_id = c.id WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'OUT'")
     List<CheckDTO> findAllCheckoutsOfToday();
 
-    @Query("SELECT u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at FROM checks c INNER JOIN users u ON c.qrcode = u.username INNER JOIN events e ON e.check_id = c.id WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'IN'")
+    @Query("SELECT c.id, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at FROM checks c INNER JOIN users u ON c.qrcode = u.username INNER JOIN events e ON e.check_id = c.id WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'IN'")
     List<CheckDTO> findAllCheckinsOfToday();
+
+    @Query("SELECT c.id, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at FROM checks c" +
+            " INNER JOIN users u ON c.qrcode = u.username" +
+            " INNER JOIN events e ON e.check_id = c.id" +
+            " WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'IN' AND e.course_id = :courseId")
+    List<CheckDTO> findAllCheckinsOfToday(@Param("courseId") final Long courseId);
+
+    @Query("SELECT c.id, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at FROM checks c" +
+            " INNER JOIN users u ON c.qrcode = u.username" +
+            " INNER JOIN events e ON e.check_id = c.id" +
+            " WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'OUT' AND e.course_id = :courseId")
+    List<CheckDTO> findAllCheckoutsOfToday(@Param("courseId") final Long courseId);
 
 }

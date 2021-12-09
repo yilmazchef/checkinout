@@ -12,9 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +41,21 @@ public class UserService implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                 .collect(Collectors.toList());
 
+    }
+
+    public Set<User> fetchAll() {
+        final var userIterator = userRepository.findAll().iterator();
+        final var userSet = new LinkedHashSet<User>();
+
+        while (userIterator.hasNext()) {
+            userSet.add(userIterator.next());
+        }
+
+        return userSet;
+    }
+
+    public Set<User> fetchAll(final Long courseId) {
+        return userRepository.findAllCheckedToday(courseId);
     }
 
     public Optional<User> findByUsernameAndHashedPassword(final String username, final String hashedPassword) {

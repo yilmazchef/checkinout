@@ -3,6 +3,7 @@ package it.vkod.views;
 import com.flowingcode.vaadin.addons.twincolgrid.TwinColGrid;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -18,6 +19,7 @@ import it.vkod.data.entity.Event;
 import it.vkod.data.entity.User;
 import it.vkod.services.AuthenticationService;
 import it.vkod.services.CheckService;
+import it.vkod.services.CourseService;
 import it.vkod.services.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
@@ -37,15 +39,17 @@ public class CheckSafeView extends VerticalLayout {
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final CheckService checkService;
+    private final CourseService courseService;
 
 
     public CheckSafeView(
             AuthenticationService authenticationService, UserService userService,
-            CheckService checkService) {
+            CheckService checkService, CourseService courseService) {
 
         this.authenticationService = authenticationService;
         this.userService = userService;
         this.checkService = checkService;
+        this.courseService = courseService;
 
         initStyle();
 
@@ -54,17 +58,22 @@ public class CheckSafeView extends VerticalLayout {
         user.ifPresent(
                 organizer -> {
 
-                    final var availableBooks = this.userService.findAll();
+                    final var students = this.userService.fetchAll();
 
-                    final var twinColGrid = new TwinColGrid<CheckDTO>("Cursisten", availableBooks)
-                            .addColumn(CheckDTO::getCheckId, "ID")
-                            .addColumn(CheckDTO::getFirstName, "First Name")
-                            .withSelectionGridCaption("Available books")
-                            .withAvailableGridCaption("Added books")
+                    final var studentsGrid = new TwinColGrid<>(students, "Failsafe aanmelden")
+                            .addColumn(item -> String.valueOf(item.getId()), "ID")
+                            .addColumn(User::getFirstName, "Voornaam")
+                            .addColumn(User::getLastName, "Familienaam")
+                            .addColumn(User::getEmail, "Email")
+                            .withSelectionGridCaption("Ingecheckt")
+                            .withAvailableGridCaption("Alles")
                             .withoutAddAllButton()
                             .withSizeFull()
                             .withDragAndDropSupport();
-                    twinColGrid.setValue(selectedBooks);
+                    studentsGrid.setHeight("50vh");
+
+                    final var attendeesGrid = new Grid<CheckDTO>();
+                    attendeesGrid.setColumnReorderingAllowed(true);
 
                     final var geoLocation = new GeoLocation();
                     geoLocation.setWatch(true);
@@ -79,10 +88,14 @@ public class CheckSafeView extends VerticalLayout {
                     usernameField.setLabel("Gebruikersnaam");
                     usernameField.setRequired(true);
 
-                    final var coursesSelect = new Select<>(checkService.fetchCourse().toArray(Course[]::new));
+                    final var coursesSelect = new Select<>(this.courseService.fetchCourse().toArray(Course[]::new));
                     coursesSelect.setLabel("Selecteer een course");
                     coursesSelect.setEmptySelectionAllowed(false);
                     coursesSelect.setItemLabelGenerator(course -> course.getTitle());
+                    coursesSelect.addValueChangeListener(onValueChange -> {
+                        studentsGrid.setValue(this.userService.fetchAll(onValueChange.getValue().getId()));
+                    });
+
 
                     final var checkInButton = new Button("Inchecken",
                             onClick -> checkInUser(usernameField.getValue(),
@@ -105,9 +118,9 @@ public class CheckSafeView extends VerticalLayout {
                     });
 
                     failSafeForm.add(coursesSelect, usernameField, checkInButton, checkOutButton);
-                    failsafeLayout.add(failSafeForm);
+                    failsafeLayout.add(failSafeForm, studentsGrid);
 
-                    add(failsafeLayout, attendeesGrid, geoLocation);
+                    addAndExpand(failsafeLayout, attendeesGrid, geoLocation);
 
                 });
 
@@ -116,14 +129,14 @@ public class CheckSafeView extends VerticalLayout {
     private void checkInUser(final String username,
                              final Double lat, final Double lon,
                              final Course course, final User organizer,
-                             final ChecksGrid attendeesGrid) {
+                             final Grid<CheckDTO> attendeesGrid) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
             final var attendee = oAttendee.get();
 
             final var hasCheckedInBefore =
-                    this.checkService.findChecksByCheckedOnAndQrcode(Date.valueOf(LocalDate.now()), username);
+                    this.checkService.fetchByDate(Date.valueOf(LocalDate.now()), username);
 
             if (hasCheckedInBefore.isEmpty()) {
                 final var checkEntity =
@@ -141,7 +154,7 @@ public class CheckSafeView extends VerticalLayout {
                 final var check = this.checkService.createCheck(checkEntity);
 
                 final var oEvent =
-                        this.checkService.findByAttendeeIdAndCheckIdAndCheckType(
+                        this.checkService.fetchByAttendeeIdAndCheckId(
                                 attendee.getId(), check.getId(), "IN");
 
                 final var eventBeingEdited = new Object() {
@@ -171,7 +184,7 @@ public class CheckSafeView extends VerticalLayout {
 
                 final var foundUser = this.userService.findUserById(savedOrUpdatedEvent.getAttendeeId());
                 if (foundUser.isPresent())
-                    attendeesGrid.setItems(this.checkService.findAllCheckinDetailsOfToday());
+                    attendeesGrid.setItems(this.checkService.fetchInDetailsToday());
 
                 Notification.show(
                                 attendee.getFirstName()
@@ -206,14 +219,14 @@ public class CheckSafeView extends VerticalLayout {
     private void checkOutUser(final String username,
                               final Double lat, final Double lon,
                               final Course course, final User organizer,
-                              final ChecksGrid attendeesGrid) {
+                              final Grid<CheckDTO> attendeesGrid) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
             final var attendee = oAttendee.get();
 
             final var foundCheck =
-                    this.checkService.findChecksByCheckedOnAndQrcode(Date.valueOf(LocalDate.now()), username);
+                    this.checkService.fetchByDate(Date.valueOf(LocalDate.now()), username);
 
             if (foundCheck.isPresent()) {
 
@@ -228,7 +241,7 @@ public class CheckSafeView extends VerticalLayout {
                                         .setLon(lon));
 
                 final var oEvent =
-                        this.checkService.findByAttendeeIdAndCheckIdAndCheckType(
+                        this.checkService.fetchByAttendeeIdAndCheckId(
                                 attendee.getId(), check.getId(), "OUT");
 
                 final var eventBeingEdited =
@@ -256,8 +269,9 @@ public class CheckSafeView extends VerticalLayout {
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
-                if (!savedOrUpdatedEvent.isNew())
-                    attendeesGrid.setItems(this.checkService.findCheckoutDetailsOfToday());
+                if (!savedOrUpdatedEvent.isNew()) {
+                    attendeesGrid.setItems(this.checkService.fetchOutDetailsToday());
+                }
 
                 Notification.show(
                                 attendee.getFirstName()

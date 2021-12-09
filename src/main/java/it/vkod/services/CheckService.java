@@ -6,7 +6,6 @@ import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
 import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Check;
-import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
 import it.vkod.repositories.CheckRepository;
 import it.vkod.repositories.CourseRepository;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,53 +29,60 @@ public class CheckService {
     private final EventRepository eventRepository;
     private final CourseRepository courseRepository;
 
-    public List<Check> findChecksByCheckedOn(final Date checkedOn) {
+    public List<Check> fetchByDate(final Date checkedOn) {
         return checkRepository.findByCheckedOn(checkedOn);
     }
 
-    public List<Check> findChecksByCheckedOnToday() {
+    public List<Check> fetchByToday() {
         return checkRepository.findByCheckedOnToday();
     }
 
-    public Optional<Check> findChecksByCheckedOnAndQrcode(final Date checkedOn, final String qrcode) {
+    public Optional<Check> fetchByDate(final Date checkedOn, final String qrcode) {
         return checkRepository.findByCheckedOnAndQrcode(checkedOn, qrcode);
     }
 
-    public Optional<Check> findChecksByCheckedOnTodayAndQrcode(final String qrcode) {
+    public Optional<Check> fetchByToday(final String qrcode) {
         return checkRepository.findByCheckedOnTodayAndQrcode(qrcode);
     }
 
-    public List<CheckDTO> findCheckDetailsOfToday() {
+    public List<CheckDTO> fetchAllDetailsToday() {
         return checkRepository.findAllChecksOfToday();
     }
 
-    public List<CheckDTO> findCheckoutDetailsOfToday() {
+    public List<CheckDTO> fetchOutDetailsToday() {
         return checkRepository.findAllCheckoutsOfToday();
     }
 
-    public List<CheckDTO> findAllCheckinDetailsOfToday() {
+    public List<CheckDTO> fetchOutDetailsToday(final Long courseId) {
+        return checkRepository.findAllCheckoutsOfToday(courseId);
+    }
+
+    public List<CheckDTO> fetchInDetailsToday() {
         return checkRepository.findAllCheckinsOfToday();
     }
 
-    public List<Event> findEventsByOrganizerId(final Long organizerId) {
+    public List<CheckDTO> fetchInDetailsToday(final Long courseId) {
+        return checkRepository.findAllCheckinsOfToday(courseId);
+    }
+
+    public List<Event> fetchEventsByOrganizerId(final Long organizerId) {
         return eventRepository.findByOrganizerId(organizerId);
     }
 
-    public List<Event> findEventsByAttendeeId(final Long attendeeId) {
+    public List<Event> fetchEventsByAttendeeId(final Long attendeeId) {
         return eventRepository.findByAttendeeId(attendeeId);
     }
 
-    public List<Event> findByAttendeeIdAndCheckId(final Long attendeeId, final Long checkId) {
+    public List<Event> fetchByAttendeeIdAndCheckId(final Long attendeeId, final Long checkId) {
         return eventRepository.findByAttendeeIdAndCheckId(attendeeId, checkId);
     }
 
-    public Optional<Event> findByAttendeeIdAndCheckIdAndCheckType(final Long attendeeId, final Long checkId,
-                                                                  final String checkType) {
+    public Optional<Event> fetchByAttendeeIdAndCheckId(final Long attendeeId, final Long checkId, final String checkType) {
         return eventRepository.findByAttendeeIdAndCheckIdAndCheckType(attendeeId, checkId, checkType);
     }
 
     @Transactional
-    public void deleteCheckById(Long checkId) {
+    public void removeById(Long checkId) {
         checkRepository.deleteById(checkId);
     }
 
@@ -107,29 +112,5 @@ public class CheckService {
     @Transactional
     public Event createEvent(Event eventEntity) {
         return eventRepository.save(eventEntity);
-    }
-
-    @Transactional
-    public Course createOrUpdateCourse(Course courseEntity) {
-        return courseRepository.save(courseEntity);
-    }
-
-    public Optional<Course> fetchCourse(Long id) {
-        return courseRepository.findById(id);
-    }
-
-    public List<Course> fetchCourse() {
-        final var cIterator = courseRepository.findAll().iterator();
-        final var cList = new ArrayList<Course>();
-
-        while (cIterator.hasNext()) {
-            cList.add(cIterator.next());
-        }
-
-        return cList;
-    }
-
-    public List<Course> fetchCourse(String keyword) {
-        return courseRepository.findAllByTitleMatchesOrDescriptionContaining(keyword, keyword);
     }
 }

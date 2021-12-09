@@ -1,5 +1,6 @@
 package it.vkod.views;
 
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -10,12 +11,14 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
+import it.vkod.data.dto.CheckDTO;
 import it.vkod.data.entity.Check;
 import it.vkod.data.entity.Course;
 import it.vkod.data.entity.Event;
 import it.vkod.data.entity.User;
 import it.vkod.services.AuthenticationService;
 import it.vkod.services.CheckService;
+import it.vkod.services.CourseService;
 import it.vkod.services.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
@@ -36,15 +39,17 @@ public class CheckinView extends VerticalLayout {
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final CheckService checkService;
+    private final CourseService courseService;
 
 
     public CheckinView(
             AuthenticationService authenticationService, UserService userService,
-            CheckService checkService) {
+            CheckService checkService, CourseService courseService) {
 
         this.authenticationService = authenticationService;
         this.userService = userService;
         this.checkService = checkService;
+        this.courseService = courseService;
 
         initStyle();
 
@@ -55,12 +60,15 @@ public class CheckinView extends VerticalLayout {
         user.ifPresent(
                 organizer -> {
 
-                    final ChecksGrid attendeesGrid = new ChecksGrid(this.checkService);
+                    final var attendeesGrid = new Grid<CheckDTO>();
+                    attendeesGrid.setColumnReorderingAllowed(true);
 
                     final var courseSelect = new Select<Course>();
-                    courseSelect.setLabel("Selecteer een course");
+                    courseSelect.setLabel("Selecteer een opleiding");
                     courseSelect.setItemLabelGenerator(course -> course.getTitle());
-                    courseSelect.setItems(checkService.fetchCourse());
+                    courseSelect.setItems(this.courseService.fetchCourse());
+                    courseSelect.addValueChangeListener(onValueChange ->
+                            attendeesGrid.setItems(this.checkService.fetchInDetailsToday(onValueChange.getValue().getId())));
 
                     final var locationLayout = new VerticalLayout();
                     locationLayout.setMargin(false);
@@ -87,7 +95,7 @@ public class CheckinView extends VerticalLayout {
                             scannedQRCode.getValue(),
                             geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
                             courseSelect.getValue(), organizer,
-                            attendeesGrid));
+                            attendeesGrid, courseSelect.getValue().getId()));
 
                     leftLayout.add(reader, locationLayout);
 
@@ -115,14 +123,15 @@ public class CheckinView extends VerticalLayout {
     private void checkInUser(final String username,
                              final Double lat, final Double lon,
                              final Course course, final User organizer,
-                             final ChecksGrid attendeesGrid) {
+                             final Grid<CheckDTO> attendeesGrid,
+                             final Long courseId) {
 
         final var oAttendee = this.userService.findByUsername(username);
         if (oAttendee.isPresent()) {
             final var attendee = oAttendee.get();
 
             final var hasCheckedInBefore =
-                    this.checkService.findChecksByCheckedOnAndQrcode(Date.valueOf(LocalDate.now()), username);
+                    this.checkService.fetchByDate(Date.valueOf(LocalDate.now()), username);
 
             if (hasCheckedInBefore.isEmpty()) {
                 final var checkEntity =
@@ -140,7 +149,7 @@ public class CheckinView extends VerticalLayout {
                 final var check = this.checkService.createCheck(checkEntity);
 
                 final var oEvent =
-                        this.checkService.findByAttendeeIdAndCheckIdAndCheckType(
+                        this.checkService.fetchByAttendeeIdAndCheckId(
                                 attendee.getId(), check.getId(), "IN");
 
                 final var eventBeingEdited =
@@ -171,7 +180,7 @@ public class CheckinView extends VerticalLayout {
 
                 final var foundUser = this.userService.findUserById(savedOrUpdatedEvent.getAttendeeId());
                 if (foundUser.isPresent() && attendeesGrid != null) {
-                    attendeesGrid.setItems(checkService.findAllCheckinDetailsOfToday());
+                    attendeesGrid.setItems(checkService.fetchInDetailsToday(courseId));
                 }
 
                 Notification.show(
