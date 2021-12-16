@@ -1,6 +1,5 @@
 package it.vkod.views;
 
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
@@ -10,7 +9,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import it.vkod.services.AdminService;
+import com.vaadin.flow.server.StreamResource;
+
+import it.vkod.services.flow.AdminService;
+import it.vkod.views.components.EmbeddedPdfDocument;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.security.RolesAllowed;
@@ -20,12 +23,10 @@ import static it.vkod.api.ExportController.*;
 
 @PageTitle("System Admin - Full Access")
 @Route(value = "adm", layout = TemplateLayout.class)
-@RolesAllowed({"ADMIN", "MANAGER", "LEADER"})
+@RolesAllowed({ "ADMIN", "MANAGER", "LEADER" })
 public class AdminView extends VerticalLayout {
 
-
     private final AdminService adminService;
-
 
     public AdminView(@Autowired AdminService adminService) {
 
@@ -77,7 +78,12 @@ public class AdminView extends VerticalLayout {
 
         actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
 
-        add(managementLayout, actionLayout);
+
+        final var viewerLayout = new VerticalLayout();
+
+        viewerLayout.add(new EmbeddedPdfDocument(hostname + EXPORT_USERS_PDF_URI));
+
+        add(managementLayout, actionLayout, viewerLayout);
 
     }
 

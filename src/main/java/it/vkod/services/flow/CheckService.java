@@ -1,4 +1,4 @@
-package it.vkod.services;
+package it.vkod.services.flow;
 
 import com.grum.geocalc.BoundingArea;
 import com.grum.geocalc.Coordinate;

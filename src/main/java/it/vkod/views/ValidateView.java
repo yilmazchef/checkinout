@@ -8,8 +8,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.services.AuthenticationService;
-import it.vkod.services.UserService;
+import it.vkod.services.flow.AuthenticationService;
+import it.vkod.services.flow.UserService;
 
 import javax.annotation.security.PermitAll;
 
@@ -34,7 +34,8 @@ public class ValidateView extends VerticalLayout {
 
         final var user = this.authenticationService.get();
 
-        user.ifPresent(organizer -> {
+        if (user.isPresent()) {
+            final var organizer = user.get();
 
             final var scanLayout = new VerticalLayout();
             final var reader = new ZXingVaadinReader();
@@ -52,9 +53,7 @@ public class ValidateView extends VerticalLayout {
             scanLayout.add(reader);
 
             add(scanLayout);
-
-        });
-
+        }
 
     }
 
@@ -63,13 +62,9 @@ public class ValidateView extends VerticalLayout {
 
         final var oAttendee = this.userService.findByUsername(scannedQRCode);
         if (oAttendee.isPresent()) {
-            Notification.show(("QR-code is valid!"),
-                    4000,
-                    Notification.Position.BOTTOM_CENTER).open();
+            Notification.show(("QR-code is valid!"), 4000, Notification.Position.BOTTOM_CENTER).open();
         } else {
-            Notification.show(("QR-code is GEEN valid: " + scannedQRCode),
-                    4000,
-                    Notification.Position.BOTTOM_CENTER).open();
+            Notification.show(("QR-code is GEEN valid: " + scannedQRCode), 4000, Notification.Position.BOTTOM_CENTER).open();
         }
     }
 

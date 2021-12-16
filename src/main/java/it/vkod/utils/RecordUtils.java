@@ -1,10 +1,7 @@
 package it.vkod.utils;
 
-
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import it.vkod.data.entity.Course;
-import it.vkod.data.entity.User;
-import it.vkod.repositories.CourseRepository;
+import it.vkod.models.entity.User;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -13,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Month;
 import java.util.Random;
 
 @SpringComponent
@@ -23,16 +21,14 @@ public class RecordUtils {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final CourseRepository courseRepository;
 
+    private static final String STUDENT_ROLE = "STUDENT";
+    private static final String TEACHER_ROLE = "TEACHER";
+    private static final String MANAGER_ROLE = "MANAGER";
+    private static final String ADMIN_ROLE = "ADMIN";
 
     @Bean
     public CommandLineRunner initUserRecords() {
-
-        final String STUDENT_ROLE = "STUDENT";
-        final String TEACHER_ROLE = "TEACHER";
-        final String MANAGER_ROLE = "MANAGER";
-        final String ADMIN_ROLE = "ADMIN";
 
         return args -> {
 
@@ -43,66 +39,91 @@ public class RecordUtils {
 
             if (userRepository.count() <= 0L) {
 
-                createUserRecord("yilmaz.mustafa", profileImg2, "Yilmaz", "Mustafa", TEACHER_ROLE);
-                createUserRecord("patrick.geudens", profileImg1, "Patrick", "Geudens", TEACHER_ROLE);
-                createUserRecord("atilla.balin", profileImg2, "Atilla", "Balin", TEACHER_ROLE);
-                createUserRecord("manuel.cogneau", profileImg1, "Manuel", "Cogneau", TEACHER_ROLE);
-                createUserRecord("benedikt.lantsoght", profileImg2, "Benedikt", "Lantsoght", TEACHER_ROLE);
-                createUserRecord("kenan.kurda", profileImg2, "Kenan", "Kurda", TEACHER_ROLE);
-                createUserRecord("alexander.keisse", profileImg1, "Alexander", "Keisse", TEACHER_ROLE);
-                createUserRecord("quinten.declerck", profileImg2, "Quinten", "De Clerck", TEACHER_ROLE);
+                createTeacherRecord("yilmaz.mustafa", profileImg2, "Yilmaz", "Mustafa", "Java Jun 21");
+                createTeacherRecord("patrick.geudens", profileImg1, "Patrick", "Geudens", "Java Sep 20");
+                createTeacherRecord("atilla.balin", profileImg2, "Atilla", "Balin", "Frontend Jan 21");
+                createTeacherRecord("manuel.cogneau", profileImg1, "Manuel", "Cogneau", "Java Jan 21");
+                createTeacherRecord("benedikt.lantsoght", profileImg2, "Benedikt", "Lantsoght", "Frontend Jun 21");
+                createTeacherRecord("kenan.kurda", profileImg2, "Kenan", "Kurda", "C# Jan 21");
+                createTeacherRecord("alexander.keisse", profileImg1, "Alexander", "Keisse", "Java Sep 21");
+                createTeacherRecord("quinten.declerck", profileImg2, "Quinten", "De Clerck", "C# Jun 21");
 
-                createUserRecord("pearl.de.smet", profileImg2, "Pearl", "De Smet", TEACHER_ROLE + "," + MANAGER_ROLE);
-                createUserRecord("cindy.pipeleers", profileImg1, "Cindy", "Pipeleers", MANAGER_ROLE);
-                createUserRecord("wouter.vandenberge", profileImg2, "Wouter", "Van den Berge", MANAGER_ROLE + "," + ADMIN_ROLE);
+                createManagerRecord("pearl.de.smet", profileImg2, "Pearl", "De Smet");
+                createManagerRecord("cindy.pipeleers", profileImg1, "Cindy", "Pipeleers");
+                createManagerRecord("wouter.vandenberge", profileImg2, "Wouter", "Van den Berge");
 
-                createUserRecord("hilal.demir", profileImg1, "Hilal", "Demir", STUDENT_ROLE);
-                createUserRecord("ahmed.faqiri", profileImg2, "Ahmed", "Faqiri", STUDENT_ROLE);
-                createUserRecord("alexandru.tudorache", profileImg1, "Alexandru", "Tudorache", STUDENT_ROLE);
-                createUserRecord("sameerun.acchukatla", profileImg2, "Sameerun", "Acchukatla", STUDENT_ROLE);
-                createUserRecord("rahime.yildiz", profileImg1, "Rahime", "Yildiz", STUDENT_ROLE);
-                createUserRecord("sinan.hubeyb.cam", profileImg2, "Sinan", "Hubeyb Cam", STUDENT_ROLE);
-                createUserRecord("joey.de.kort", profileImg1, "Joey", "De Kort", STUDENT_ROLE);
-                createUserRecord("irina.afanassenko", profileImg2, "Irina", "Afanassenko", STUDENT_ROLE);
-                createUserRecord("ali.jamal.alwasseti", profileImg2, "Ali Jamal", "Alwasseti", STUDENT_ROLE);
+                createStudentRecord("hilal.demir", profileImg1, "Hilal", "Demir", "Java Jun 21");
+                createStudentRecord("ahmed.faqiri", profileImg2, "Ahmed", "Faqiri", "Java Jun 21");
+                createStudentRecord("alexandru.tudorache", profileImg1, "Alexandru", "Tudorache", "Java Jun 21");
+                createStudentRecord("sameerun.acchukatla", profileImg2, "Sameerun", "Acchukatla", "Java Jun 21");
+                createStudentRecord("rahime.yildiz", profileImg1, "Rahime", "Yildiz", "Java Jun 21");
+                createStudentRecord("sinan.hubeyb.cam", profileImg2, "Sinan", "Hubeyb Cam", "Java Jun 21");
+                createStudentRecord("joey.de.kort", profileImg1, "Joey", "De Kort", "Java Jun 21");
+                createStudentRecord("irina.afanassenko", profileImg2, "Irina", "Afanassenko", "Java Jun 21");
+                createStudentRecord("ali.jamal.alwasseti", profileImg2, "Ali Jamal", "Alwasseti", "Java Jun 21");
 
-            }
-
-
-            if (courseRepository.count() <= 0) {
-                createCourseRecord("Java Jan 2021");
-                createCourseRecord("Java Juni 2021");
-                createCourseRecord("Java Sept 2021");
-                createCourseRecord("Java Okt 2021");
-                createCourseRecord("Java iOT 2021");
-                createCourseRecord("Java Jan 2022");
             }
 
         };
     }
 
-    private void createCourseRecord(String title) {
-        Course course = new Course()
-                .setTitle(title)
-                .setDescription("No description is added yet.");
+    private void createAdminRecord(String username, String profile, String firstName, String lastName) {
+        User user = new User()
+                .setUsername(username).setHashedPassword(passwordEncoder.encode("P@ssw0rd"))
+                .setProfile(profile)
+                .setFirstName(firstName).setLastName(lastName)
+                .setCurrentTraining("Administratie")
+                .setEmail(username.concat("@").concat("intecbrussel.be"))
+                .setPhone(String.format("0467334%d", username.length() * new Random().nextInt(1000)))
+                .setRoles(TEACHER_ROLE + "," + MANAGER_ROLE + "," + ADMIN_ROLE);
 
-        final var savedCourse = courseRepository.save(course);
-        logger.info("New course is added: " + savedCourse);
+        final var savedUser = userRepository.save(user);
+        logger.info("New ADMIN is added: " + savedUser);
     }
 
+    private void createManagerRecord(String username, String profile, String firstName, String lastName) {
+        User user = new User()
+                .setUsername(username).setHashedPassword(passwordEncoder.encode("P@ssw0rd"))
+                .setProfile(profile)
+                .setFirstName(firstName).setLastName(lastName)
+                .setCurrentTraining("Teamleading & Management")
+                .setEmail(username.concat("@").concat("intecbrussel.be"))
+                .setPhone(String.format("0467334%d", username.length() * new Random().nextInt(1000)))
+                .setRoles(TEACHER_ROLE + "," + MANAGER_ROLE);
 
-    private void createUserRecord(String username, String profile, String firstName, String lastName, String roles) {
+        final var savedUser = userRepository.save(user);
+        logger.info("New MANAGER is added: " + savedUser);
+    }
+
+    private void createTeacherRecord(String username, String profile, String firstName, String lastName,
+            String currentTraining) {
+        User user = new User()
+                .setUsername(username).setHashedPassword(passwordEncoder.encode("P@ssw0rd"))
+                .setProfile(profile)
+                .setFirstName(firstName).setLastName(lastName)
+                .setCurrentTraining(currentTraining)
+                .setEmail(username.concat("@").concat("intecbrussel.be"))
+                .setPhone(String.format("0467334%d", username.length() * new Random().nextInt(1000)))
+                .setRoles(TEACHER_ROLE);
+
+        final var savedUser = userRepository.save(user);
+        logger.info("New TEACHER is added: " + savedUser);
+    }
+
+    private void createStudentRecord(String username, String profile, String firstName, String lastName,
+            String currentTraining) {
 
         User user = new User()
                 .setUsername(username).setHashedPassword(passwordEncoder.encode("P@ssw0rd"))
                 .setProfile(profile)
                 .setFirstName(firstName).setLastName(lastName)
+                .setCurrentTraining(currentTraining)
                 .setEmail(username.concat("@").concat("intecbrussel.be"))
                 .setPhone(String.format("0467334%d", username.length() * new Random().nextInt(1000)))
-                .setRoles(roles);
+                .setRoles(STUDENT_ROLE);
 
         final var savedUser = userRepository.save(user);
-        logger.info("New user is added: " + savedUser);
+        logger.info("New STUDENT is added: " + savedUser);
     }
 
 }

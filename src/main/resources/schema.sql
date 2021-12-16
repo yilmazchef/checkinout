@@ -18,54 +18,23 @@ create table if not exists checks
 create table if not exists users
 (
 
-    id              bigint auto_increment primary key,
-    first_name      varchar(255)                null,
-    last_name       varchar(255)                null,
-    username        varchar(255)                not null,
-    email           varchar(255)                not null,
-    phone           varchar(255)                null,
-    hashed_password varchar(255)                not null,
-    profile         longtext                    null,
-    registered_on   date                        null,
-    registered_at   time                        null,
-    updated_at      time                        null,
-    roles           varchar(100) default 'USER' null,
+    id               bigint auto_increment primary key,
+    first_name       varchar(255)                   null,
+    last_name        varchar(255)                   null,
+    username         varchar(255)                   not null,
+    email            varchar(255)                   not null,
+    phone            varchar(255)                   null,
+    hashed_password  varchar(255)                   not null,
+    profile          longtext                       null,
+    registered_on    date                           null,
+    registered_at    time                           null,
+    updated_at       time                           null,
+    roles            varchar(100) default 'STUDENT' null,
+    current_training varchar(100)                   null,
 
     constraint email unique (email),
     constraint phone unique (phone),
     constraint username unique (username)
-
-) charset = utf8;
-
-create table if not exists courses
-(
-
-    id          bigint auto_increment primary key,
-    title       varchar(255)  null,
-    description varchar(2000) null,
-    parent_id   bigint        null,
-
-    constraint title unique (title),
-
-    constraint parent_to_child_fk
-        foreign key (parent_id) references courses (id)
-
-) charset = utf8;
-
-create table if not exists trainings
-(
-
-    id         bigint auto_increment primary key,
-    course_id  bigint not null,
-    student_id bigint not null,
-    start_date date   not null,
-    end_date   date   not null,
-
-    constraint course_to_training_fk
-        foreign key (course_id) references courses (id),
-
-    constraint user_to_training_fk
-        foreign key (student_id) references users (id)
 
 ) charset = utf8;
 
@@ -78,12 +47,10 @@ create table if not exists events
     attendee_id  bigint             not null,
     organizer_id bigint             null,
     check_type   enum ('IN', 'OUT') not null,
+    training     varchar(100)       not null,
 
     constraint check_to_attendee_fk
         foreign key (check_id) references checks (id),
-
-    constraint course_to_event_fk
-        foreign key (course_id) references courses (id),
 
     constraint user_to_attendee_fk
         foreign key (attendee_id) references users (id),

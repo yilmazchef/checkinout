@@ -5,20 +5,19 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.data.dto.CheckDTO;
-import it.vkod.data.entity.Check;
-import it.vkod.data.entity.Event;
-import it.vkod.data.entity.User;
-import it.vkod.services.AuthenticationService;
-import it.vkod.services.CheckService;
-import it.vkod.services.UserService;
+import it.vkod.models.dto.CheckDetails;
+import it.vkod.models.entity.Check;
+import it.vkod.models.entity.Event;
+import it.vkod.models.entity.User;
+import it.vkod.services.flow.AuthenticationService;
+import it.vkod.services.flow.CheckService;
+import it.vkod.services.flow.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
@@ -26,6 +25,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @PageTitle("Inchecken-remote")
 @Route(value = "inrem", layout = TemplateLayout.class)
@@ -37,9 +37,7 @@ public class RemoteCheckinView extends VerticalLayout {
     private final UserService userService;
     private final CheckService checkService;
 
-    public RemoteCheckinView(
-            AuthenticationService authenticationService, UserService userService,
-            CheckService checkService) {
+    public RemoteCheckinView(AuthenticationService authenticationService, UserService userService, CheckService checkService) {
 
         this.authenticationService = authenticationService;
         this.userService = userService;
@@ -51,124 +49,134 @@ public class RemoteCheckinView extends VerticalLayout {
 
         final var user = this.authenticationService.get();
 
-        user.ifPresent(
-                remoteUser -> {
-                    final var attendeesGrid = new Grid<CheckDTO>();
-                    attendeesGrid
-                            .addColumn(CheckDTO::getFirstName)
-                            .setHeader("Voornaam")
-                            .setKey("firstName");
-                    attendeesGrid
-                            .addColumn(CheckDTO::getLastName)
-                            .setHeader("Familienaam")
-                            .setKey("lastName");
-                    attendeesGrid.addColumn(CheckDTO::getEmail).setHeader("Email").setKey("email");
-                    attendeesGrid.addThemeVariants(
-                            GridVariant.LUMO_NO_BORDER,
-                            GridVariant.LUMO_NO_ROW_BORDERS,
-                            GridVariant.LUMO_ROW_STRIPES);
+        if (user.isPresent()) {
 
-                    attendeesGrid.setItems(this.checkService.fetchInDetailsToday());
+            final var remoteUser = user.get();
 
-                    final var locationLayout = new VerticalLayout();
-                    locationLayout.setMargin(false);
-                    locationLayout.setPadding(false);
-                    locationLayout.setSpacing(false);
-                    final var latField = new TextField("Latitude");
-                    latField.setReadOnly(true);
-                    final var lonField = new TextField("Longitude");
-                    lonField.setReadOnly(true);
-                    final var geoLocation = new GeoLocation();
-                    geoLocation.setWatch(true);
-                    geoLocation.setHighAccuracy(true);
-                    geoLocation.setTimeout(100000);
-                    geoLocation.setMaxAge(200000);
-                    geoLocation.addValueChangeListener(onLocationChange -> {
-                        latField.setValue(String.valueOf(onLocationChange.getValue().getLatitude()));
-                        lonField.setValue(String.valueOf(onLocationChange.getValue().getLongitude()));
-                    });
-                    locationLayout.add(latField, lonField, geoLocation);
+            final var checksToday = this.checkService.fetchInDetailsToday();
+            final Grid<CheckDetails> checkinGrid = checkDetailsGrid(checksToday);
 
-                    final var leftLayout = new VerticalLayout();
-                    leftLayout.setMargin(false);
-                    leftLayout.setPadding(false);
-                    leftLayout.setSpacing(false);
-                    final var reader = new ZXingVaadinReader();
+            final var locationLayout = new VerticalLayout();
+            locationLayout.setMargin(false);
+            locationLayout.setPadding(false);
+            locationLayout.setSpacing(false);
 
-                    reader.setFrom(Constants.From.camera);
-                    reader.setId("video"); // id needs to be 'video' if From.camera.
-                    reader.setStyle("object-fit: cover; width:400px; height:100vh; max-height:500px");
+            final GeoLocation geoLocation = geoLocation();
+            locationLayout.add(geoLocation);
 
-                    reader.addValueChangeListener(
-                            scannedQRCode -> checkInUser(remoteUser, attendeesGrid, scannedQRCode.getValue(),
-                                    Float.valueOf(latField.getValue()), Float.valueOf(lonField.getValue())));
+            final var leftLayout = new VerticalLayout();
+            leftLayout.setMargin(false);
+            leftLayout.setPadding(false);
+            leftLayout.setSpacing(false);
 
-                    leftLayout.add(reader, locationLayout);
+            final var reader = qrScanner();
+            reader.addValueChangeListener(
+                    scannedQRCode -> checkInUser(remoteUser, checkinGrid, scannedQRCode.getValue(),
+                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude()));
 
-                    final var rightLayout = new VerticalLayout();
-                    rightLayout.setMargin(false);
-                    rightLayout.setPadding(false);
-                    rightLayout.setSpacing(false);
+            leftLayout.add(reader, locationLayout);
 
-                    rightLayout.add(attendeesGrid);
+            final var rightLayout = new VerticalLayout();
+            rightLayout.setMargin(false);
+            rightLayout.setPadding(false);
+            rightLayout.setSpacing(false);
 
-                    splitLayout.add(leftLayout, rightLayout);
+            rightLayout.add(checkinGrid);
 
-                });
+            splitLayout.add(leftLayout, rightLayout);
 
+            add(splitLayout);
 
-        add(splitLayout);
+        }
+
     }
 
-    private void checkInUser(
-            final User organizer, final Grid<CheckDTO> attendeesGrid, final String scannedQRCode, final Float lat, final Float lon) {
+    public ZXingVaadinReader qrScanner() {
+
+        final var reader = new ZXingVaadinReader();
+        reader.setFrom(Constants.From.camera);
+        reader.setId("video"); // id needs to be 'video' if From.camera.
+        reader.setStyle("object-fit: cover; width:400px; height:100vh; max-height:500px");
+        return reader;
+    }
+
+    private GeoLocation geoLocation() {
+        final var geoLocation = new GeoLocation();
+        geoLocation.setWatch(true);
+        geoLocation.setHighAccuracy(true);
+        geoLocation.setTimeout(100000);
+        geoLocation.setMaxAge(200000);
+        return geoLocation;
+    }
+
+    private Grid<CheckDetails> checkDetailsGrid(List<CheckDetails> checksToday) {
+        final var checkinGrid = new Grid<CheckDetails>();
+        checkinGrid
+                .addColumn(CheckDetails::getFirstName)
+                .setHeader("Voornaam")
+                .setKey("firstName");
+        checkinGrid
+                .addColumn(CheckDetails::getLastName)
+                .setHeader("Familienaam")
+                .setKey("lastName");
+        checkinGrid.addColumn(CheckDetails::getEmail).setHeader("Email").setKey("email");
+        checkinGrid.addThemeVariants(
+                GridVariant.LUMO_NO_BORDER,
+                GridVariant.LUMO_NO_ROW_BORDERS,
+                GridVariant.LUMO_ROW_STRIPES);
+
+        checkinGrid.setItems(checksToday);
+        return checkinGrid;
+    }
+
+    private void checkInUser(final User organizer, final Grid<CheckDetails> attendeesGrid,
+                             final String scannedQRCode, final Double lat, final Double lon) {
 
         final var oAttendee = this.userService.findByUsername(scannedQRCode);
+
         if (oAttendee.isPresent()) {
+
             final var attendee = oAttendee.get();
 
             final var hasCheckedInBefore =
                     this.checkService.fetchByDate(Date.valueOf(LocalDate.now()), scannedQRCode);
 
             if (hasCheckedInBefore.isEmpty()) {
-                final var checkEntity =
-                        new Check()
-                                .setIsActive(true)
-                                .setCurrentSession(VaadinSession.getCurrent().getSession().getId())
-                                .setPincode(111111)
-                                .setCheckedInAt(Time.valueOf(LocalTime.now()))
-                                .setCheckedOutAt(Time.valueOf(LocalTime.now()))
-                                .setQrcode(scannedQRCode)
-                                .setLat(lat)
-                                .setLon(lon)
-                                .setCheckedOn(Date.valueOf(LocalDate.now()));
+                final var checkEntity = new Check()
+                        .setIsActive(true)
+                        .setCurrentSession(VaadinSession.getCurrent().getSession().getId())
+                        .setPincode(111111)
+                        .setCheckedInAt(Time.valueOf(LocalTime.now()))
+                        .setCheckedOutAt(Time.valueOf(LocalTime.now()))
+                        .setQrcode(scannedQRCode)
+                        .setLat(lat)
+                        .setLon(lon)
+                        .setCheckedOn(Date.valueOf(LocalDate.now()));
 
                 final var check = this.checkService.createCheck(checkEntity);
 
                 final var oEvent =
-                        this.checkService.fetchByAttendeeIdAndCheckId(
-                                attendee.getId(), check.getId(), "IN");
+                        this.checkService.fetchByAttendeeIdAndCheckId(attendee.getId(), check.getId(), "IN");
 
-                final var eventBeingEdited =
-                        new Object() {
-                            Event data = null;
-                        };
+                final var eventBeingEdited = new Object() {
+                    Event data = null;
+                };
 
                 if (oEvent.isPresent()) {
-                    eventBeingEdited.data =
-                            oEvent
-                                    .get()
-                                    .setCheckId(check.getId())
-                                    .setAttendeeId(attendee.getId())
-                                    .setOrganizerId(organizer.getId())
-                                    .setCheckType("IN");
+                    eventBeingEdited.data = oEvent
+                            .get()
+                            .setCheckId(check.getId())
+                            .setAttendeeId(attendee.getId())
+                            .setOrganizerId(organizer.getId())
+                            .setCheckType("IN")
+                            .setTraining(attendee.getCurrentTraining());
                 } else {
-                    eventBeingEdited.data =
-                            new Event()
-                                    .setCheckId(check.getId())
-                                    .setAttendeeId(attendee.getId())
-                                    .setOrganizerId(organizer.getId())
-                                    .setCheckType("IN");
+                    eventBeingEdited.data = new Event()
+                            .setCheckId(check.getId())
+                            .setAttendeeId(attendee.getId())
+                            .setOrganizerId(organizer.getId())
+                            .setCheckType("IN")
+                            .setTraining(attendee.getCurrentTraining());
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);

@@ -1,4 +1,4 @@
-package it.vkod.data.dto;
+package it.vkod.models.dto;
 
 import com.opencsv.bean.CsvBindByPosition;
 import lombok.AccessLevel;

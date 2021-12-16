@@ -1,4 +1,4 @@
-package it.vkod.data.entity;
+package it.vkod.models.entity;
 
 import lombok.AccessLevel;
 import lombok.Data;

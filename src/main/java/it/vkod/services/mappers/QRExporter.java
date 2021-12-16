@@ -1,4 +1,4 @@
-package it.vkod.services;
+package it.vkod.services.mappers;
 
 import com.google.zxing.WriterException;
 import com.lowagie.text.Document;
@@ -6,6 +6,7 @@ import com.lowagie.text.Image;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfWriter;
+import it.vkod.services.flow.AuthenticationService;
 import it.vkod.utils.QRUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

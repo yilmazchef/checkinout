@@ -16,9 +16,9 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import it.vkod.data.entity.User;
-import it.vkod.services.EmailService;
-import it.vkod.services.UserService;
+import it.vkod.models.entity.User;
+import it.vkod.services.flow.EmailService;
+import it.vkod.services.flow.UserService;
 import org.springframework.mail.MailException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 

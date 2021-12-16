@@ -70,6 +70,8 @@
     "@vaadin/vaadin-usage-statistics": "2.1.0",
     "@vaadin/vaadin-virtual-list": "21.0.3",
     "@webcomponents/shadycss": "1.9.6",
+    "@zxing/browser": "^0.0.8",
+    "@zxing/library": "^0.18.4",
     "construct-style-sheets-polyfill": "2.4.16",
     "line-awesome": "1.3.0",
     "lit": "2.0.0",
@@ -95,7 +97,7 @@
     "raw-loader": "^4.0.2",
     "ts-loader": "8.0.12",
     "typescript": "4.3.3",
-    "validator": "13.1.17",
+    "validator": "^13.7.0",
     "webpack": "4.46.0",
     "webpack-cli": "3.3.12",
     "webpack-dev-server": "3.11.0",
@@ -173,6 +175,8 @@
       "@vaadin/vaadin-usage-statistics": "2.1.0",
       "@vaadin/vaadin-virtual-list": "21.0.3",
       "@webcomponents/shadycss": "1.9.6",
+      "@zxing/browser": "^0.0.8",
+      "@zxing/library": "^0.18.4",
       "construct-style-sheets-polyfill": "2.4.16",
       "line-awesome": "1.3.0",
       "lit": "2.0.0"
@@ -202,6 +206,6 @@
       "workbox-precaching": "6.2.0",
       "workbox-webpack-plugin": "6.2.0"
     },
-    "hash": "cc37ee0204fb626e6ffd71184bc4cb5edf51e5e55b83e9bfa95bd54c12458fc2"
+    "hash": "a3aafb0c83a9ba1acc8a29357f93c64055b21dc798312669c10eb834dc185a42"
   }
 }

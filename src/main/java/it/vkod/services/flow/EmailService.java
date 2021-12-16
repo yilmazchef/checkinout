@@ -1,4 +1,4 @@
-package it.vkod.services;
+package it.vkod.services.flow;
 
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.io.File;
 public class EmailService {
 
     private final JavaMailSender emailSender;
-    
+
     public void sendSimpleMessage(final String to, final String subject, final String text) throws MailException {
 
         SimpleMailMessage message = new SimpleMailMessage();

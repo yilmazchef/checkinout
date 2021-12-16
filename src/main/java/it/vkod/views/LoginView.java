@@ -19,7 +19,7 @@ public class LoginView extends LoginOverlay {
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setHeader(new LoginI18n.Header());
         i18n.getHeader().setTitle("Check In/Out");
-        i18n.getHeader().setDescription("student | yilmaz.mustafa | pearl.de.smet");
+        i18n.getHeader().setDescription("voornaam.familienaam (bvb: john.doe)");
         i18n.setAdditionalInformation(null);
         setI18n(i18n);
 

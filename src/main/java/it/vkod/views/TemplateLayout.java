@@ -17,17 +17,18 @@ import com.vaadin.flow.server.VaadinSession;
 public class TemplateLayout extends AppLayout {
 
     public TemplateLayout() {
-        H1 title = new H1("Intec Aanmeldingssysteem");
+
+        final var title = new H1("Intec Aanmeldingssysteem");
         title.getStyle()
                 .set("font-size", "var(--lumo-font-size-l)")
                 .set("margin", "var(--lumo-space-m) var(--lumo-space-l)");
 
-        Tabs tabs = getTabs();
+        final var tabs = getTabs();
 
-        H2 viewTitle = new H2("Inchecken/Uitchecken");
+        final var viewTitle = new H2("Inchecken/Uitchecken");
         Paragraph viewContent = new Paragraph("Lees meer over het project..");
 
-        Div content = new Div();
+        final var content = new Div();
         content.add(viewTitle, viewContent);
 
         addToNavbar(title);
@@ -37,18 +38,19 @@ public class TemplateLayout extends AppLayout {
     }
 
     private Tabs getTabs() {
-        Tabs tabs = new Tabs();
-        final var logoutButton = new Button("Uitloggen", onClick -> {
+
+        final var tabs = new Tabs();
+        final var logoutButton = new Button("Afmelden", onClick -> {
             VaadinSession.getCurrent().getSession().invalidate();
             UI.getCurrent().navigate(LoginView.class);
         });
 
         tabs.add(
-                createTab("Inloggen", LoginView.class),
+                createTab("Aanmelden", LoginView.class),
                 createTab("Inchecken", CheckinView.class),
                 createTab("Uitchecken", CheckoutView.class),
-                createTab("Inschrijving", RegisterView.class),
-                createTab("Administrateur", AdminView.class),
+                createTab("Failsafe", CheckSafeView.class),
+                createTab("Rapports", AdminView.class),
                 new Tab(logoutButton)
         );
         tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL, TabsVariant.LUMO_EQUAL_WIDTH_TABS);
@@ -57,7 +59,7 @@ public class TemplateLayout extends AppLayout {
 
     private Tab createTab(String viewName, Class<? extends Component> clazz) {
 
-        RouterLink link = new RouterLink();
+        final var link = new RouterLink();
         link.add(viewName);
         link.setRoute(clazz);
         link.setTabIndex(-1);

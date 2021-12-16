@@ -1,4 +1,4 @@
-package it.vkod.services;
+package it.vkod.services.mappers;
 
 
 import it.vkod.models.dto.CheckDetails;

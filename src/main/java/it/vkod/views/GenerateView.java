@@ -15,7 +15,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import it.vkod.services.UserService;
+import it.vkod.services.flow.UserService;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -48,34 +48,33 @@ public class GenerateView extends VerticalLayout {
         passwordField.setRequiredIndicatorVisible(true);
         passwordField.setClearButtonVisible(true);
 
-        final var generateButton =
-                new Button(
-                        "Generate",
-                        onClick -> {
-                            final var keyword = usernameField.getValue();
-                            final var oUser =
-                                    this.userService.findByUsernameOrEmailOrPhone(
-                                            keyword.toLowerCase(), keyword, keyword.trim());
+        final var generateButton = new Button(
+                "Generate",
+                onClick -> {
+                    final var keyword = usernameField.getValue();
+                    final var oUser =
+                            this.userService.findByUsernameOrEmailOrPhone(
+                                    keyword.toLowerCase(), keyword, keyword.trim());
 
-                            if (oUser.isPresent()) {
-                                final var user = oUser.get();
-                                try {
+                    if (oUser.isPresent()) {
+                        final var user = oUser.get();
+                        try {
 
-                                    generateLayout.add(
-                                            convertToImage(generateQR(user.getUsername(), 512, 512), user.getUsername()));
-                                    Notification.show(
-                                                    ("Generated a QR Code for " + user.getUsername()),
-                                                    8000,
-                                                    Notification.Position.BOTTOM_CENTER)
-                                            .open();
+                            generateLayout.add(
+                                    convertToImage(generateQR(user.getUsername(), 512, 512), user.getUsername()));
+                            Notification.show(
+                                            ("Generated a QR Code for " + user.getUsername()),
+                                            8000,
+                                            Notification.Position.BOTTOM_CENTER)
+                                    .open();
 
-                                } catch (WriterException | IOException fileEx) {
-                                    Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER).open();
-                                }
-                            } else {
-                                Notification.show("USER DOES NOT EXIST !! ", 3000, Notification.Position.BOTTOM_CENTER).open();
-                            }
-                        });
+                        } catch (WriterException | IOException fileEx) {
+                            Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER).open();
+                        }
+                    } else {
+                        Notification.show("USER DOES NOT EXIST !! ", 3000, Notification.Position.BOTTOM_CENTER).open();
+                    }
+                });
 
         formLayout.addFormItem(usernameField, "Username");
         formLayout.addFormItem(passwordField, "Password");

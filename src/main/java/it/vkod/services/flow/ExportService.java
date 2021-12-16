@@ -1,10 +1,14 @@
-package it.vkod.services;
+package it.vkod.services.flow;
 
 import com.google.zxing.WriterException;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import it.vkod.models.dto.CheckDetails;
 import it.vkod.models.entity.User;
+import it.vkod.services.mappers.CSVExporter;
+import it.vkod.services.mappers.ExcelExporter;
+import it.vkod.services.mappers.PDFExporter;
+import it.vkod.services.mappers.QRExporter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;

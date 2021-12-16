@@ -5,20 +5,19 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.data.dto.CheckDTO;
-import it.vkod.data.entity.Course;
-import it.vkod.data.entity.Event;
-import it.vkod.data.entity.User;
-import it.vkod.services.AuthenticationService;
-import it.vkod.services.CheckService;
-import it.vkod.services.CourseService;
-import it.vkod.services.UserService;
+import it.vkod.models.dto.CheckDetails;
+import it.vkod.models.entity.Event;
+import it.vkod.models.entity.User;
+import it.vkod.services.flow.AuthenticationService;
+import it.vkod.services.flow.CheckService;
+import it.vkod.services.flow.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
@@ -36,18 +35,16 @@ public class CheckoutView extends VerticalLayout {
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final CheckService checkService;
-    private final CourseService courseService;
 
     private final HorizontalLayout splitLayout = new HorizontalLayout();
 
     public CheckoutView(
             AuthenticationService authenticationService, UserService userService,
-            CheckService checkService, CourseService courseService) {
+            CheckService checkService) {
 
         this.userService = userService;
         this.checkService = checkService;
         this.authenticationService = authenticationService;
-        this.courseService = courseService;
 
         initParentStyle();
 
@@ -55,14 +52,14 @@ public class CheckoutView extends VerticalLayout {
 
         user.ifPresentOrElse(organizer -> {
 
-            final var attendeesGrid = new Grid<CheckDTO>();
+            final var attendeesGrid = new Grid<CheckDetails>();
             attendeesGrid.setAllRowsVisible(true);
 
-            final var courseSelect = new ComboBox<Course>("Selecteer een opleiding");
-            courseSelect.setItemLabelGenerator(course -> course.getTitle());
-            courseSelect.setItems(this.courseService.fetchCourse());
-            courseSelect.addValueChangeListener(onValueChange ->
-                    attendeesGrid.setItems(this.checkService.fetchOutDetailsToday(onValueChange.getValue().getId())));
+            final var courseSelect = new ComboBox<String>("Selecteer een opleiding");
+            courseSelect.setItems(DataProvider.ofItems(
+                    "Java Jan 21", "Java Jun 21", "Java Sept 21", "Java Dec 21",
+                    "Python Jan 21", "Python Jun 21", "Python Sept 21", "Python Dec 21"
+            ));
 
             final var leftLayout = new VerticalLayout();
             final var reader = new ZXingVaadinReader();
@@ -88,7 +85,8 @@ public class CheckoutView extends VerticalLayout {
                     scannedQRCode.getValue(),
                     geoLocation.getValue().getLatitude(),
                     geoLocation.getValue().getLongitude(),
-                    courseSelect.getValue(), organizer,
+                    organizer,
+                    courseSelect.getValue(),
                     attendeesGrid));
 
             initLayoutStyle(leftLayout, "35vw");
@@ -113,8 +111,9 @@ public class CheckoutView extends VerticalLayout {
 
     private void checkOutUser(final String scannedQRCode,
                               final Double lat, final Double lon,
-                              final Course course, final User organizer,
-                              final Grid<CheckDTO> attendeesGrid) {
+                              final User organizer,
+                              final String training,
+                              final Grid<CheckDetails> attendeesGrid) {
 
         final var oAttendee = this.userService.findByUsername(scannedQRCode);
         if (oAttendee.isPresent()) {
@@ -152,7 +151,7 @@ public class CheckoutView extends VerticalLayout {
                                     .setAttendeeId(attendee.getId())
                                     .setOrganizerId(organizer.getId())
                                     .setCheckType("OUT")
-                                    .setCourseId(course.getId());
+                                    .setTraining(training);
                 } else {
                     eventBeingEdited.data =
                             new Event()
@@ -160,7 +159,7 @@ public class CheckoutView extends VerticalLayout {
                                     .setAttendeeId(attendee.getId())
                                     .setOrganizerId(organizer.getId())
                                     .setCheckType("OUT")
-                                    .setCourseId(course.getId());
+                                    .setTraining(training);
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
