@@ -1,7 +1,7 @@
 package it.vkod.services;
 
 
-import it.vkod.data.entity.User;
+import it.vkod.models.entity.User;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

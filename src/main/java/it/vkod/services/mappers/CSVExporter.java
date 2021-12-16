@@ -4,7 +4,7 @@ import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import it.vkod.data.dto.CheckDTO;
+import it.vkod.models.dto.CheckDetails;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
@@ -19,10 +19,10 @@ import static com.opencsv.ICSVWriter.NO_QUOTE_CHARACTER;
 @Component
 public class CSVExporter {
 
-    public void export(HttpServletResponse response, List<CheckDTO> data) throws IOException, CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
+    public void export(HttpServletResponse response, List<CheckDetails> data) throws IOException, CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
 
         //create a csv writer
-        final var writer = new StatefulBeanToCsvBuilder<CheckDTO>(response.getWriter())
+        final var writer = new StatefulBeanToCsvBuilder<CheckDetails>(response.getWriter())
                 .withQuotechar(NO_QUOTE_CHARACTER)
                 .withSeparator(DEFAULT_SEPARATOR)
                 .withOrderedResults(true)

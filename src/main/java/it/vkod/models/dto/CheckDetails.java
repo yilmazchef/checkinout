@@ -15,7 +15,7 @@ import java.time.LocalTime;
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class CheckDTO implements Serializable, Cloneable {
+public class CheckDetails implements Serializable, Cloneable {
 
     @CsvBindByPosition(position = 0)
     Long checkId;
@@ -40,19 +40,19 @@ public class CheckDTO implements Serializable, Cloneable {
     LocalTime checkedOutAt;
 
     @CsvBindByPosition(position = 7)
-    String course;
+    String training;
 
     @Override
-    public CheckDTO clone() {
+    public CheckDetails clone() {
         try {
-            return ((CheckDTO) super.clone())
+            return ((CheckDetails) super.clone())
                     .setEmail(this.getEmail())
                     .setFirstName(this.getFirstName())
                     .setLastName(this.getLastName())
                     .setCheckedOn(this.getCheckedOn())
                     .setCheckedInAt(this.getCheckedInAt())
                     .setCheckedOutAt(this.getCheckedOutAt())
-                    .setCourse(this.getCourse());
+                    .setTraining(this.getTraining());
 
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

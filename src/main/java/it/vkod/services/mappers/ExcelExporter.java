@@ -1,7 +1,7 @@
 package it.vkod.services;
 
 
-import it.vkod.data.dto.CheckDTO;
+import it.vkod.models.dto.CheckDetails;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -67,7 +67,7 @@ public class ExcelExporter {
         cell.setCellStyle(style);
     }
 
-    private void writeDataLines(List<CheckDTO> data) {
+    private void writeDataLines(List<CheckDetails> data) {
 
         int rowCount = 1;
 
@@ -77,7 +77,7 @@ public class ExcelExporter {
 
         style.setFont(font);
 
-        for (CheckDTO cd : data) {
+        for (CheckDetails cd : data) {
             Row row = sheet.createRow(rowCount++);
             int columnCount = 0;
 
@@ -91,7 +91,7 @@ public class ExcelExporter {
         }
     }
 
-    public void export(HttpServletResponse response, List<CheckDTO> data) throws IOException {
+    public void export(HttpServletResponse response, List<CheckDetails> data) throws IOException {
         writeHeaderLine();
         writeDataLines(data);
 

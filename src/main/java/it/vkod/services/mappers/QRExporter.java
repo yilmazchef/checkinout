@@ -22,6 +22,7 @@ public class QRExporter {
     public void export(HttpServletResponse response, String... usernames) throws IOException, WriterException {
 
         final var oOrganizer = authenticationService.get();
+
         if (oOrganizer.isPresent()) {
 
             final var organizer = oOrganizer.get();

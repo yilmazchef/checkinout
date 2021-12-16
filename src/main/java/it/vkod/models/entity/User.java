@@ -42,6 +42,8 @@ public class User implements Serializable, Cloneable {
 
     String profile;
 
+    String currentTraining;
+
     public boolean isNew() {
         return this.id == null;
     }
@@ -55,7 +57,8 @@ public class User implements Serializable, Cloneable {
                     .setFirstName(this.getEmail())
                     .setLastName(this.getEmail())
                     .setPhone(this.getPhone())
-                    .setProfile(this.getProfile());
+                    .setProfile(this.getProfile())
+                    .setCurrentTraining(this.getCurrentTraining());
 
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

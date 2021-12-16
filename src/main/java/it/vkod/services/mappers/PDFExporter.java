@@ -5,8 +5,8 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import it.vkod.data.dto.CheckDTO;
-import it.vkod.data.entity.User;
+import it.vkod.models.dto.CheckDetails;
+import it.vkod.models.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import java.util.List;
 @Component
 public class PDFExporter {
 
-    public void export(HttpServletResponse response, List<CheckDTO> data, User user) throws IOException {
+    public void export(HttpServletResponse response, List<CheckDetails> data, User user) throws IOException {
 
         final var document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
@@ -119,12 +119,12 @@ public class PDFExporter {
         table.addCell(cell);
     }
 
-    private void writeTableData(PdfPTable table, List<CheckDTO> data) {
+    private void writeTableData(PdfPTable table, List<CheckDetails> data) {
 
         final var cFont = FontFactory.getFont(FontFactory.TIMES_ROMAN);
         cFont.setSize(10F);
 
-        for (CheckDTO check : data) {
+        for (CheckDetails check : data) {
             table.addCell(new Phrase(check.getLastName(), cFont));
             table.addCell(new Phrase(check.getFirstName(), cFont));
             table.addCell(new Phrase(check.getEmail(), cFont));

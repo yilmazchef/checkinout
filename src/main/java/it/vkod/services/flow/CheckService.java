@@ -4,11 +4,10 @@ import com.grum.geocalc.BoundingArea;
 import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
-import it.vkod.data.dto.CheckDTO;
-import it.vkod.data.entity.Check;
-import it.vkod.data.entity.Event;
+import it.vkod.models.dto.CheckDetails;
+import it.vkod.models.entity.Check;
+import it.vkod.models.entity.Event;
 import it.vkod.repositories.CheckRepository;
-import it.vkod.repositories.CourseRepository;
 import it.vkod.repositories.EventRepository;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ public class CheckService {
     private final UserRepository userRepository;
     private final CheckRepository checkRepository;
     private final EventRepository eventRepository;
-    private final CourseRepository courseRepository;
 
     public List<Check> fetchByDate(final Date checkedOn) {
         return checkRepository.findByCheckedOn(checkedOn);
@@ -45,23 +43,23 @@ public class CheckService {
         return checkRepository.findByCheckedOnTodayAndQrcode(qrcode);
     }
 
-    public List<CheckDTO> fetchAllDetailsToday() {
+    public List<CheckDetails> fetchAllDetailsToday() {
         return checkRepository.findAllChecksOfToday();
     }
 
-    public List<CheckDTO> fetchOutDetailsToday() {
+    public List<CheckDetails> fetchOutDetailsToday() {
         return checkRepository.findAllCheckoutsOfToday();
     }
 
-    public List<CheckDTO> fetchOutDetailsToday(final Long courseId) {
+    public List<CheckDetails> fetchOutDetailsToday(final Long courseId) {
         return checkRepository.findAllCheckoutsOfToday(courseId);
     }
 
-    public List<CheckDTO> fetchInDetailsToday() {
+    public List<CheckDetails> fetchInDetailsToday() {
         return checkRepository.findAllCheckinsOfToday();
     }
 
-    public List<CheckDTO> fetchInDetailsToday(final Long courseId) {
+    public List<CheckDetails> fetchInDetailsToday(final String courseId) {
         return checkRepository.findAllCheckinsOfToday(courseId);
     }
 
