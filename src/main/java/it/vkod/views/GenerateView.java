@@ -1,6 +1,7 @@
 package it.vkod.views;
 
 import com.google.zxing.WriterException;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -29,6 +30,7 @@ import static it.vkod.utils.QRUtils.generateQR;
 public class GenerateView extends VerticalLayout {
 
     private final UserService userService;
+    private final String whatsappRedirectUrl = "https://api.whatsapp.com/send?phone=";
 
     public GenerateView(UserService userService) {
 
@@ -52,9 +54,8 @@ public class GenerateView extends VerticalLayout {
                 "Generate",
                 onClick -> {
                     final var keyword = usernameField.getValue();
-                    final var oUser =
-                            this.userService.findByUsernameOrEmailOrPhone(
-                                    keyword.toLowerCase(), keyword, keyword.trim());
+                    final var oUser = this.userService.findByUsernameOrEmailOrPhone(
+                            keyword.toLowerCase(), keyword, keyword.trim());
 
                     if (oUser.isPresent()) {
                         final var user = oUser.get();
@@ -63,10 +64,16 @@ public class GenerateView extends VerticalLayout {
                             generateLayout.add(
                                     convertToImage(generateQR(user.getUsername(), 512, 512), user.getUsername()));
                             Notification.show(
-                                            ("Generated a QR Code for " + user.getUsername()),
-                                            8000,
-                                            Notification.Position.BOTTOM_CENTER)
+                                    ("Generated a QR Code for " + user.getUsername()),
+                                    8000,
+                                    Notification.Position.BOTTOM_CENTER)
                                     .open();
+
+                            final var sendWhatsAppButton = new Button("Send to Whatsapp", onSendClick -> {
+                                UI.getCurrent().navigate(whatsappRedirectUrl.concat(user.getPhone()));
+                            });
+
+                            generateLayout.add(sendWhatsAppButton);
 
                         } catch (WriterException | IOException fileEx) {
                             Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER).open();
@@ -79,8 +86,8 @@ public class GenerateView extends VerticalLayout {
         formLayout.addFormItem(usernameField, "Username");
         formLayout.addFormItem(passwordField, "Password");
 
-        final var confirmCheck =
-                new Checkbox("I confirm that the event organizer can change my password in this session.");
+        final var confirmCheck = new Checkbox(
+                "I confirm that the event organizer can change my password in this session.");
         formLayout.addFormItem(confirmCheck, "Confirmation");
 
         generateLayout.setMargin(false);

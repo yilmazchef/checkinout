@@ -67,6 +67,10 @@ public class CheckinView extends VerticalLayout {
             final var attendeesGrid = new Grid<CheckDetails>();
             attendeesGrid.setColumnReorderingAllowed(true);
 
+            final var configLayout = new HorizontalLayout();
+
+            final var typeSelect = typeSelection();
+
             final var courseSelect = courseSelection();
             courseSelect.addValueChangeListener(onSelection -> {
 
@@ -92,11 +96,17 @@ public class CheckinView extends VerticalLayout {
 
                     final var reader = qrReader();
 
-                    reader.addValueChangeListener(scannedQRCode -> checkInUser(
-                            scannedQRCode.getValue(),
-                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
-                            user.get(),
-                            attendeesGrid, courseSelect.getValue()));
+                    reader.addValueChangeListener(scannedQRCode -> {
+
+                        final var username = scannedQRCode.getValue();
+                        final var lat = geoLocation.getValue().getLatitude();
+                        final var lon = geoLocation.getValue().getLongitude();
+                        final var organizer = user.get();
+                        final var training = courseSelect.getValue();
+                        final var type = typeSelection().getValue() == null ? "IN" : typeSelection().getValue();
+
+                        check(username, lat, lon, organizer, training, attendeesGrid, type);
+                    });
 
                     leftLayout.add(reader, locationLayout);
 
@@ -122,7 +132,8 @@ public class CheckinView extends VerticalLayout {
                 }
             });
 
-            add(courseSelect);
+            configLayout.add(courseSelect, typeSelect);
+            add(configLayout);
 
         } else {
             final var authenticationError = Notification.show(
@@ -167,6 +178,13 @@ public class CheckinView extends VerticalLayout {
         return geoLocation;
     }
 
+    private Select<String> typeSelection() {
+        final var typeSelect = new Select<String>();
+        typeSelect.setLabel("Checktyp");
+        typeSelect.setItems(DataProvider.ofItems("IN", "OUT"));
+        return typeSelect;
+    }
+
     private Select<String> courseSelection() {
         final var courseSelect = new Select<String>();
         courseSelect.setLabel("Selecteer een opleiding");
@@ -191,15 +209,29 @@ public class CheckinView extends VerticalLayout {
         layout.setHeight("90vh");
     }
 
+    private void check(final String username,
+            final Double lat, final Double lon,
+            final User organizer,
+            final String training,
+            final Grid<CheckDetails> attendeesGrid,
+            final String type) {
+
+        if (type.equalsIgnoreCase("IN")) {
+            checkInUser(username, lat, lon, organizer, training, attendeesGrid);
+        } else if (type.equalsIgnoreCase("OUT")) {
+            checkOutUser(username, lat, lon, organizer, training, attendeesGrid);
+        }
+    }
+
     private void checkInUser(final String username,
             final Double lat, final Double lon,
             final User organizer,
-            final Grid<CheckDetails> attendeesGrid,
-            final String course) {
+            final String training,
+            final Grid<CheckDetails> attendeesGrid) {
 
         final var oAttendee = this.userService.findByUsername(username);
 
-        boolean valid = oAttendee.isPresent() && oAttendee.get().getCurrentTraining().equalsIgnoreCase(course);
+        boolean valid = oAttendee.isPresent() && oAttendee.get().getCurrentTraining().equalsIgnoreCase(training);
 
         if (valid) {
 
@@ -233,14 +265,14 @@ public class CheckinView extends VerticalLayout {
                             .setAttendeeId(attendee.getId())
                             .setOrganizerId(organizer.getId())
                             .setCheckType("IN")
-                            .setTraining(course);
+                            .setTraining(training);
                 } else {
                     eventBeingEdited.data = new Event()
                             .setCheckId(check.getId())
                             .setAttendeeId(attendee.getId())
                             .setOrganizerId(organizer.getId())
                             .setCheckType("IN")
-                            .setTraining(course);
+                            .setTraining(training);
                 }
 
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
@@ -265,7 +297,7 @@ public class CheckinView extends VerticalLayout {
                         Notification.Position.BOTTOM_CENTER)
                         .open();
 
-                final var notification = Notification.show("Application submitted!");
+                final var notification = Notification.show("Event is submitted!");
 
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
@@ -280,6 +312,89 @@ public class CheckinView extends VerticalLayout {
         } else {
             Notification.show(
                     (username + " is GEEN valid QR-code."),
+                    4000,
+                    Notification.Position.BOTTOM_CENTER)
+                    .open();
+        }
+    }
+
+    private void checkOutUser(final String scannedQRCode,
+            final Double lat, final Double lon,
+            final User organizer,
+            final String training,
+            final Grid<CheckDetails> attendeesGrid) {
+
+        final var oAttendee = this.userService.findByUsername(scannedQRCode);
+        if (oAttendee.isPresent()) {
+            final var attendee = oAttendee.get();
+
+            final var foundCheck = this.checkService.fetchByDate(Date.valueOf(LocalDate.now()), scannedQRCode);
+
+            if (foundCheck.isPresent()) {
+
+                final var check = this.checkService.createCheck(
+                        foundCheck
+                                .get()
+                                .setCurrentSession(VaadinSession.getCurrent().getSession().getId())
+                                .setQrcode(scannedQRCode)
+                                .setCheckedOutAt(Time.valueOf(LocalTime.now()))
+                                .setLat(lat)
+                                .setLon(lon));
+
+                final var oEvent = this.checkService.fetchByAttendeeIdAndCheckId(
+                        attendee.getId(), check.getId(), "OUT");
+
+                final var eventBeingEdited = new Object() {
+                    Event data = null;
+                };
+
+                if (oEvent.isPresent()) {
+                    eventBeingEdited.data = oEvent
+                            .get()
+                            .setCheckId(check.getId())
+                            .setAttendeeId(attendee.getId())
+                            .setOrganizerId(organizer.getId())
+                            .setCheckType("OUT")
+                            .setTraining(training);
+                } else {
+                    eventBeingEdited.data = new Event()
+                            .setCheckId(check.getId())
+                            .setAttendeeId(attendee.getId())
+                            .setOrganizerId(organizer.getId())
+                            .setCheckType("OUT")
+                            .setTraining(training);
+                }
+
+                final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
+                if (!savedOrUpdatedEvent.isNew() && attendeesGrid != null) {
+                    attendeesGrid.setItems(this.checkService.fetchOutDetailsToday());
+                }
+
+                Notification.show(
+                        attendee.getFirstName()
+                                + " "
+                                + attendee.getLastName()
+                                + " heeft gecheckt"
+                                + "."
+                                + "Org: "
+                                + organizer.getFirstName()
+                                + " "
+                                + organizer.getLastName(),
+                        4000,
+                        Notification.Position.BOTTOM_CENTER)
+                        .open();
+
+            } else {
+                Notification.show(
+                        ("Geannuleerd, GEEN valid QR-code: " + scannedQRCode),
+                        4000,
+                        Notification.Position.BOTTOM_CENTER)
+                        .open();
+            }
+
+        } else {
+            Notification.show(
+                    (scannedQRCode + " heeft nog NIET gecheckt."),
                     4000,
                     Notification.Position.BOTTOM_CENTER)
                     .open();

@@ -43,7 +43,6 @@ create table if not exists events
 
     id           bigint auto_increment primary key,
     check_id     bigint             not null,
-    course_id    bigint             not null,
     attendee_id  bigint             not null,
     organizer_id bigint             null,
     check_type   enum ('IN', 'OUT') not null,
