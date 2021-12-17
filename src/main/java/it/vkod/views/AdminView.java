@@ -28,7 +28,7 @@ public class AdminView extends VerticalLayout {
 
     private final AdminService adminService;
 
-    public AdminView(@Autowired AdminService adminService) {
+    public AdminView(AdminService adminService) {
 
         this.adminService = adminService;
 
@@ -77,7 +77,6 @@ public class AdminView extends VerticalLayout {
         Anchor excelAnchor = new Anchor(hostname + EXPORT_CHECKS_EXCEL_URI, "Exporteer als PDF");
 
         actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
-
 
         final var viewerLayout = new VerticalLayout();
 

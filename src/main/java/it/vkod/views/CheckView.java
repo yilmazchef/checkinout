@@ -80,7 +80,9 @@ public class CheckView extends VerticalLayout {
             final var courseSelect = courseSelection();
             courseSelect.addValueChangeListener(onSelection -> {
 
-                final var matchesWithTrainersCourse = user.get().getCurrentTraining().contains(onSelection.getValue());
+                final var authUser = user.get();
+
+                final var matchesWithTrainersCourse = authUser.getCurrentTraining().contains(onSelection.getValue());
 
                 typeSelect.setEnabled(matchesWithTrainersCourse);
 
@@ -165,17 +167,17 @@ public class CheckView extends VerticalLayout {
 
         final var fullName = details.getFirstName() + " " + details.getLastName();
 
-        Avatar avatar = new Avatar();
+        final var avatar = new Avatar();
         avatar.setName(fullName);
         avatar.setImage(details.getProfile());
 
-        Span name = new Span(fullName);
-        Span roles = new Span(details.getRoles());
+        final var name = new Span(fullName);
+        final var roles = new Span(details.getRoles());
         roles.getStyle()
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
 
-        VerticalLayout column = new VerticalLayout(name, roles);
+        final var column = new VerticalLayout(name, roles);
         column.setPadding(false);
         column.setSpacing(false);
 
@@ -190,9 +192,9 @@ public class CheckView extends VerticalLayout {
                 4000, Position.BOTTOM_CENTER);
         authenticationError.addThemeVariants(NotificationVariant.LUMO_ERROR);
 
-        Div text = new Div(new Text("Unauthorized event."));
+        final var text = new Div(new Text("Unauthorized event."));
 
-        Button closeButton = new Button(new Icon("lumo", "cross"));
+        final var closeButton = new Button(new Icon("lumo", "cross"));
         closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         closeButton.getElement().setAttribute("aria-label", "Close");
         closeButton.addClickListener(event -> {
@@ -200,7 +202,7 @@ public class CheckView extends VerticalLayout {
             UI.getCurrent().navigate(LoginView.class);
         });
 
-        HorizontalLayout layout = new HorizontalLayout(text, closeButton);
+        final var layout = new HorizontalLayout(text, closeButton);
         layout.setAlignItems(Alignment.CENTER);
 
         authenticationError.add(layout);

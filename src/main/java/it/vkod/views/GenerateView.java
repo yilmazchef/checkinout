@@ -70,7 +70,8 @@ public class GenerateView extends VerticalLayout {
                                     .open();
 
                             final var sendWhatsAppButton = new Button("Send to Whatsapp", onSendClick -> {
-                                UI.getCurrent().navigate(whatsappRedirectUrl.concat(user.getPhone()));
+                                // UI.getCurrent().navigate(whatsappRedirectUrl.concat(user.getPhone()));
+                                UI.getCurrent().getPage().setLocation(whatsappRedirectUrl.concat(user.getPhone()));
                             });
 
                             generateLayout.add(sendWhatsAppButton);

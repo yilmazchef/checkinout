@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -54,14 +55,27 @@ public class TemplateLayout extends AppLayout {
 
         final var oUser = authService.get();
 
-        tabs.add(createTab("Aanmelden", LoginView.class));
+        tabs.add(
+
+                new Tab(new Button("Aanmelden", onClick -> {
+                    VaadinSession.getCurrent().getSession().invalidate();
+                    try {
+                        UI.getCurrent().navigate(LoginView.class);
+                    } catch (NotFoundException notFoundEx) {
+                        notifyException(notFoundEx).open();
+                    }
+
+                }))
+
+        );
+
+        tabs.add(createTab("In/Out", oUser.isPresent() ? CheckView.class : RemoteCheckinView.class));
 
         if (oUser.isPresent()) {
-            tabs.add(createTab("Checken", CheckView.class));
 
             final var user = oUser.get();
 
-            if (user.getRoles().contains("MANAGER")) {
+            if (user.getRoles().contains("TEACHER") || user.getRoles().contains("MANAGER")) {
                 createTab("Manager", CheckSafeView.class);
             }
 
@@ -73,7 +87,7 @@ public class TemplateLayout extends AppLayout {
 
         tabs.add(
 
-                new Tab(new Button("Afmelden", onClick -> {
+                new Tab(new Button("In", onClick -> {
                     VaadinSession.getCurrent().getSession().invalidate();
                     try {
                         UI.getCurrent().navigate(LoginView.class);

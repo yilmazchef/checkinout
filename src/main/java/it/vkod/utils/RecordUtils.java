@@ -81,18 +81,23 @@ public class RecordUtils {
         logger.info("New ADMIN is added: " + savedUser);
     }
 
-    private void createManagerRecord(String username, String profile, String firstName, String lastName) {
+    private void createManagerRecord(String username, String profile, String firstName, String lastName,
+            String training) {
         User user = new User()
                 .setUsername(username).setHashedPassword(passwordEncoder.encode("P@ssw0rd"))
                 .setProfile(profile)
                 .setFirstName(firstName).setLastName(lastName)
-                .setCurrentTraining("Teamleading & Management")
+                .setCurrentTraining(training)
                 .setEmail(username.concat("@").concat("intecbrussel.be"))
                 .setPhone(String.format("0467334%d", username.length() * new Random().nextInt(1000)))
                 .setRoles(TEACHER_ROLE + "," + MANAGER_ROLE);
 
         final var savedUser = userRepository.save(user);
         logger.info("New MANAGER is added: " + savedUser);
+    }
+
+    private void createManagerRecord(String username, String profile, String firstName, String lastName) {
+        createManagerRecord(username, profile, firstName, lastName, "Java Juni 21");
     }
 
     private void createTeacherRecord(String username, String profile, String firstName, String lastName,

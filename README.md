@@ -51,13 +51,13 @@ Once the JAR file is built, you can run it using
 To build the Dockerized version of the project, run
 
 ```
-docker build . -t checkinout:latest
+docker build . -t yilmazchef/checkinout:latest
 ```
 
 Once the Docker image is correctly built, you can test it locally using
 
 ```
-docker run -p 8080:8080 checkinout:latest
+docker run -p 8443:443 yilmazchef/checkinout:latest
 ```
 
 ## Deploying using Kubernetes
