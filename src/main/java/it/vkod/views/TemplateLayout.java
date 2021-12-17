@@ -4,19 +4,30 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
+import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 
+import it.vkod.services.flow.AuthenticationService;
+
 public class TemplateLayout extends AppLayout {
 
-    public TemplateLayout() {
+    private final AuthenticationService authService;
+
+    public TemplateLayout(final AuthenticationService authService) {
+
+        this.authService = authService;
 
         final var title = new H1("Intec Aanmeldingssysteem");
         title.getStyle()
@@ -40,21 +51,50 @@ public class TemplateLayout extends AppLayout {
     private Tabs getTabs() {
 
         final var tabs = new Tabs();
-        final var logoutButton = new Button("Afmelden", onClick -> {
-            VaadinSession.getCurrent().getSession().invalidate();
-            UI.getCurrent().navigate(LoginView.class);
-        });
+
+        final var oUser = authService.get();
+
+        tabs.add(createTab("Aanmelden", LoginView.class));
+
+        if (oUser.isPresent()) {
+            tabs.add(createTab("Checken", CheckView.class));
+
+            final var user = oUser.get();
+
+            if (user.getRoles().contains("MANAGER")) {
+                createTab("Manager", CheckSafeView.class);
+            }
+
+            if (user.getRoles().contains("ADMIN")) {
+                tabs.add(createTab("Admin", AdminView.class));
+            }
+
+        }
 
         tabs.add(
-                createTab("Aanmelden", LoginView.class),
-                createTab("Inchecken", CheckinView.class),
-                createTab("Uitchecken", CheckoutView.class),
-                createTab("Failsafe", CheckSafeView.class),
-                createTab("Rapports", AdminView.class),
-                new Tab(logoutButton)
+
+                new Tab(new Button("Afmelden", onClick -> {
+                    VaadinSession.getCurrent().getSession().invalidate();
+                    try {
+                        UI.getCurrent().navigate(LoginView.class);
+                    } catch (NotFoundException notFoundEx) {
+                        notifyException(notFoundEx).open();
+                    }
+
+                }))
+
         );
+
         tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL, TabsVariant.LUMO_EQUAL_WIDTH_TABS);
         return tabs;
+    }
+
+    private Notification notifyException(Exception exception) {
+        final var trainingError = Notification.show(
+                exception.getMessage(),
+                4000, Position.BOTTOM_CENTER);
+        trainingError.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        return trainingError;
     }
 
     private Tab createTab(String viewName, Class<? extends Component> clazz) {

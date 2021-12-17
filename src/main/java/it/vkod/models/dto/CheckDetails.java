@@ -18,34 +18,42 @@ import java.time.LocalTime;
 public class CheckDetails implements Serializable, Cloneable {
 
     @CsvBindByPosition(position = 0)
-    Long checkId;
+    String profile;
 
     @CsvBindByPosition(position = 1)
-    String firstName;
+    String roles;
 
     @CsvBindByPosition(position = 2)
-    String lastName;
+    Long checkId;
 
     @CsvBindByPosition(position = 3)
+    String firstName;
+
+    @CsvBindByPosition(position = 4)
+    String lastName;
+
+    @CsvBindByPosition(position = 5)
     @EqualsAndHashCode.Include
     String email;
 
-    @CsvBindByPosition(position = 4)
+    @CsvBindByPosition(position = 6)
     LocalDate checkedOn;
 
-    @CsvBindByPosition(position = 5)
+    @CsvBindByPosition(position = 7)
     LocalTime checkedInAt;
 
-    @CsvBindByPosition(position = 6)
+    @CsvBindByPosition(position = 8)
     LocalTime checkedOutAt;
 
-    @CsvBindByPosition(position = 7)
+    @CsvBindByPosition(position = 9)
     String training;
 
     @Override
     public CheckDetails clone() {
         try {
             return ((CheckDetails) super.clone())
+                    .setProfile(this.getProfile())
+                    .setRoles(this.getRoles())
                     .setEmail(this.getEmail())
                     .setFirstName(this.getFirstName())
                     .setLastName(this.getLastName())
