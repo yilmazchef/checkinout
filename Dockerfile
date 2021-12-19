@@ -10,8 +10,5 @@ RUN mvn clean package -DskipTests -Pproduction
 # Run stage
 FROM openjdk:11-jdk-slim-buster
 COPY --from=build /usr/src/app/target/*.jar /usr/app/app.jar
-## Add the wait script to the image
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait /wait
-RUN chmod +x /wait
 EXPOSE 8443
-CMD wait && java -jar /usr/app/app.jar
+CMD java -jar /usr/app/app.jar
