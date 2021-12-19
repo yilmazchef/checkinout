@@ -22,12 +22,18 @@ services:
   checkinout-app:
     image: yilmazchef/checkinout:latest
     restart: on-failure
+    depends_on:
+      - checkinout-db
+    networks:
+      - checknet
     environment:
-      WAIT_HOSTS: db:3306
       SPRING_DATASOURCE_URL: jdbc:mysql://checkinout-db:3306/checkinoutdb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: pass
-    networks:
-      - checknet
     ports:
       - "443:8443"
+
+networks:
+  checknet:
+    attachable: true
+    enable_ipv6: true

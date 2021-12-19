@@ -17,6 +17,8 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.NotFoundException;
+import com.vaadin.flow.router.RouteParam;
+import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -26,7 +28,7 @@ public class TemplateLayout extends AppLayout {
 
     private final AuthenticationService authService;
 
-    public TemplateLayout(final AuthenticationService authService) {
+    public TemplateLayout(AuthenticationService authService) {
 
         this.authService = authService;
 
@@ -90,7 +92,7 @@ public class TemplateLayout extends AppLayout {
                 new Tab(new Button("In", onClick -> {
                     VaadinSession.getCurrent().getSession().invalidate();
                     try {
-                        UI.getCurrent().navigate(LoginView.class);
+                        UI.getCurrent().navigate(LoginView.class, new RouteParameters("userID", "123"));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }

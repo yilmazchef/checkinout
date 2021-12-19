@@ -1,0 +1,1 @@
+ mvn clean dependency:go-offline install -Pproduction spring-boot:run
