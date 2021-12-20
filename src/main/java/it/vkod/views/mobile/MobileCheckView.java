@@ -40,6 +40,7 @@ import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.theme.lumo.Lumo;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 
@@ -92,15 +93,7 @@ public class MobileCheckView extends VerticalLayout {
             }
 
             if (this.sessionService.getCheckType() == null) {
-
-                final var typeSelect = new RadioButtonGroup<String>();
-                typeSelect.setWidthFull();
-                typeSelect.setItems(CheckType.IN.getValue(), CheckType.OUT.getValue());
-                typeSelect.setValue(CheckType.IN.getValue());
-
-                this.sessionService.setCheckType(typeSelect.getValue());
-
-                add(typeSelect);
+                this.sessionService.setCheckType(CheckType.IN.getValue());
             }
 
             initializeScannerLayoutWithDialog(sessionService.getTrainingCode(), sessionService.getCheckType(),
