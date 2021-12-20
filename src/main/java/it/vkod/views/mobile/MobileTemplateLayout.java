@@ -13,6 +13,8 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.RouteParam;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 
 import it.vkod.models.http.CheckType;
 import it.vkod.models.http.TrainingCode;
@@ -48,10 +50,12 @@ public class MobileTemplateLayout extends AppLayout {
 
             if (user.getRoles().contains("TEACHER") || user.getRoles().contains("MANAGER")
                     || user.getRoles().contains("ADMIN")) {
+                inButton.setSizeFull();
+
                 inButton.addClickListener(onClick -> {
                     try {
-                        sessionService.setCheckType("IN");
-                        sessionService.setTrainingCode(user.getCurrentTraining());
+                        this.sessionService.setCheckType("IN");
+                        this.sessionService.setTrainingCode(user.getCurrentTraining());
                         inButton.getUI().ifPresent(ui -> ui.navigate(MobileCheckView.class));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
@@ -64,6 +68,8 @@ public class MobileTemplateLayout extends AppLayout {
             }
 
             if (user.getRoles().contains("MANAGER")) {
+                managerButton.setSizeFull();
+
                 managerButton.addClickListener(onClick -> {
                     try {
                         managerButton.getUI().ifPresent(ui -> ui.navigate(MobileCheckSafeView.class));
@@ -77,6 +83,8 @@ public class MobileTemplateLayout extends AppLayout {
             }
 
             if (user.getRoles().contains("ADMIN")) {
+                adminButton.setSizeFull();
+
                 adminButton.addClickListener(onClick -> {
                     try {
                         adminButton.getUI().ifPresent(ui -> ui.navigate(MobileAdminView.class));
@@ -91,10 +99,11 @@ public class MobileTemplateLayout extends AppLayout {
 
             if (user.getRoles().contains("TEACHER") || user.getRoles().contains("MANAGER")
                     || user.getRoles().contains("ADMIN")) {
+                outButton.setSizeFull();
                 outButton.addClickListener(onClick -> {
                     try {
-                        sessionService.setCheckType("OUT");
-                        sessionService.setTrainingCode(user.getCurrentTraining());
+                        this.sessionService.setCheckType("OUT");
+                        this.sessionService.setTrainingCode(user.getCurrentTraining());
                         outButton.getUI().ifPresent(ui -> ui.navigate(MobileCheckView.class));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
@@ -110,7 +119,23 @@ public class MobileTemplateLayout extends AppLayout {
 
         tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL, TabsVariant.LUMO_EQUAL_WIDTH_TABS);
 
-        addToNavbar(true, tabs);
+        final var logoutButton = new Button("Logout");
+        logoutButton.getStyle()
+                .set("position", "absolute")
+                .set("right", "0").set("top", "0");
+        logoutButton.addClickListener(onClick -> {
+            VaadinSession.getCurrent().getSession().invalidate();
+            this.sessionService.setTrainingCode("");
+            this.sessionService.setCheckType("");
+            try {
+                logoutButton.getUI().ifPresent(ui -> ui.navigate("logout"));
+            } catch (NotFoundException notFoundEx) {
+                notifyException(notFoundEx).open();
+            }
+
+        });
+
+        addToNavbar(true, tabs, logoutButton);
 
     }
 
