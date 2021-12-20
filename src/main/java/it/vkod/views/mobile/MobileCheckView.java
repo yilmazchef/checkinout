@@ -92,7 +92,15 @@ public class MobileCheckView extends VerticalLayout {
             }
 
             if (this.sessionService.getCheckType() == null) {
-                this.sessionService.setCheckType(CheckType.IN.getValue());
+
+                final var typeSelect = new RadioButtonGroup<String>();
+                typeSelect.setWidthFull();
+                typeSelect.setItems(CheckType.IN.getValue(), CheckType.OUT.getValue());
+                typeSelect.setValue(CheckType.IN.getValue());
+
+                this.sessionService.setCheckType(typeSelect.getValue());
+
+                add(typeSelect);
             }
 
             initializeScannerLayoutWithDialog(sessionService.getTrainingCode(), sessionService.getCheckType(),
