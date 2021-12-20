@@ -1,4 +1,4 @@
-package it.vkod.views;
+package it.vkod.views.mobile;
 
 import com.flowingcode.vaadin.addons.twincolgrid.TwinColGrid;
 import com.vaadin.flow.component.Text;
@@ -9,6 +9,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -16,6 +17,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -24,6 +28,8 @@ import it.vkod.models.dto.CheckDetails;
 import it.vkod.models.entity.Check;
 import it.vkod.models.entity.Event;
 import it.vkod.models.entity.User;
+import it.vkod.models.http.CheckType;
+import it.vkod.models.http.TrainingCode;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
@@ -35,6 +41,10 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -45,7 +55,7 @@ import static com.vaadin.flow.component.notification.NotificationVariant.LUMO_SU
 @Route(value = "m/safe", layout = MobileTemplateLayout.class)
 @RouteAlias(value = "mobile/failsafe", layout = MobileTemplateLayout.class)
 @RolesAllowed({ "ADMIN", "MANAGER", "LEADER" })
-public class MobileCheckSafeView extends VerticalLayout {
+public class MobileCheckSafeView extends VerticalLayout implements HasUrlParameter<String> {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
@@ -61,73 +71,10 @@ public class MobileCheckSafeView extends VerticalLayout {
 
         initStyle();
 
-        final var user = this.authenticationService.get();
-
-        if (user.isPresent()) {
-
-            final var organizer = user.get();
-
-            final var dateTimePicker = dateAndTime();
-
-            final var students = this.userService.fetchAll();
-
-            final TwinColGrid<User> studentsGrid = studentsGrid(students);
-
-            final Grid<CheckDetails> attendeesGrid = checkinGrid();
-
-            final GeoLocation geoLocation = geoLocation();
-
-            final var failsafeLayout = new VerticalLayout();
-            final var failSafeForm = new FormLayout();
-
-            final TextField usernameField = userName();
-
-            final Select<String> coursesSelect = courseSelect();
-
-            final var checkInButton = new Button("Inchecken",
-                    onClick -> checkInUser(usernameField.getValue(),
-                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
-                            organizer,
-                            coursesSelect.getValue(),
-                            attendeesGrid));
-
-            final var checkOutButton = new Button("Uitchecken",
-                    onClick -> checkOutUser(
-                            usernameField.getValue(),
-                            geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
-                            organizer,
-                            coursesSelect.getValue(),
-                            attendeesGrid));
-
-            usernameField.addValueChangeListener(onValueChange -> {
-                checkInButton.setEnabled(!onValueChange.getValue().isEmpty());
-                checkOutButton.setEnabled(!onValueChange.getValue().isEmpty());
-            });
-
-            failSafeForm.add(coursesSelect, usernameField, dateTimePicker, checkInButton, checkOutButton);
-            failsafeLayout.add(failSafeForm, studentsGrid);
-
-            addAndExpand(failsafeLayout, attendeesGrid, geoLocation);
-        }
-
     }
 
-    private Grid<CheckDetails> checkinGrid() {
-        final var checkinsGrid = new Grid<CheckDetails>();
-        checkinsGrid.setColumnReorderingAllowed(true);
-        return checkinsGrid;
-    }
+    private void initializeFailsafeLayout(final String training, final Set<User> students, final User organizer) {
 
-    private GeoLocation geoLocation() {
-        final var geoLocation = new GeoLocation();
-        geoLocation.setWatch(true);
-        geoLocation.setHighAccuracy(true);
-        geoLocation.setTimeout(100000);
-        geoLocation.setMaxAge(200000);
-        return geoLocation;
-    }
-
-    private TwinColGrid<User> studentsGrid(Set<User> students) {
         final var studentsGrid = new TwinColGrid<>(students, "Failsafe aanmelden")
                 .addColumn(item -> String.valueOf(item.getId()), "ID")
                 .addColumn(User::getFirstName, "Voornaam")
@@ -139,28 +86,10 @@ public class MobileCheckSafeView extends VerticalLayout {
                 .withSizeFull()
                 .withDragAndDropSupport();
         studentsGrid.setHeight("50vh");
-        return studentsGrid;
-    }
 
-    private TextField userName() {
-        final var usernameField = new TextField();
-        usernameField.setLabel("Gebruikersnaam");
-        usernameField.setRequired(true);
-        return usernameField;
-    }
+        final var attendeesGrid = new Grid<CheckDetails>();
+        attendeesGrid.setColumnReorderingAllowed(true);
 
-    private Select<String> courseSelect() {
-        final var coursesSelect = new Select<String>();
-        coursesSelect.setLabel("Selecteer een course");
-        coursesSelect.setEmptySelectionAllowed(false);
-        coursesSelect.setItems(DataProvider.ofItems(
-                "Java Jan 21", "Java Jun 21", "Java Sep 21", "Java Dec 21",
-                "Python Jan 21", "Python Jun 21", "Python Sep 21", "Python Dec 21",
-                "Frontend Jan 21", "Frontend Jun 21", "Frontend Sep 21", "Frontend Dec 21"));
-        return coursesSelect;
-    }
-
-    private DateTimePicker dateAndTime() {
         final var dateTimePicker = new DateTimePicker();
         dateTimePicker.setLabel("Appointment date and time");
         dateTimePicker.setHelperText("Must be within 60 days from today");
@@ -168,7 +97,44 @@ public class MobileCheckSafeView extends VerticalLayout {
         dateTimePicker.setMin(LocalDateTime.now().minusDays(1));
         dateTimePicker.setMax(LocalDateTime.now().plusDays(7));
         dateTimePicker.setValue(LocalDateTime.now());
-        return dateTimePicker;
+
+        final var geoLocation = new GeoLocation();
+        geoLocation.setWatch(true);
+        geoLocation.setHighAccuracy(true);
+        geoLocation.setTimeout(100000);
+        geoLocation.setMaxAge(200000);
+
+        final var failsafeLayout = new VerticalLayout();
+        final var failSafeForm = new FormLayout();
+
+        final var usernameField = new TextField();
+        usernameField.setLabel("Gebruikersnaam");
+        usernameField.setRequired(true);
+
+        final var checkInButton = new Button(VaadinIcon.SIGN_IN_ALT.create(),
+                onClick -> checkInUser(usernameField.getValue(),
+                        geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
+                        organizer,
+                        training,
+                        attendeesGrid));
+
+        final var checkOutButton = new Button(VaadinIcon.SIGN_OUT_ALT.create(),
+                onClick -> checkOutUser(
+                        usernameField.getValue(),
+                        geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude(),
+                        organizer,
+                        training,
+                        attendeesGrid));
+
+        usernameField.addValueChangeListener(onValueChange -> {
+            checkInButton.setEnabled(!onValueChange.getValue().isEmpty());
+            checkOutButton.setEnabled(!onValueChange.getValue().isEmpty());
+        });
+
+        failSafeForm.add(usernameField, dateTimePicker, checkInButton, checkOutButton);
+        failsafeLayout.add(failSafeForm, studentsGrid);
+
+        addAndExpand(failsafeLayout, attendeesGrid, geoLocation);
     }
 
     private Notification notify(String errorMessage) {
@@ -367,5 +333,27 @@ public class MobileCheckSafeView extends VerticalLayout {
         setJustifyContentMode(JustifyContentMode.CENTER);
         setHorizontalComponentAlignment(Alignment.CENTER);
         setAlignItems(Alignment.CENTER);
+    }
+
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+
+        final var location = event.getLocation();
+        final var queryParameters = location.getQueryParameters();
+        final Map<String, List<String>> parametersMap = queryParameters.getParameters();
+
+        final var user = this.authenticationService.get();
+        final var types = parametersMap.get(CheckType.IN.getName());
+        final String typeParam = (types != null && !types.isEmpty()) ? parametersMap.get(CheckType.IN.getName()).get(0)
+                : "IN";
+        final String trainingParam = (parametersMap.get(TrainingCode.QUERY.getName()) != null
+                && !parametersMap.get(TrainingCode.QUERY.getName()).isEmpty())
+                        ? parametersMap.get(TrainingCode.QUERY.getName()).get(0)
+                        : user.orElseThrow(null).getCurrentTraining();
+
+        if (user.isPresent()) {
+            final var students = this.userService.fetchAll();
+            initializeFailsafeLayout(trainingParam, students, user.get());
+        }
     }
 }

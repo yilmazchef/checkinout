@@ -54,7 +54,11 @@ public class MobileTemplateLayout extends AppLayout {
             if (user.getRoles().contains("MANAGER"))
                 tabs.add(new Tab(new Button(VaadinIcon.ACADEMY_CAP.create(), onClick -> {
                     try {
-                        UI.getCurrent().navigate(CheckSafeView.class);
+                        RouteParam typeParam = new RouteParam(CheckType.IN.getName(), CheckType.IN.getValue());
+                        RouteParam trainingParam = new RouteParam(TrainingCode.QUERY.getName(),
+                                user.getCurrentTraining());
+                        UI.getCurrent().navigate(MobileCheckSafeView.class,
+                                new RouteParameters(typeParam, trainingParam));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
@@ -64,7 +68,7 @@ public class MobileTemplateLayout extends AppLayout {
             if (user.getRoles().contains("ADMIN")) {
                 tabs.add(new Tab(new Button(VaadinIcon.BRIEFCASE.create(), onClick -> {
                     try {
-                        UI.getCurrent().navigate(AdminView.class);
+                        UI.getCurrent().navigate(MobileAdminView.class);
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }

@@ -364,16 +364,64 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
 
         final var user = this.authenticationService.get();
         final var types = parametersMap.get(CheckType.IN.getName());
-        final String typeParam = (types != null && !types.isEmpty()) ? parametersMap.get(CheckType.IN.getName()).get(0)
-                : "IN";
-        final String trainingParam = (parametersMap.get(TrainingCode.QUERY.getName()) != null
-                && !parametersMap.get(TrainingCode.QUERY.getName()).isEmpty())
-                        ? parametersMap.get(TrainingCode.QUERY.getName()).get(0)
-                        : user.orElseThrow(null).getCurrentTraining();
+        final var trainings = parametersMap.get(TrainingCode.QUERY.getName());
 
         if (user.isPresent()) {
-            initializeScannerLayout(trainingParam, typeParam, user.get());
+
+            final String typeParam = (types != null && !types.isEmpty()) ? types.get(0) : CheckType.IN.getValue();
+
+            final String trainingParam;
+
+            if (trainings != null && !trainings.isEmpty()) {
+                trainingParam = trainings.get(0);
+                initializeScannerLayout(trainingParam, typeParam, user.get());
+
+            } else {
+                trainingParam = user.get().getCurrentTraining();
+                initializeScannerLayoutWithDialog(trainingParam, typeParam, user.get());
+            }
+
         }
+    }
+
+    private void initializeScannerLayoutWithDialog(final String training, final String type, final User organizer) {
+
+        final var dialogLayout = new VerticalLayout();
+
+        final var dialog = new Dialog();
+
+        final var headline = new H2("Voer de vereiste info in");
+        headline.getStyle().set("margin", "var(--lumo-space-m) 0 0 0")
+                .set("font-size", "1.5em").set("font-weight", "bold");
+
+        final var trainingCodeField = new TextField("Klas-code");
+        trainingCodeField.setValue(training);
+        trainingCodeField.setClearButtonVisible(true);
+        trainingCodeField.setRequiredIndicatorVisible(true);
+
+        final var fieldLayout = new VerticalLayout(trainingCodeField);
+        fieldLayout.setSpacing(false);
+        fieldLayout.setPadding(false);
+        fieldLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
+
+        final var saveButton = new Button("Submit", e -> {
+            initializeScannerLayout(
+                    !trainingCodeField.getValue().isEmpty() ? trainingCodeField.getValue() : training,
+                    type, organizer);
+            dialog.close();
+            dialogLayout.setVisible(false);
+        });
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        final var buttonLayout = new HorizontalLayout(saveButton);
+        buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+
+        dialogLayout.add(headline, fieldLayout, buttonLayout);
+        dialogLayout.setPadding(false);
+        dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
+        dialogLayout.getStyle().set("width", "300px").set("max-width", "100%");
+
+        add(dialogLayout);
     }
 
 }
