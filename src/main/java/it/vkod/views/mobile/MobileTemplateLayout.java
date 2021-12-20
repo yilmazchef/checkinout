@@ -76,12 +76,13 @@ public class MobileTemplateLayout extends AppLayout {
                         this.sessionService.setCheckType("IN");
                         this.sessionService.setTrainingCode(user.getCurrentTraining());
                         inButton.getUI().ifPresent(ui -> ui.navigate(MobileCheckView.class));
+                        inTab.getStyle().set("background-color", "green");
+                        outTab.getStyle().set("background-color", "#161616");
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
                 });
-                inTab.getStyle().set("background-color", "green");
                 inTab.add(inButton);
                 tabs.add(inTab);
             }
@@ -124,12 +125,13 @@ public class MobileTemplateLayout extends AppLayout {
                         this.sessionService.setCheckType("OUT");
                         this.sessionService.setTrainingCode(user.getCurrentTraining());
                         outButton.getUI().ifPresent(ui -> ui.navigate(MobileCheckView.class));
+                        outTab.getStyle().set("background-color", "red");
+                        inTab.getStyle().set("background-color", "#161616");
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
                 });
-                outTab.getStyle().set("background-color", "red");
                 outTab.add(outButton);
                 tabs.add(outTab);
             }
@@ -157,10 +159,18 @@ public class MobileTemplateLayout extends AppLayout {
     }
 
     private Notification notifyException(Exception exception) {
-        final var trainingError = Notification.show(
+        final var error = Notification.show(
                 exception.getMessage(),
                 4000, Position.BOTTOM_CENTER);
-        trainingError.addThemeVariants(NotificationVariant.LUMO_ERROR);
-        return trainingError;
+        error.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        return error;
+    }
+
+    private Notification notify(String message) {
+        final var info = Notification.show(
+                message,
+                4000, Position.BOTTOM_CENTER);
+        info.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+        return info;
     }
 }

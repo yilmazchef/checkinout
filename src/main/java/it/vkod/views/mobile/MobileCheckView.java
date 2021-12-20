@@ -228,7 +228,7 @@ public class MobileCheckView extends VerticalLayout {
 
         reader.setFrom(Constants.From.camera);
         reader.setId("video"); // id needs to be 'video' if From.camera.
-        reader.setStyle("object-fit: cover; width:95vw; height: 95vh;");
+        reader.setStyle("object-fit: cover; width:95vw; height: 95vh; max-width:400px;");
         return reader;
     }
 
