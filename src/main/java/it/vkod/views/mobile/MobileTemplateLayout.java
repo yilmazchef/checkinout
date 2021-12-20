@@ -60,6 +60,9 @@ public class MobileTemplateLayout extends AppLayout {
 
         });
 
+        restartTab.add(logoutButton);
+        tabs.add(restartTab);
+
         if (oUser.isPresent()) {
 
             final var user = oUser.get();
