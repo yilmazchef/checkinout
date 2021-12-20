@@ -1,4 +1,12 @@
-package it.vkod.views;
+package it.vkod.views.desktop;
+
+import static it.vkod.api.ExportController.EXPORT_CHECKS_CSV_URI;
+import static it.vkod.api.ExportController.EXPORT_CHECKS_EXCEL_URI;
+import static it.vkod.api.ExportController.EXPORT_USERS_PDF_URI;
+
+import java.util.concurrent.atomic.AtomicLong;
+
+import javax.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -9,26 +17,18 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
 
 import it.vkod.services.flow.AdminService;
 import it.vkod.views.components.EmbeddedPdfDocument;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.security.RolesAllowed;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static it.vkod.api.ExportController.*;
-
 @PageTitle("System Admin - Full Access")
-@Route(value = "adm", layout = TemplateLayout.class)
+@Route(value = "adm", layout = DesktopAppLayout.class)
 @RolesAllowed({ "ADMIN", "MANAGER", "LEADER" })
-public class AdminView extends VerticalLayout {
+public class DesktopAdminView extends VerticalLayout {
 
     private final AdminService adminService;
 
-    public AdminView(AdminService adminService) {
+    public DesktopAdminView(AdminService adminService) {
 
         this.adminService = adminService;
 

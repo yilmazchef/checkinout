@@ -56,11 +56,11 @@ import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.SessionService;
 import it.vkod.services.flow.UserService;
-import it.vkod.views.LoginView;
+import it.vkod.views.desktop.DesktopLoginView;
 
 @PageTitle("Inchecken/Uitchecken")
-@Route(value = "m", layout = MobileTemplateLayout.class)
-@RouteAlias(value = "mobile/check", layout = MobileTemplateLayout.class)
+@Route(value = "m", layout = MobileAppLayout.class)
+@RouteAlias(value = "mobile/check", layout = MobileAppLayout.class)
 @PermitAll
 public class MobileCheckView extends VerticalLayout {
 
@@ -184,29 +184,6 @@ public class MobileCheckView extends VerticalLayout {
         row.add(avatar, column);
         row.getStyle().set("line-height", "var(--lumo-line-height-m)");
         return row;
-    }
-
-    private Notification notifyStudentToAuthenticate() {
-        final var authenticationError = Notification.show(
-                "The user is NOT authorized. Please go back to login page and authenticate with a teacher, manager, or admin.",
-                4000, Position.BOTTOM_CENTER);
-        authenticationError.addThemeVariants(NotificationVariant.LUMO_ERROR);
-
-        final var text = new Div(new Text("Unauthorized event."));
-
-        final var closeButton = new Button(new Icon("lumo", "cross"));
-        closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        closeButton.getElement().setAttribute("aria-label", "Close");
-        closeButton.addClickListener(event -> {
-            authenticationError.close();
-            UI.getCurrent().navigate(LoginView.class);
-        });
-
-        final var layout = new HorizontalLayout(text, closeButton);
-        layout.setAlignItems(Alignment.CENTER);
-
-        authenticationError.add(layout);
-        return authenticationError;
     }
 
     private Notification notifyTeacherToAuthenticate() {

@@ -1,5 +1,4 @@
-package it.vkod.views;
-
+package it.vkod.views.desktop;
 
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
@@ -8,11 +7,11 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @PageTitle("Inloggen")
-@Route(value = "login", layout = TemplateLayout.class)
+@Route(value = "login", layout = DesktopAppLayout.class)
 @AnonymousAllowed
-public class LoginView extends LoginOverlay {
+public class DesktopLoginView extends LoginOverlay {
 
-    public LoginView() {
+    public DesktopLoginView() {
 
         setAction("login");
 

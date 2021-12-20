@@ -1,4 +1,4 @@
-package it.vkod.views;
+package it.vkod.views.desktop;
 
 import com.flowingcode.vaadin.addons.twincolgrid.TwinColGrid;
 import com.vaadin.flow.component.Text;
@@ -42,16 +42,16 @@ import static com.vaadin.flow.component.notification.NotificationVariant.LUMO_ER
 import static com.vaadin.flow.component.notification.NotificationVariant.LUMO_SUCCESS;
 
 @PageTitle("Inchecken/Uitchecken")
-@Route(value = "safe", layout = TemplateLayout.class)
-@RouteAlias(value = "failsafe", layout = TemplateLayout.class)
+@Route(value = "safe", layout = DesktopAppLayout.class)
+@RouteAlias(value = "failsafe", layout = DesktopAppLayout.class)
 @RolesAllowed({ "ADMIN", "MANAGER", "LEADER" })
-public class CheckSafeView extends VerticalLayout {
+public class DesktopCheckSafeView extends VerticalLayout {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final CheckService checkService;
 
-    public CheckSafeView(
+    public DesktopCheckSafeView(
             AuthenticationService authenticationService, UserService userService,
             CheckService checkService) {
 

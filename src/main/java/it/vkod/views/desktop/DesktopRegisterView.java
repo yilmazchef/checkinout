@@ -1,5 +1,4 @@
-package it.vkod.views;
-
+package it.vkod.views.desktop;
 
 import com.google.zxing.WriterException;
 import com.vaadin.flow.component.button.Button;
@@ -34,19 +33,18 @@ import static com.vaadin.flow.component.notification.Notification.show;
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Inschrijven")
-@Route(value = "reg", layout = TemplateLayout.class)
-@RouteAlias(value = "register", layout = TemplateLayout.class)
+@Route(value = "reg", layout = DesktopAppLayout.class)
+@RouteAlias(value = "register", layout = DesktopAppLayout.class)
 @AnonymousAllowed
-public class RegisterView extends VerticalLayout {
+public class DesktopRegisterView extends VerticalLayout {
 
     private final UserService userService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-
-    public RegisterView(UserService userService,
-                        BCryptPasswordEncoder passwordEncoder,
-                        EmailService emailService) {
+    public DesktopRegisterView(UserService userService,
+            BCryptPasswordEncoder passwordEncoder,
+            EmailService emailService) {
 
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -75,7 +73,8 @@ public class RegisterView extends VerticalLayout {
 
         final var lastNameField = new TextField();
         lastNameField.addValueChangeListener(onChange -> {
-            usernameField.setValue(firstNameField.getValue().toLowerCase().concat(".").concat(lastNameField.getValue().toLowerCase()));
+            usernameField.setValue(
+                    firstNameField.getValue().toLowerCase().concat(".").concat(lastNameField.getValue().toLowerCase()));
         });
 
         final var passwordField = new PasswordField();
@@ -140,11 +139,11 @@ public class RegisterView extends VerticalLayout {
                         emailService.sendSimpleMessage(
                                 savedUser.getEmail(),
                                 "Your << CheckInOut >> Account is successfully created.",
-                                "Username: ".concat(savedUser.getUsername()).concat("\n").concat("Password: ").concat(passwordField.getValue()));
+                                "Username: ".concat(savedUser.getUsername()).concat("\n").concat("Password: ")
+                                        .concat(passwordField.getValue()));
                     } catch (MailException mailException) {
                         show(mailException.getMessage(), 4000, BOTTOM_CENTER).open();
                     }
-
 
                     generateQRLayout(user);
 
@@ -152,7 +151,7 @@ public class RegisterView extends VerticalLayout {
                 }
             } else {
                 show("Error! Make sure you have read and accepted 'Terms and Conditions'. Please double" +
-                                " check that all required information is entered.",
+                        " check that all required information is entered.",
                         4000, BOTTOM_CENTER).open();
 
             }
@@ -166,7 +165,6 @@ public class RegisterView extends VerticalLayout {
 
     }
 
-
     public void initLayout() {
 
         setPadding(false);
@@ -178,7 +176,6 @@ public class RegisterView extends VerticalLayout {
         setHorizontalComponentAlignment(Alignment.CENTER);
         setAlignItems(Alignment.CENTER);
     }
-
 
     public void generateQRLayout(User user) {
 
@@ -202,7 +199,6 @@ public class RegisterView extends VerticalLayout {
 
         add(layout);
     }
-
 
     private Image convertToImage(final byte[] imageData, final String username) {
 

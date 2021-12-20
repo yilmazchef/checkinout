@@ -1,33 +1,40 @@
-package it.vkod.views;
+package it.vkod.views.desktop;
 
-import com.vaadin.flow.component.Component;
+import java.sql.Date;
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Random;
+
+import javax.annotation.security.PermitAll;
+
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
+
+import org.vaadin.elmot.flow.sensors.GeoLocation;
+
 import it.vkod.models.dto.CheckDetails;
 import it.vkod.models.entity.Check;
 import it.vkod.models.entity.Event;
@@ -35,24 +42,14 @@ import it.vkod.models.entity.User;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
-import it.vkod.views.components.ScrollableHorizontalLayout;
-
-import org.vaadin.elmot.flow.sensors.GeoLocation;
-
-import javax.annotation.security.PermitAll;
-import java.sql.Date;
-import java.sql.Time;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Random;
 
 @PageTitle("Inchecken")
-@Route(value = "in", layout = TemplateLayout.class)
-@RouteAlias(value = "checkin", layout = TemplateLayout.class)
-@RouteAlias(value = "", layout = TemplateLayout.class)
+@Route(value = "in", layout = DesktopAppLayout.class)
+@RouteAlias(value = "checkin", layout = DesktopAppLayout.class)
+@RouteAlias(value = "", layout = DesktopAppLayout.class)
 @PermitAll
 @StyleSheet("css/checkview.css")
-public class CheckView extends VerticalLayout {
+public class DesktopCheckView extends VerticalLayout {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
@@ -61,7 +58,8 @@ public class CheckView extends VerticalLayout {
     private static final String CHECK_IN = "IN";
     private static final String CHECK_OUT = "OUT";
 
-    public CheckView(AuthenticationService authenticationService, UserService userService, CheckService checkService) {
+    public DesktopCheckView(AuthenticationService authenticationService, UserService userService,
+            CheckService checkService) {
 
         this.authenticationService = authenticationService;
         this.userService = userService;
@@ -204,7 +202,7 @@ public class CheckView extends VerticalLayout {
         closeButton.getElement().setAttribute("aria-label", "Close");
         closeButton.addClickListener(event -> {
             authenticationError.close();
-            UI.getCurrent().navigate(LoginView.class);
+            UI.getCurrent().navigate(DesktopLoginView.class);
         });
 
         final var layout = new HorizontalLayout(text, closeButton);

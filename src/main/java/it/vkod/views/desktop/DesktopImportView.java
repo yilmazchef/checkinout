@@ -1,4 +1,4 @@
-package it.vkod.views;
+package it.vkod.views.desktop;
 
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderBuilder;
@@ -19,13 +19,13 @@ import java.io.InputStreamReader;
 import java.util.stream.IntStream;
 
 @PageTitle("Importeer CSV")
-@Route(value = "icsv", layout = TemplateLayout.class)
-@RouteAlias(value = "import/csv", layout = TemplateLayout.class)
-public class ImportView extends VerticalLayout {
+@Route(value = "icsv", layout = DesktopAppLayout.class)
+@RouteAlias(value = "import/csv", layout = DesktopAppLayout.class)
+public class DesktopImportView extends VerticalLayout {
 
     private final Grid<String[]> grid = new Grid<>();
 
-    public ImportView() {
+    public DesktopImportView() {
 
         final var buffer = new MemoryBuffer();
         final var upload = new Upload(buffer);
@@ -37,8 +37,7 @@ public class ImportView extends VerticalLayout {
     private void displayCsv(InputStream resourceAsStream) {
 
         final var parser = new CSVParserBuilder().withSeparator(',').build();
-        final var reader =
-                new CSVReaderBuilder(new InputStreamReader(resourceAsStream)).withCSVParser(parser).build();
+        final var reader = new CSVReaderBuilder(new InputStreamReader(resourceAsStream)).withCSVParser(parser).build();
         try {
             final var entries = reader.readAll();
             final var headers = entries.get(0);
@@ -47,8 +46,7 @@ public class ImportView extends VerticalLayout {
             IntStream
                     .range(0, headers.length)
                     .forEachOrdered(colIndex -> grid.addColumn(row -> row[colIndex])
-                            .setHeader(SharedUtil.camelCaseToHumanFriendly(headers[colIndex]))
-                    );
+                            .setHeader(SharedUtil.camelCaseToHumanFriendly(headers[colIndex])));
 
             grid.setItems(entries.subList(1, entries.size()));
 

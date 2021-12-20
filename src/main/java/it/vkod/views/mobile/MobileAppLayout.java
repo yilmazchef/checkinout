@@ -22,7 +22,7 @@ import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.SessionService;
 import lombok.Getter;
 
-public class MobileTemplateLayout extends AppLayout {
+public class MobileAppLayout extends AppLayout {
 
     private final AuthenticationService authService;
     private final SessionService sessionService;
@@ -35,7 +35,7 @@ public class MobileTemplateLayout extends AppLayout {
     private final Tab restartTab = new Tab();
     private final Tab exitTab = new Tab();
 
-    public MobileTemplateLayout(AuthenticationService authService, SessionService sessionService) {
+    public MobileAppLayout(AuthenticationService authService, SessionService sessionService) {
 
         this.authService = authService;
         this.sessionService = sessionService;

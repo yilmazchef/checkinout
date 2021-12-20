@@ -52,8 +52,8 @@ import static com.vaadin.flow.component.notification.NotificationVariant.LUMO_ER
 import static com.vaadin.flow.component.notification.NotificationVariant.LUMO_SUCCESS;
 
 @PageTitle("Inchecken/Uitchecken")
-@Route(value = "m/safe", layout = MobileTemplateLayout.class)
-@RouteAlias(value = "mobile/failsafe", layout = MobileTemplateLayout.class)
+@Route(value = "m/safe", layout = MobileAppLayout.class)
+@RouteAlias(value = "mobile/failsafe", layout = MobileAppLayout.class)
 @RolesAllowed({ "ADMIN", "MANAGER", "LEADER" })
 public class MobileCheckSafeView extends VerticalLayout implements HasUrlParameter<String> {
 

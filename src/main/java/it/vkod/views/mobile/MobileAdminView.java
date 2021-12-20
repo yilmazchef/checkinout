@@ -23,8 +23,8 @@ import it.vkod.services.flow.AdminService;
 import it.vkod.views.components.EmbeddedPdfDocument;
 
 @PageTitle("System Admin - Full Access")
-@Route(value = "m/adm", layout = MobileTemplateLayout.class)
-@RouteAlias(value = "mobile/admin", layout = MobileTemplateLayout.class)
+@Route(value = "m/adm", layout = MobileAppLayout.class)
+@RouteAlias(value = "mobile/admin", layout = MobileAppLayout.class)
 @RolesAllowed({ "ADMIN", "MANAGER", "LEADER" })
 public class MobileAdminView extends VerticalLayout {
 

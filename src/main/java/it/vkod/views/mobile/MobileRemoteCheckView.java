@@ -1,4 +1,4 @@
-package it.vkod.views;
+package it.vkod.views.mobile;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -27,17 +27,18 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-@PageTitle("Inchecken-remote")
-@Route(value = "inrem", layout = TemplateLayout.class)
-@RouteAlias(value = "checkin/remote", layout = TemplateLayout.class)
+@PageTitle("Remote inchecken / uitchecken")
+@Route(value = "minrem", layout = MobileAppLayout.class)
+@RouteAlias(value = "mobile/check/remote", layout = MobileAppLayout.class)
 @PermitAll
-public class RemoteCheckinView extends VerticalLayout {
+public class MobileRemoteCheckView extends VerticalLayout {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final CheckService checkService;
 
-    public RemoteCheckinView(AuthenticationService authenticationService, UserService userService, CheckService checkService) {
+    public MobileRemoteCheckView(AuthenticationService authenticationService, UserService userService,
+            CheckService checkService) {
 
         this.authenticationService = authenticationService;
         this.userService = userService;
@@ -54,7 +55,7 @@ public class RemoteCheckinView extends VerticalLayout {
             final var remoteUser = user.get();
 
             final var checksToday = this.checkService.fetchInDetailsToday();
-            final Grid<CheckDetails> checkinGrid = checkDetailsGrid(checksToday);
+            final Grid<CheckDetails> checksGrid = checkDetailsGrid(checksToday);
 
             final var locationLayout = new VerticalLayout();
             locationLayout.setMargin(false);
@@ -71,7 +72,7 @@ public class RemoteCheckinView extends VerticalLayout {
 
             final var reader = qrScanner();
             reader.addValueChangeListener(
-                    scannedQRCode -> checkInUser(remoteUser, checkinGrid, scannedQRCode.getValue(),
+                    scannedQRCode -> checkInUser(remoteUser, checksGrid, scannedQRCode.getValue(),
                             geoLocation.getValue().getLatitude(), geoLocation.getValue().getLongitude()));
 
             leftLayout.add(reader, locationLayout);
@@ -81,7 +82,7 @@ public class RemoteCheckinView extends VerticalLayout {
             rightLayout.setPadding(false);
             rightLayout.setSpacing(false);
 
-            rightLayout.add(checkinGrid);
+            rightLayout.add(checksGrid);
 
             splitLayout.add(leftLayout, rightLayout);
 
@@ -96,7 +97,7 @@ public class RemoteCheckinView extends VerticalLayout {
         final var reader = new ZXingVaadinReader();
         reader.setFrom(Constants.From.camera);
         reader.setId("video"); // id needs to be 'video' if From.camera.
-        reader.setStyle("object-fit: cover; width:400px; height:100vh; max-height:500px");
+        reader.setStyle("object-fit: cover; width:400px; height:90vh; max-height:400px");
         return reader;
     }
 
@@ -130,7 +131,7 @@ public class RemoteCheckinView extends VerticalLayout {
     }
 
     private void checkInUser(final User organizer, final Grid<CheckDetails> attendeesGrid,
-                             final String scannedQRCode, final Double lat, final Double lon) {
+            final String scannedQRCode, final Double lat, final Double lon) {
 
         final var oAttendee = this.userService.findByUsername(scannedQRCode);
 
@@ -138,8 +139,7 @@ public class RemoteCheckinView extends VerticalLayout {
 
             final var attendee = oAttendee.get();
 
-            final var hasCheckedInBefore =
-                    this.checkService.fetchByDate(Date.valueOf(LocalDate.now()), scannedQRCode);
+            final var hasCheckedInBefore = this.checkService.fetchByDate(Date.valueOf(LocalDate.now()), scannedQRCode);
 
             if (hasCheckedInBefore.isEmpty()) {
                 final var checkEntity = new Check()
@@ -155,8 +155,7 @@ public class RemoteCheckinView extends VerticalLayout {
 
                 final var check = this.checkService.createCheck(checkEntity);
 
-                final var oEvent =
-                        this.checkService.fetchByAttendeeIdAndCheckId(attendee.getId(), check.getId(), "IN");
+                final var oEvent = this.checkService.fetchByAttendeeIdAndCheckId(attendee.getId(), check.getId(), "IN");
 
                 final var eventBeingEdited = new Object() {
                     Event data = null;
@@ -182,34 +181,35 @@ public class RemoteCheckinView extends VerticalLayout {
                 final var savedOrUpdatedEvent = this.checkService.createEvent(eventBeingEdited.data);
 
                 final var foundUser = this.userService.findUserById(savedOrUpdatedEvent.getAttendeeId());
-                if (foundUser.isPresent()) attendeesGrid.setItems(checkService.fetchInDetailsToday());
+                if (foundUser.isPresent())
+                    attendeesGrid.setItems(checkService.fetchInDetailsToday());
 
                 Notification.show(
-                                attendee.getFirstName()
-                                        + " "
-                                        + attendee.getLastName()
-                                        + " heeft ingecheckt "
-                                        + "."
-                                        + "Verantwoordelijk: "
-                                        + organizer.getFirstName()
-                                        + " "
-                                        + organizer.getLastName(),
-                                4000,
-                                Notification.Position.BOTTOM_CENTER)
+                        attendee.getFirstName()
+                                + " "
+                                + attendee.getLastName()
+                                + " heeft ingecheckt "
+                                + "."
+                                + "Verantwoordelijk: "
+                                + organizer.getFirstName()
+                                + " "
+                                + organizer.getLastName(),
+                        4000,
+                        Notification.Position.BOTTOM_CENTER)
                         .open();
             } else {
                 Notification.show(
-                                (scannedQRCode + " heeft vroeger al gecheckt."),
-                                4000,
-                                Notification.Position.BOTTOM_CENTER)
+                        (scannedQRCode + " heeft vroeger al gecheckt."),
+                        4000,
+                        Notification.Position.BOTTOM_CENTER)
                         .open();
             }
 
         } else {
             Notification.show(
-                            (scannedQRCode + " is GEEN valid QR-code."),
-                            4000,
-                            Notification.Position.BOTTOM_CENTER)
+                    (scannedQRCode + " is GEEN valid QR-code."),
+                    4000,
+                    Notification.Position.BOTTOM_CENTER)
                     .open();
         }
     }

@@ -1,34 +1,31 @@
-package it.vkod.views;
+package it.vkod.views.desktop;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.NotFoundException;
-import com.vaadin.flow.router.RouteParam;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 
 import it.vkod.services.flow.AuthenticationService;
 
-public class TemplateLayout extends AppLayout {
+public class DesktopAppLayout extends AppLayout {
 
     private final AuthenticationService authService;
 
-    public TemplateLayout(AuthenticationService authService) {
+    public DesktopAppLayout(AuthenticationService authService) {
 
         this.authService = authService;
 
@@ -62,7 +59,7 @@ public class TemplateLayout extends AppLayout {
                 new Tab(new Button("Aanmelden", onClick -> {
                     VaadinSession.getCurrent().getSession().invalidate();
                     try {
-                        UI.getCurrent().navigate(LoginView.class);
+                        UI.getCurrent().navigate(DesktopLoginView.class);
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
@@ -71,18 +68,18 @@ public class TemplateLayout extends AppLayout {
 
         );
 
-        tabs.add(createTab("In/Out", oUser.isPresent() ? CheckView.class : RemoteCheckinView.class));
+        tabs.add(createTab("In/Out", oUser.isPresent() ? DesktopCheckView.class : DesktopRemoteCheckinView.class));
 
         if (oUser.isPresent()) {
 
             final var user = oUser.get();
 
             if (user.getRoles().contains("TEACHER") || user.getRoles().contains("MANAGER")) {
-                createTab("Manager", CheckSafeView.class);
+                createTab("Manager", DesktopCheckSafeView.class);
             }
 
             if (user.getRoles().contains("ADMIN")) {
-                tabs.add(createTab("Admin", AdminView.class));
+                tabs.add(createTab("Admin", DesktopAdminView.class));
             }
 
         }
@@ -92,7 +89,7 @@ public class TemplateLayout extends AppLayout {
                 new Tab(new Button("In", onClick -> {
                     VaadinSession.getCurrent().getSession().invalidate();
                     try {
-                        UI.getCurrent().navigate(LoginView.class, new RouteParameters("userID", "123"));
+                        UI.getCurrent().navigate(DesktopLoginView.class, new RouteParameters("userID", "123"));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
