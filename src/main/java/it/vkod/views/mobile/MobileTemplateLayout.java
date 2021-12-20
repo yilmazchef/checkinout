@@ -117,9 +117,7 @@ public class MobileTemplateLayout extends AppLayout {
 
         }
 
-        tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL, TabsVariant.LUMO_EQUAL_WIDTH_TABS);
-
-        final var logoutButton = new Button("Logout");
+        final var logoutButton = new Button(VaadinIcon.CLOSE.create());
         logoutButton.getStyle()
                 .set("position", "absolute")
                 .set("right", "0").set("top", "0");
@@ -135,7 +133,10 @@ public class MobileTemplateLayout extends AppLayout {
 
         });
 
-        addToNavbar(true, tabs, logoutButton);
+        tabs.add(logoutButton);
+
+        tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL, TabsVariant.LUMO_EQUAL_WIDTH_TABS);
+        addToNavbar(true, tabs);
 
     }
 
