@@ -83,6 +83,13 @@ public class MobileCheckView extends VerticalLayout {
         setPadding(false);
         setSpacing(false);
 
+        final var user = this.authenticationService.get();
+
+        if (user.isPresent()) {
+            initializeScannerLayoutWithDialog(sessionService.getTrainingCode(), sessionService.getCheckType(),
+                    user.get());
+        }
+
     }
 
     private void initializeScannerLayout(final String training, final CheckType type, final User organizer) {
@@ -354,16 +361,6 @@ public class MobileCheckView extends VerticalLayout {
         final var notification = Notification.show(message, 3000, Position.MIDDLE);
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         notification.open();
-    }
-
-    public void initLayout() {
-
-        final var user = this.authenticationService.get();
-
-        if (user.isPresent()) {
-            initializeScannerLayoutWithDialog(sessionService.getTrainingCode(), sessionService.getCheckType(),
-                    user.get());
-        }
     }
 
     private void initializeScannerLayoutWithDialog(final String training, final String type, final User organizer) {
