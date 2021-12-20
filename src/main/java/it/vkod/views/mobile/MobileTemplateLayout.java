@@ -17,16 +17,24 @@ import com.vaadin.flow.router.RouteParameters;
 import it.vkod.models.http.CheckType;
 import it.vkod.models.http.TrainingCode;
 import it.vkod.services.flow.AuthenticationService;
+import it.vkod.services.flow.SessionService;
+import lombok.Getter;
 
 public class MobileTemplateLayout extends AppLayout {
 
     private final AuthenticationService authService;
+    private final SessionService sessionService;
 
-    public MobileTemplateLayout(AuthenticationService authService) {
+    private final Tabs tabs = new Tabs();
+    private final Tab inTab = new Tab();
+    private final Tab outTab = new Tab();
+    private final Tab managerTab = new Tab();
+    private final Tab adminTab = new Tab();
+
+    public MobileTemplateLayout(AuthenticationService authService, SessionService sessionService) {
 
         this.authService = authService;
-
-        final var tabs = new Tabs();
+        this.sessionService = sessionService;
 
         final var oUser = this.authService.get();
         final var inButton = new Button(VaadinIcon.SIGN_IN_ALT.create());
@@ -42,40 +50,30 @@ public class MobileTemplateLayout extends AppLayout {
                     || user.getRoles().contains("ADMIN")) {
                 inButton.addClickListener(onClick -> {
                     try {
-                        RouteParam typeParam = new RouteParam(CheckType.IN.getName(), CheckType.IN.getValue());
-                        RouteParam trainingParam = new RouteParam(TrainingCode.QUERY.getName(),
-                                user.getCurrentTraining());
-
-                        inButton.getUI().ifPresent(ui -> ui.navigate(
-                                MobileCheckView.class,
-                                new RouteParameters(typeParam, trainingParam)));
+                        sessionService.setCheckType("IN");
+                        sessionService.setTrainingCode(user.getCurrentTraining());
+                        inButton.getUI().ifPresent(ui -> ui.navigate(MobileCheckView.class));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
                 });
-                Tab inTab = new Tab(inButton);
                 inTab.getStyle().set("background-color", "green");
+                inTab.add(inButton);
                 tabs.add(inTab);
             }
 
             if (user.getRoles().contains("MANAGER")) {
                 managerButton.addClickListener(onClick -> {
                     try {
-                        RouteParam typeParam = new RouteParam(CheckType.IN.getName(), CheckType.IN.getValue());
-                        RouteParam trainingParam = new RouteParam(TrainingCode.QUERY.getName(),
-                                user.getCurrentTraining());
-
-                        managerButton.getUI().ifPresent(ui -> ui.navigate(
-                                MobileCheckSafeView.class,
-                                new RouteParameters(typeParam, trainingParam)));
-
+                        managerButton.getUI().ifPresent(ui -> ui.navigate(MobileCheckSafeView.class));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
                 });
-                tabs.add(new Tab(managerButton));
+                managerTab.add(managerButton);
+                tabs.add(managerTab);
             }
 
             if (user.getRoles().contains("ADMIN")) {
@@ -87,28 +85,24 @@ public class MobileTemplateLayout extends AppLayout {
                     }
 
                 });
-                tabs.add(new Tab(adminButton));
+                adminTab.add(adminButton);
+                tabs.add(adminTab);
             }
 
             if (user.getRoles().contains("TEACHER") || user.getRoles().contains("MANAGER")
                     || user.getRoles().contains("ADMIN")) {
                 outButton.addClickListener(onClick -> {
                     try {
-                        RouteParam typeParam = new RouteParam(CheckType.IN.getName(), CheckType.IN.getValue());
-                        RouteParam trainingParam = new RouteParam(TrainingCode.QUERY.getName(),
-                                user.getCurrentTraining());
-
-                        outButton.getUI().ifPresent(ui -> ui.navigate(
-                                MobileCheckView.class,
-                                new RouteParameters(typeParam, trainingParam)));
-
+                        sessionService.setCheckType("OUT");
+                        sessionService.setTrainingCode(user.getCurrentTraining());
+                        outButton.getUI().ifPresent(ui -> ui.navigate(MobileCheckView.class));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
                 });
-                Tab outTab = new Tab(outButton);
                 outTab.getStyle().set("background-color", "red");
+                outTab.add(outButton);
                 tabs.add(outTab);
             }
 

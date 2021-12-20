@@ -53,6 +53,7 @@ import it.vkod.models.http.CheckType;
 import it.vkod.models.http.TrainingCode;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
+import it.vkod.services.flow.SessionService;
 import it.vkod.services.flow.UserService;
 import it.vkod.views.LoginView;
 
@@ -60,21 +61,20 @@ import it.vkod.views.LoginView;
 @Route(value = "m", layout = MobileTemplateLayout.class)
 @RouteAlias(value = "mobile/check", layout = MobileTemplateLayout.class)
 @PermitAll
-public class MobileCheckView extends VerticalLayout implements HasUrlParameter<String> {
+public class MobileCheckView extends VerticalLayout {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final CheckService checkService;
-
-    private static final String CHECK_IN = "IN";
-    private static final String CHECK_OUT = "OUT";
+    private final SessionService sessionService;
 
     public MobileCheckView(AuthenticationService authenticationService, UserService userService,
-            CheckService checkService) {
+            CheckService checkService, SessionService sessionService) {
 
         this.authenticationService = authenticationService;
         this.userService = userService;
         this.checkService = checkService;
+        this.sessionService = sessionService;
 
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
@@ -85,7 +85,7 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
 
     }
 
-    private void initializeScannerLayout(final String training, final String type, final User organizer) {
+    private void initializeScannerLayout(final String training, final CheckType type, final User organizer) {
         final var locationLayout = new VerticalLayout();
         locationLayout.setMargin(false);
         locationLayout.setPadding(false);
@@ -111,7 +111,7 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
             };
             final var oAttendee = this.userService.findByUsername(qr.getValue());
 
-            if (oAttendee.isPresent() && type.equalsIgnoreCase(CHECK_IN)) {
+            if (oAttendee.isPresent() && type == CheckType.IN) {
                 checkInUser(oAttendee.get(), coordinates, organizer, training);
                 activeChecks.removeAll();
 
@@ -121,7 +121,7 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
                     activeChecks.add(singleCheckDetails(cd));
                 }
 
-            } else if (oAttendee.isPresent() && type.equalsIgnoreCase(CHECK_OUT)) {
+            } else if (oAttendee.isPresent() && type == CheckType.OUT) {
                 checkOutUser(oAttendee.get(), coordinates, organizer, training);
                 activeChecks.removeAll();
 
@@ -244,7 +244,8 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
 
             final var check = this.checkService.createCheck(checkEntity);
 
-            final var oEvent = this.checkService.fetchByAttendeeIdAndCheckId(attendee.getId(), check.getId(), CHECK_IN);
+            final var oEvent = this.checkService.fetchByAttendeeIdAndCheckId(attendee.getId(), check.getId(),
+                    CheckType.IN.getValue());
             final var eventBeingEdited = new Object() {
                 Event data = null;
             };
@@ -300,7 +301,7 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
                             .setLon(coordinates[1]));
 
             final var oEvent = this.checkService.fetchByAttendeeIdAndCheckId(
-                    attendee.getId(), check.getId(), CHECK_OUT);
+                    attendee.getId(), check.getId(), CheckType.OUT.getValue());
 
             final var eventBeingEdited = new Object() {
                 Event data = null;
@@ -312,14 +313,14 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
                         .setCheckId(check.getId())
                         .setAttendeeId(attendee.getId())
                         .setOrganizerId(organizer.getId())
-                        .setCheckType(CHECK_OUT)
+                        .setCheckType(CheckType.OUT.getValue())
                         .setTraining(training);
             } else {
                 eventBeingEdited.data = new Event()
                         .setCheckId(check.getId())
                         .setAttendeeId(attendee.getId())
                         .setOrganizerId(organizer.getId())
-                        .setCheckType(CHECK_OUT)
+                        .setCheckType(CheckType.OUT.getValue())
                         .setTraining(training);
             }
 
@@ -355,33 +356,13 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
         notification.open();
     }
 
-    @Override
-    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
-
-        final var location = event.getLocation();
-        final var queryParameters = location.getQueryParameters();
-        final Map<String, List<String>> parametersMap = queryParameters.getParameters();
+    public void initLayout() {
 
         final var user = this.authenticationService.get();
 
-        final var types = (List<String>) parametersMap.get(CheckType.IN.getName());
-        final var trainings = (List<String>) parametersMap.get(TrainingCode.QUERY.getName());
-
         if (user.isPresent()) {
-
-            final String typeParam = (types != null && !types.isEmpty()) ? types.get(0) : CheckType.IN.getValue();
-
-            final String trainingParam;
-
-            if (trainings != null && !trainings.isEmpty()) {
-                trainingParam = trainings.get(0);
-                initializeScannerLayout(trainingParam, typeParam, user.get());
-
-            } else {
-                trainingParam = user.get().getCurrentTraining();
-                initializeScannerLayoutWithDialog(trainingParam, typeParam, user.get());
-            }
-
+            initializeScannerLayoutWithDialog(sessionService.getTrainingCode(), sessionService.getCheckType(),
+                    user.get());
         }
     }
 
@@ -408,7 +389,7 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
         final var saveButton = new Button("Submit", e -> {
             initializeScannerLayout(
                     !trainingCodeField.getValue().isEmpty() ? trainingCodeField.getValue() : training,
-                    type, organizer);
+                    CheckType.valueOf(type), organizer);
             dialog.close();
             dialogLayout.setVisible(false);
         });
