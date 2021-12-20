@@ -32,6 +32,8 @@ public class MobileTemplateLayout extends AppLayout {
     private final Tab outTab = new Tab();
     private final Tab managerTab = new Tab();
     private final Tab adminTab = new Tab();
+    private final Tab restartTab = new Tab();
+    private final Tab exitTab = new Tab();
 
     public MobileTemplateLayout(AuthenticationService authService, SessionService sessionService) {
 
@@ -39,10 +41,24 @@ public class MobileTemplateLayout extends AppLayout {
         this.sessionService = sessionService;
 
         final var oUser = this.authService.get();
+        final var loginButton = new Button(VaadinIcon.REFRESH.create());
         final var inButton = new Button(VaadinIcon.SIGN_IN_ALT.create());
         final var managerButton = new Button(VaadinIcon.ACADEMY_CAP.create());
         final var adminButton = new Button(VaadinIcon.BRIEFCASE.create());
         final var outButton = new Button(VaadinIcon.SIGN_OUT_ALT.create());
+        final var logoutButton = new Button(VaadinIcon.CLOSE.create());
+
+        loginButton.addClickListener(onClick -> {
+            VaadinSession.getCurrent().getSession().invalidate();
+            this.sessionService.setTrainingCode("");
+            this.sessionService.setCheckType("");
+            try {
+                loginButton.getUI().ifPresent(ui -> ui.navigate("login"));
+            } catch (NotFoundException notFoundEx) {
+                notifyException(notFoundEx).open();
+            }
+
+        });
 
         if (oUser.isPresent()) {
 
@@ -117,10 +133,6 @@ public class MobileTemplateLayout extends AppLayout {
 
         }
 
-        final var logoutButton = new Button(VaadinIcon.CLOSE.create());
-        logoutButton.getStyle()
-                .set("position", "absolute")
-                .set("right", "0").set("top", "0");
         logoutButton.addClickListener(onClick -> {
             VaadinSession.getCurrent().getSession().invalidate();
             this.sessionService.setTrainingCode("");
@@ -133,7 +145,8 @@ public class MobileTemplateLayout extends AppLayout {
 
         });
 
-        tabs.add(logoutButton);
+        exitTab.add(logoutButton);
+        tabs.add(exitTab);
 
         tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL, TabsVariant.LUMO_EQUAL_WIDTH_TABS);
         addToNavbar(true, tabs);
