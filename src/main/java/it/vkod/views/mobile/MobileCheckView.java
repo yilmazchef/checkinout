@@ -86,6 +86,15 @@ public class MobileCheckView extends VerticalLayout {
         final var user = this.authenticationService.get();
 
         if (user.isPresent()) {
+
+            if (this.sessionService.getTrainingCode() == null) {
+                this.sessionService.setTrainingCode(user.get().getCurrentTraining());
+            }
+
+            if (this.sessionService.getCheckType() == null) {
+                this.sessionService.setCheckType(CheckType.IN.getValue());
+            }
+
             initializeScannerLayoutWithDialog(sessionService.getTrainingCode(), sessionService.getCheckType(),
                     user.get());
         }
