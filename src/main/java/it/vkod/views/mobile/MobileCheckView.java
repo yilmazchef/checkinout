@@ -363,8 +363,9 @@ public class MobileCheckView extends VerticalLayout implements HasUrlParameter<S
         final Map<String, List<String>> parametersMap = queryParameters.getParameters();
 
         final var user = this.authenticationService.get();
-        final var types = parametersMap.get(CheckType.IN.getName());
-        final var trainings = parametersMap.get(TrainingCode.QUERY.getName());
+
+        final var types = (List<String>) parametersMap.get(CheckType.IN.getName());
+        final var trainings = (List<String>) parametersMap.get(TrainingCode.QUERY.getName());
 
         if (user.isPresent()) {
 

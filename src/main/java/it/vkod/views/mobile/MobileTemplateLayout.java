@@ -17,8 +17,6 @@ import com.vaadin.flow.router.RouteParameters;
 import it.vkod.models.http.CheckType;
 import it.vkod.models.http.TrainingCode;
 import it.vkod.services.flow.AuthenticationService;
-import it.vkod.views.AdminView;
-import it.vkod.views.CheckSafeView;
 
 public class MobileTemplateLayout extends AppLayout {
 
@@ -31,65 +29,88 @@ public class MobileTemplateLayout extends AppLayout {
         final var tabs = new Tabs();
 
         final var oUser = this.authService.get();
+        final var inButton = new Button(VaadinIcon.SIGN_IN_ALT.create());
+        final var managerButton = new Button(VaadinIcon.ACADEMY_CAP.create());
+        final var adminButton = new Button(VaadinIcon.BRIEFCASE.create());
+        final var outButton = new Button(VaadinIcon.SIGN_OUT_ALT.create());
 
         if (oUser.isPresent()) {
 
             final var user = oUser.get();
 
             if (user.getRoles().contains("TEACHER") || user.getRoles().contains("MANAGER")
-                    || user.getRoles().contains("ADMIN"))
-                tabs.add(new Tab(new Button(VaadinIcon.SIGN_IN_ALT.create(), onClick -> {
+                    || user.getRoles().contains("ADMIN")) {
+                inButton.addClickListener(onClick -> {
                     try {
                         RouteParam typeParam = new RouteParam(CheckType.IN.getName(), CheckType.IN.getValue());
                         RouteParam trainingParam = new RouteParam(TrainingCode.QUERY.getName(),
                                 user.getCurrentTraining());
-                        UI.getCurrent().navigate(MobileCheckView.class,
-                                new RouteParameters(typeParam, trainingParam));
+
+                        inButton.getUI().ifPresent(ui -> ui.navigate(
+                                MobileCheckView.class,
+                                new RouteParameters(typeParam, trainingParam)));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
-                })));
+                });
+                Tab inTab = new Tab(inButton);
+                inTab.getStyle().set("background-color", "green");
+                tabs.add(inTab);
+            }
 
-            if (user.getRoles().contains("MANAGER"))
-                tabs.add(new Tab(new Button(VaadinIcon.ACADEMY_CAP.create(), onClick -> {
+            if (user.getRoles().contains("MANAGER")) {
+                managerButton.addClickListener(onClick -> {
                     try {
                         RouteParam typeParam = new RouteParam(CheckType.IN.getName(), CheckType.IN.getValue());
                         RouteParam trainingParam = new RouteParam(TrainingCode.QUERY.getName(),
                                 user.getCurrentTraining());
-                        UI.getCurrent().navigate(MobileCheckSafeView.class,
-                                new RouteParameters(typeParam, trainingParam));
+
+                        managerButton.getUI().ifPresent(ui -> ui.navigate(
+                                MobileCheckSafeView.class,
+                                new RouteParameters(typeParam, trainingParam)));
+
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
-                })));
+                });
+                tabs.add(new Tab(managerButton));
+            }
 
             if (user.getRoles().contains("ADMIN")) {
-                tabs.add(new Tab(new Button(VaadinIcon.BRIEFCASE.create(), onClick -> {
+                adminButton.addClickListener(onClick -> {
                     try {
-                        UI.getCurrent().navigate(MobileAdminView.class);
+                        adminButton.getUI().ifPresent(ui -> ui.navigate(MobileAdminView.class));
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
-                })));
+                });
+                tabs.add(new Tab(adminButton));
             }
 
             if (user.getRoles().contains("TEACHER") || user.getRoles().contains("MANAGER")
-                    || user.getRoles().contains("ADMIN"))
-                tabs.add(new Tab(new Button(VaadinIcon.SIGN_OUT_ALT.create(), onClick -> {
+                    || user.getRoles().contains("ADMIN")) {
+                outButton.addClickListener(onClick -> {
                     try {
-                        RouteParam typeParam = new RouteParam(CheckType.OUT.getName(), CheckType.OUT.getValue());
+                        RouteParam typeParam = new RouteParam(CheckType.IN.getName(), CheckType.IN.getValue());
                         RouteParam trainingParam = new RouteParam(TrainingCode.QUERY.getName(),
                                 user.getCurrentTraining());
-                        UI.getCurrent().navigate(MobileCheckView.class,
-                                new RouteParameters(typeParam, trainingParam));
+
+                        outButton.getUI().ifPresent(ui -> ui.navigate(
+                                MobileCheckView.class,
+                                new RouteParameters(typeParam, trainingParam)));
+
                     } catch (NotFoundException notFoundEx) {
                         notifyException(notFoundEx).open();
                     }
 
-                })));
+                });
+                Tab outTab = new Tab(outButton);
+                outTab.getStyle().set("background-color", "red");
+                tabs.add(outTab);
+            }
 
         }
 
