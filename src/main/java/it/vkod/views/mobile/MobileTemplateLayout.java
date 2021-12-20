@@ -41,7 +41,7 @@ public class MobileTemplateLayout extends AppLayout {
         this.sessionService = sessionService;
 
         final var oUser = this.authService.get();
-        final var loginButton = new Button(VaadinIcon.REFRESH.create());
+        final var loginButton = new Button(VaadinIcon.DASHBOARD.create());
         final var inButton = new Button(VaadinIcon.SIGN_IN_ALT.create());
         final var managerButton = new Button(VaadinIcon.ACADEMY_CAP.create());
         final var adminButton = new Button(VaadinIcon.BRIEFCASE.create());
@@ -60,7 +60,7 @@ public class MobileTemplateLayout extends AppLayout {
 
         });
 
-        restartTab.add(logoutButton);
+        restartTab.add(loginButton);
         tabs.add(restartTab);
 
         if (oUser.isPresent()) {
