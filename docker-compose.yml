@@ -4,11 +4,13 @@ services:
 
   checkinout-db:
     image: mysql:latest
+    restart: unless-stopped
     networks:
       - checknet
     ports:
-      - "3306:3306"
+      - "3333:3306"
     environment:
+      - MYSQL_DATABASE=checkinout_prod
       - MYSQL_ROOT_PASSWORD=pass
       - TZ=Europe/Brussels
     command:
@@ -27,13 +29,12 @@ services:
     networks:
       - checknet
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://checkinout-db:3306/checkinoutdb
+      SPRING_DATASOURCE_URL: jdbc:mysql://checkinout-db:3306/checkinoutdb_prod
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: pass
     ports:
-      - "443:8443"
+      - "8888:8443"
 
 networks:
   checknet:
     attachable: true
-    enable_ipv6: true
