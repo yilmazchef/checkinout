@@ -10,10 +10,17 @@
     <packaging>jar</packaging>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <vaadin.version>21.0.3</vaadin.version>
         <spring.boot.version>2.5.6</spring.boot.version>
+        <spring-boot.build-image.imageName>$DOCKER_USER_NAME$/${parent.artifactId}-${project.artifactId}</spring-boot.build-image.imageName>
+        <mysql.host>localhost</mysql.host>
+        <mysql.port>3306</mysql.port>
+        <mysql.database>checkinout_prod</mysql.database>
+        <mysql.user>root</mysql.user>
+        <mysql.pass>P@ssw0rd</mysql.pass>
     </properties>
 
     <developers>
@@ -266,6 +273,8 @@
 
     <build>
 
+        <finalName>${project.artifactId}</finalName>
+
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
             <plugin>
@@ -319,6 +328,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pdf-plugin</artifactId>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>pdf</id>
@@ -347,6 +357,7 @@
 
             <build>
                 <plugins>
+
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>vaadin-maven-plugin</artifactId>
@@ -364,6 +375,108 @@
                             <pnpmEnable>false</pnpmEnable>
                         </configuration>
                     </plugin>
+
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>sql-maven-plugin</artifactId>
+                        <version>1.5</version>
+
+                        <dependencies>
+                            <dependency>
+                                <groupId>mysql</groupId>
+                                <artifactId>mysql-connector-java</artifactId>
+                                <version>8.0.27</version>
+                            </dependency>
+                        </dependencies>
+
+                        <configuration>
+                            <driver>com.mysql.jdbc.Driver</driver>
+                            <url>jdbc:mysql://${mysql.host}:${mysql.port}??useUnicode=TRUE&amp;characterEncoding=UTF-8&amp;useSSL=FALSE&amp;allowPublicKeyRetrieval=TRUE&amp;createDatabaseIfNotExist=TRUE;</url>
+                            <username>${mysql.user}</username>
+                            <password>${mysql.pass}</password>
+                            <settingsKey>sensibleKey</settingsKey>
+                            <!--all executions are ignored if -Dmaven.test.skip=true-->
+                            <skip>${maven.test.skip}</skip>
+                        </configuration>
+
+                        <executions>
+                            <execution>
+                                <id>drop-db-before-test-if-any</id>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <url>jdbc:mysql://${mysql.host}:${mysql.port}?useSSL=false&amp;createDatabaseIfNotExist=TRUE;</url>
+                                    <autocommit>true</autocommit>
+                                    <sqlCommand>create table if not exists ${mysql.database}.checks
+                                        (
+                                        
+                                            id              bigint auto_increment primary key,
+                                            checked_on      date         not null,
+                                            checked_in_at   time         not null,
+                                            checked_out_at  time         null,
+                                            current_session varchar(255) null,
+                                            is_active       bit          not null default 1,
+                                            lat             float        null,
+                                            lon             float        null,
+                                            valid_location  bit          not null default 0,
+                                            pincode         int          null,
+                                            qrcode          varchar(255) not null
+                                        
+                                        ) charset = utf8;
+                                        
+                                        create table if not exists ${mysql.database}.users
+                                        (
+                                        
+                                            id               bigint auto_increment primary key,
+                                            first_name       varchar(255)                   null,
+                                            last_name        varchar(255)                   null,
+                                            username         varchar(255)                   not null,
+                                            email            varchar(255)                   not null,
+                                            phone            varchar(255)                   null,
+                                            hashed_password  varchar(255)                   not null,
+                                            profile          longtext                       null,
+                                            registered_on    date                           null,
+                                            registered_at    time                           null,
+                                            updated_at       time                           null,
+                                            roles            varchar(100) default 'STUDENT' null,
+                                            current_training varchar(100)                   null,
+                                        
+                                            constraint email unique (email),
+                                            constraint phone unique (phone),
+                                            constraint username unique (username)
+                                        
+                                        ) charset = utf8;
+                                        
+                                        create table if not exists ${mysql.database}.events
+                                        (
+                                        
+                                            id           bigint auto_increment primary key,
+                                            check_id     bigint             not null,
+                                            attendee_id  bigint             not null,
+                                            organizer_id bigint             null,
+                                            check_type   enum ('IN', 'OUT') not null,
+                                            training     varchar(100)       not null,
+                                        
+                                            constraint check_to_attendee_fk
+                                                foreign key (check_id) references checks (id),
+                                        
+                                            constraint user_to_attendee_fk
+                                                foreign key (attendee_id) references users (id),
+                                        
+                                            constraint user_to_organizer_fk
+                                                foreign key (organizer_id) references users (id)
+                                        
+                                        ) charset = utf8;
+                                        
+                                    </sqlCommand>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
                 </plugins>
             </build>
 
