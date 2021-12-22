@@ -41,7 +41,7 @@ public class MobileLayout extends AppLayout {
 			sessionService.setCheckType( "" );
 
 			try {
-				loginButton.getUI().ifPresent( ui -> ui.navigate( "login" ) );
+				loginButton.getUI().ifPresent( ui -> ui.navigate( LoginView.class ) );
 			} catch ( NotFoundException notFoundEx ) {
 				NotificationUtils.error( notFoundEx.getMessage() ).open();
 			}

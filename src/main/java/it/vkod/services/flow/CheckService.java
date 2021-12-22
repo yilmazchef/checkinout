@@ -1,7 +1,6 @@
 package it.vkod.services.flow;
 
 
-import com.grum.geocalc.BoundingArea;
 import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
@@ -58,14 +57,14 @@ public class CheckService {
 		final var oAttendee = userRepository.findByUsername( checkEntity.getAttendee().getUsername() );
 		final var oOrganizer = authenticationService.get();
 
-		Coordinate lat = Coordinate.fromDegrees( checkEntity.getLat() );
-		Coordinate lng = Coordinate.fromDegrees( checkEntity.getLon() );
-		Point userLocation = Point.at( lat, lng );
+		final var lat = Coordinate.fromDegrees( checkEntity.getLat() );
+		final var lng = Coordinate.fromDegrees( checkEntity.getLon() );
+		final var userLocation = Point.at( lat, lng );
 
 		final var intecLat = Coordinate.fromDegrees( 50.8426647248452 );
 		final var intecLon = Coordinate.fromDegrees( 4.346442528782073 );
 		final var intecLoc = Point.at( intecLat, intecLon );
-		BoundingArea area = EarthCalc.gcd.around( intecLoc, 10 );
+		final var area = EarthCalc.gcd.around( intecLoc, 10 );
 
 		final var validLocation = area.contains( userLocation );
 

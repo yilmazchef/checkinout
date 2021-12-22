@@ -110,13 +110,11 @@
             <groupId>com.vaadin</groupId>
             <!-- Replace artifactId with vaadin-core to use only free components -->
             <artifactId>vaadin-core</artifactId>
-            <version>22.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
-            <version>22.0.1</version>
         </dependency>
 
         <dependency>
@@ -155,7 +153,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
-            <version>22.0.1</version>
         </dependency>
 
         <!-- Include JUnit 4 support for TestBench and others -->
@@ -177,12 +174,6 @@
             <artifactId>webdrivermanager</artifactId>
             <version>5.0.2</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.javafaker</groupId>
-            <artifactId>javafaker</artifactId>
-            <version>1.0.2</version>
         </dependency>
 
         <dependency>

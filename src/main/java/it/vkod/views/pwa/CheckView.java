@@ -12,7 +12,6 @@ import it.vkod.models.entities.Check;
 import it.vkod.models.entities.CheckType;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
-import it.vkod.services.flow.SessionService;
 import it.vkod.services.flow.UserService;
 import it.vkod.views.components.CheckedUserLayout;
 import it.vkod.views.components.NotificationUtils;
@@ -35,7 +34,7 @@ import java.util.Random;
 public class CheckView extends VerticalLayout {
 
 	public CheckView( @Autowired AuthenticationService authService, @Autowired UserService userService,
-	                  @Autowired CheckService checkService, @Autowired SessionService sessionService ) {
+	                  @Autowired CheckService checkService ) {
 
 		final var location = new GeoLocation();
 		location.setWatch( true );
@@ -50,36 +49,45 @@ public class CheckView extends VerticalLayout {
 		scanner.setStyle( "object-fit: cover; width:95vw; height: 95vh; max-width:400px;" );
 		add( scanner );
 
-		authService.get()
-				.ifPresent( organizer -> scanner.addValueChangeListener( onScan -> {
-					final var check = checkService.create( new Check()
-							.setOrganizer( organizer )
-							.setAttendee( userService.getByUsername( onScan.getValue() ) )
-							.setActive( true )
-							.setCheckedOn( Date.valueOf( LocalDate.now() ) )
-							.setCheckedInAt( Time.valueOf( LocalTime.now() ) )
-							.setCheckedOutAt( Time.valueOf( LocalTime.now() ) )
-							.setCourse( organizer.getCourse() )
-							.setLat( location.getValue().getLatitude() )
-							.setLon( location.getValue().getLongitude() )
-							.setPin( new Random().nextInt( 8999 ) + 1000 )
-							.setSession( VaadinSession.getCurrent().getSession().getId() )
-							.setValidLocation( true )
-							.setType( CheckType.PHYSICAL_IN )
-					);
 
-					final var checkLayout = new CheckedUserLayout( check );
-					add( checkLayout );
+		final var authUser = authService.get();
 
-					NotificationUtils.success(
-							check.getAttendee().getFirstName()
-									+ " "
-									+ check.getAttendee().getLastName()
-									+ ( check.getType() == CheckType.PHYSICAL_IN ? " heeft ingecheckt " : " heeft uitgecheckt" )
-									+ "."
-					).open();
+		if ( authUser.isEmpty() ) {
+			NotificationUtils.error( "The user is not authorized to view this page!" ).open();
+		} else {
+			final var organizer = authUser.get();
 
-				} ) );
+			scanner.addValueChangeListener( onScan -> {
+				final var check = checkService.create( new Check()
+						.setOrganizer( organizer )
+						.setAttendee( userService.getByUsername( onScan.getValue() ) )
+						.setActive( true )
+						.setCheckedOn( Date.valueOf( LocalDate.now() ) )
+						.setCheckedInAt( Time.valueOf( LocalTime.now() ) )
+						.setCheckedOutAt( Time.valueOf( LocalTime.now() ) )
+						.setCourse( organizer.getCourse() )
+						.setLat( location.getValue().getLatitude() )
+						.setLon( location.getValue().getLongitude() )
+						.setPin( new Random().nextInt( 8999 ) + 1000 )
+						.setSession( VaadinSession.getCurrent().getSession().getId() )
+						.setValidLocation( true )
+						.setType( CheckType.PHYSICAL_IN )
+				);
+
+				final var checkLayout = new CheckedUserLayout( check );
+				add( checkLayout );
+
+				NotificationUtils.success(
+						check.getAttendee().getFirstName()
+								+ " "
+								+ check.getAttendee().getLastName()
+								+ ( check.getType() == CheckType.PHYSICAL_IN ? " heeft ingecheckt " : " heeft uitgecheckt" )
+								+ "."
+				).open();
+
+			} );
+		}
+
 
 	}
 
