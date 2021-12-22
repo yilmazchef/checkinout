@@ -5,8 +5,8 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import it.vkod.models.dto.CheckDetails;
-import it.vkod.models.entity.User;
+import it.vkod.models.entities.Check;
+import it.vkod.models.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import java.util.List;
 @Component
 public class PDFExporter {
 
-    public void export(HttpServletResponse response, List<CheckDetails> data, User user) throws IOException {
+    public void export( HttpServletResponse response, List< Check > checks) throws IOException {
 
         final var document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
@@ -55,12 +55,13 @@ public class PDFExporter {
         table.setSpacingAfter(100F);
 
         writeTableHeader(table);
-        writeTableData(table, data);
+        writeTableData(table, checks);
 
         document.add(table);
 
-        final var name = user.getFirstName() + " " + user.getLastName();
-        final var email = user.getEmail();
+        final var organizer = checks.get(0).getOrganizer();
+        final var name = organizer.getFirstName() + " " + organizer.getLastName();
+        final var email = organizer.getEmail();
 
         final var pi = "Met vriendelijke groeten,\n" +
                 "\n" +
@@ -119,15 +120,15 @@ public class PDFExporter {
         table.addCell(cell);
     }
 
-    private void writeTableData(PdfPTable table, List<CheckDetails> data) {
+    private void writeTableData(PdfPTable table, List<Check> checks) {
 
         final var cFont = FontFactory.getFont(FontFactory.TIMES_ROMAN);
         cFont.setSize(10F);
 
-        for (CheckDetails check : data) {
-            table.addCell(new Phrase(check.getLastName(), cFont));
-            table.addCell(new Phrase(check.getFirstName(), cFont));
-            table.addCell(new Phrase(check.getEmail(), cFont));
+        for (Check check : checks) {
+            table.addCell(new Phrase(check.getAttendee().getLastName(), cFont));
+            table.addCell(new Phrase(check.getAttendee().getFirstName(), cFont));
+            table.addCell(new Phrase(check.getAttendee().getEmail(), cFont));
             table.addCell(new Phrase(check.getCheckedOn().toString(), cFont));
             table.addCell(new Phrase(check.getCheckedInAt().toString(), cFont));
             table.addCell(new Phrase(check.getCheckedOutAt().toString(), cFont));

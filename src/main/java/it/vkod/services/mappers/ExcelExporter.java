@@ -1,7 +1,6 @@
 package it.vkod.services.mappers;
 
-
-import it.vkod.models.dto.CheckDetails;
+import it.vkod.models.entities.Check;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -67,7 +66,7 @@ public class ExcelExporter {
         cell.setCellStyle(style);
     }
 
-    private void writeDataLines(List<CheckDetails> data) {
+    private void writeDataLines(List< Check > checks) {
 
         int rowCount = 1;
 
@@ -77,23 +76,23 @@ public class ExcelExporter {
 
         style.setFont(font);
 
-        for (CheckDetails cd : data) {
+        for (Check check : checks) {
             Row row = sheet.createRow(rowCount++);
             int columnCount = 0;
 
-            createCell(row, columnCount++, cd.getLastName(), style);
-            createCell(row, columnCount++, cd.getFirstName(), style);
-            createCell(row, columnCount++, cd.getEmail(), style);
-            createCell(row, columnCount++, cd.getCheckedOn(), style);
-            createCell(row, columnCount++, cd.getCheckedInAt(), style);
-            createCell(row, columnCount++, cd.getCheckedOutAt(), style);
+            createCell(row, columnCount++, check.getAttendee().getLastName(), style);
+            createCell(row, columnCount++, check.getAttendee().getFirstName(), style);
+            createCell(row, columnCount++, check.getAttendee().getEmail(), style);
+            createCell(row, columnCount++, check.getCheckedOn(), style);
+            createCell(row, columnCount++, check.getCheckedInAt(), style);
+            createCell(row, columnCount++, check.getCheckedOutAt(), style);
 
         }
     }
 
-    public void export(HttpServletResponse response, List<CheckDetails> data) throws IOException {
+    public void export(HttpServletResponse response, List<Check> checks) throws IOException {
         writeHeaderLine();
-        writeDataLines(data);
+        writeDataLines(checks);
 
         ServletOutputStream outputStream = response.getOutputStream();
         workbook.write(outputStream);

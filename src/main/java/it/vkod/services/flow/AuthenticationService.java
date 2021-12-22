@@ -4,7 +4,7 @@ package it.vkod.services.flow;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 import it.vkod.configs.SecurityConfiguration;
-import it.vkod.models.entity.User;
+import it.vkod.models.entities.User;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -31,7 +31,7 @@ public class AuthenticationService {
     }
 
 
-    public Optional<User> get() {
+    public Optional< User > get() {
 
         return getAuthentication().map(authentication -> userRepository.getByUsername(authentication.getName()));
     }

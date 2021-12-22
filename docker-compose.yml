@@ -29,7 +29,7 @@ services:
     networks:
       - checknet
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://checkinout-db:3306/checkinoutdb_prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://checkinout-db:3306/checkinout_prod
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: pass
     ports:

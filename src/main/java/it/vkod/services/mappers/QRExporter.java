@@ -1,5 +1,6 @@
 package it.vkod.services.mappers;
 
+
 import com.google.zxing.WriterException;
 import com.lowagie.text.Document;
 import com.lowagie.text.Image;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Component
@@ -20,7 +22,7 @@ public class QRExporter {
 
     private final AuthenticationService authenticationService;
 
-    public void export(HttpServletResponse response, String... usernames) throws IOException, WriterException {
+    public void export(HttpServletResponse response, Set<String> usernames) throws IOException, WriterException {
 
         final var oOrganizer = authenticationService.get();
 

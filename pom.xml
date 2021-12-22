@@ -5,7 +5,7 @@
 
     <groupId>it.vkod</groupId>
     <artifactId>checkinout</artifactId>
-    <name>Project base for Spring Boot and Vaadin Flow</name>
+    <name>Aanmeldingssysteem voor Intec Brussel</name>
     <version>1.0</version>
     <packaging>jar</packaging>
 
@@ -14,12 +14,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <vaadin.version>21.0.3</vaadin.version>
-        <spring.boot.version>2.5.6</spring.boot.version>
-        <mysql.host>localhost</mysql.host>
-        <mysql.port>3306</mysql.port>
-        <mysql.database>checkinout_prod</mysql.database>
-        <mysql.user>root</mysql.user>
-        <mysql.pass>P@ssw0rd</mysql.pass>
+        <spring.boot.version>2.6.1</spring.boot.version>
     </properties>
 
     <developers>
@@ -106,19 +101,28 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.vaadin</groupId>
             <!-- Replace artifactId with vaadin-core to use only free components -->
             <artifactId>vaadin-core</artifactId>
+            <version>22.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
+            <version>22.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <version>2.6.1</version>
         </dependency>
 
         <dependency>
@@ -130,36 +134,35 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jdbc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+            <version>2.6.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
+            <version>2.6.1</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <version>2.6.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
-            <scope>test</scope>
+            <version>22.0.1</version>
         </dependency>
 
         <!-- Include JUnit 4 support for TestBench and others -->
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
+            <version>5.8.2</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -185,7 +188,7 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
+            <version>2.4.0-b180830.0359</version>
         </dependency>
 
         <dependency>
@@ -227,7 +230,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.2</version>
+            <version>5.5.2</version>
         </dependency>
 
         <dependency>
@@ -260,12 +263,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.27</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flowingcode.vaadin.addons</groupId>
-            <artifactId>twincolgrid</artifactId>
-            <version>2.5.0</version>
         </dependency>
 
     </dependencies>
@@ -330,7 +327,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pdf-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>1.5.1</version>
                 <executions>
                     <execution>
                         <id>pdf</id>
@@ -376,107 +373,6 @@
                             <productionMode>true</productionMode>
                             <pnpmEnable>false</pnpmEnable>
                         </configuration>
-                    </plugin>
-
-
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>sql-maven-plugin</artifactId>
-                        <version>1.5</version>
-
-                        <dependencies>
-                            <dependency>
-                                <groupId>mysql</groupId>
-                                <artifactId>mysql-connector-java</artifactId>
-                                <version>8.0.27</version>
-                            </dependency>
-                        </dependencies>
-
-                        <configuration>
-                            <driver>com.mysql.jdbc.Driver</driver>
-                            <url>jdbc:mysql://${mysql.host}:${mysql.port}??useUnicode=TRUE&amp;characterEncoding=UTF-8&amp;useSSL=FALSE&amp;allowPublicKeyRetrieval=TRUE&amp;</url>
-                            <username>${mysql.user}</username>
-                            <password>${mysql.pass}</password>
-                            <settingsKey>sensibleKey</settingsKey>
-                            <!--all executions are ignored if -Dmaven.test.skip=true-->
-                            <skip>${maven.test.skip}</skip>
-                        </configuration>
-
-                        <executions>
-                            <execution>
-                                <id>drop-db-before-test-if-any</id>
-                                <phase>process-test-resources</phase>
-                                <goals>
-                                    <goal>execute</goal>
-                                </goals>
-                                <configuration>
-                                    <url>jdbc:mysql://${mysql.host}:${mysql.port}?useSSL=false&amp;</url>
-                                    <autocommit>true</autocommit>
-                                    <sqlCommand>create table if not exists ${mysql.database}.checks
-                                        (
-                                        
-                                            id              bigint auto_increment primary key,
-                                            checked_on      date         not null,
-                                            checked_in_at   time         not null,
-                                            checked_out_at  time         null,
-                                            current_session varchar(255) null,
-                                            is_active       bit          not null default 1,
-                                            lat             float        null,
-                                            lon             float        null,
-                                            valid_location  bit          not null default 0,
-                                            pincode         int          null,
-                                            qrcode          varchar(255) not null
-                                        
-                                        ) charset = utf8;
-                                        
-                                        create table if not exists ${mysql.database}.users
-                                        (
-                                        
-                                            id               bigint auto_increment primary key,
-                                            first_name       varchar(255)                   null,
-                                            last_name        varchar(255)                   null,
-                                            username         varchar(255)                   not null,
-                                            email            varchar(255)                   not null,
-                                            phone            varchar(255)                   null,
-                                            hashed_password  varchar(255)                   not null,
-                                            profile          longtext                       null,
-                                            registered_on    date                           null,
-                                            registered_at    time                           null,
-                                            updated_at       time                           null,
-                                            roles            varchar(100) default 'STUDENT' null,
-                                            current_training varchar(100)                   null,
-                                        
-                                            constraint email unique (email),
-                                            constraint phone unique (phone),
-                                            constraint username unique (username)
-                                        
-                                        ) charset = utf8;
-                                        
-                                        create table if not exists ${mysql.database}.events
-                                        (
-                                        
-                                            id           bigint auto_increment primary key,
-                                            check_id     bigint             not null,
-                                            attendee_id  bigint             not null,
-                                            organizer_id bigint             null,
-                                            check_type   enum ('IN', 'OUT') not null,
-                                            training     varchar(100)       not null,
-                                        
-                                            constraint check_to_attendee_fk
-                                                foreign key (check_id) references checks (id),
-                                        
-                                            constraint user_to_attendee_fk
-                                                foreign key (attendee_id) references users (id),
-                                        
-                                            constraint user_to_organizer_fk
-                                                foreign key (organizer_id) references users (id)
-                                        
-                                        ) charset = utf8;
-                                        
-                                    </sqlCommand>
-                                </configuration>
-                            </execution>
-                        </executions>
                     </plugin>
 
                 </plugins>

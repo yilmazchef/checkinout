@@ -1,50 +1,30 @@
 package it.vkod.repositories;
 
-import it.vkod.models.dto.CheckDetails;
-import it.vkod.models.entity.Check;
-import org.springframework.data.jdbc.repository.query.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
+import it.vkod.models.entities.Check;
+import it.vkod.models.entities.CheckType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import javax.validation.constraints.NotEmpty;
 import java.sql.Date;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-@Repository
-public interface CheckRepository extends CrudRepository<Check, Long> {
+public interface CheckRepository extends JpaRepository< Check, Long >, JpaSpecificationExecutor< Check > {
 
-        List<Check> findByCheckedOn(final Date checkedOn);
+	List< Check > findAllByActiveAndCheckedOn( final Boolean active, final Date checkedOn );
 
-        @Query("SELECT * FROM checks WHERE checked_on = CURRENT_DATE")
-        List<Check> findByCheckedOnToday();
+	Optional< Check > findByActiveAndCheckedOnAndAttendee_Username( final Boolean active, final Date checkedOn, final @NotEmpty String username );
 
-        Optional<Check> findByCheckedOnAndQrcode(final Date checkedOn, final String qrcode);
+	List< Check > findAllByActiveAndCheckedOnAndTypeIsIn( final Boolean active, final Date checkedOn, final Collection< CheckType > type );
 
-        @Query("SELECT * FROM checks WHERE checked_on = CURRENT_DATE AND qrcode = :qrcode")
-        Optional<Check> findByCheckedOnTodayAndQrcode(@Param("qrcode") final String qrcode);
+	List< Check > findByActiveAndCheckedOnAndTypeIsInAndAttendee_Username( final Boolean active, final Date checkedOn, final Set< CheckType > type, final @NotEmpty String attendee_username );
 
-        @Query("SELECT c.id, u.profile, u.roles, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at, c.checked_out_at FROM checks c INNER JOIN users u ON c.qrcode = u.username WHERE c.checked_on = CURRENT_DATE")
-        List<CheckDetails> findAllChecksOfToday();
+	List< Check > findAllByActiveAndCheckedOnAndOrganizer_Username( final Boolean active, final Date checkedOn, final @NotEmpty String username );
 
-        @Query("SELECT c.id, u.profile, u.roles, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at, c.checked_out_at FROM checks c INNER JOIN users u ON c.qrcode = u.username INNER JOIN events e ON e.check_id = c.id WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'OUT'")
-        List<CheckDetails> findAllCheckoutsOfToday();
-
-        @Query("SELECT c.id, u.profile, u.roles, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at FROM checks c INNER JOIN users u ON c.qrcode = u.username INNER JOIN events e ON e.check_id = c.id WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'IN'")
-        List<CheckDetails> findAllCheckinsOfToday();
-
-        @Query("SELECT c.id, u.profile, u.roles, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at FROM checks c"
-                        +
-                        " INNER JOIN users u ON c.qrcode = u.username" +
-                        " INNER JOIN events e ON e.check_id = c.id" +
-                        " WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'IN' AND u.current_training = :current_training")
-        List<CheckDetails> findAllCheckinsOfToday(@Param("courseId") final String course);
-
-        @Query("SELECT c.id, u.profile, u.roles, u.first_name, u.last_name, u.email, c.checked_on, c.checked_in_at FROM checks c"
-                        +
-                        " INNER JOIN users u ON c.qrcode = u.username" +
-                        " INNER JOIN events e ON e.check_id = c.id" +
-                        " WHERE c.checked_on = CURRENT_DATE AND e.check_type = 'OUT' AND e.course_id = :courseId")
-        List<CheckDetails> findAllCheckoutsOfToday(@Param("courseId") final Long courseId);
+	List< Check > findAllByActiveAndCourse( final Boolean active, final String course );
 
 }

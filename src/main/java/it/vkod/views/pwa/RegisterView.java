@@ -1,4 +1,5 @@
-package it.vkod.views.desktop;
+package it.vkod.views.pwa;
+
 
 import com.google.zxing.WriterException;
 import com.vaadin.flow.component.button.Button;
@@ -15,7 +16,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import it.vkod.models.entity.User;
+import it.vkod.models.entities.User;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
 import org.springframework.mail.MailException;
@@ -33,18 +34,18 @@ import static com.vaadin.flow.component.notification.Notification.show;
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Inschrijven")
-@Route(value = "reg", layout = DesktopAppLayout.class)
-@RouteAlias(value = "register", layout = DesktopAppLayout.class)
+@Route(value = "reg", layout = DesktopLayout.class)
+@RouteAlias(value = "register", layout = DesktopLayout.class)
 @AnonymousAllowed
-public class DesktopRegisterView extends VerticalLayout {
+public class RegisterView extends VerticalLayout {
 
     private final UserService userService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    public DesktopRegisterView(UserService userService,
-            BCryptPasswordEncoder passwordEncoder,
-            EmailService emailService) {
+    public RegisterView( UserService userService,
+                         BCryptPasswordEncoder passwordEncoder,
+                         EmailService emailService) {
 
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -124,7 +125,7 @@ public class DesktopRegisterView extends VerticalLayout {
                         .setLastName(lastNameField.getValue().toLowerCase())
                         .setUsername(usernameField.getValue().toLowerCase())
                         .setEmail(emailField.getValue().toLowerCase())
-                        .setHashedPassword(this.passwordEncoder.encode(passwordField.getValue()))
+                        .setPassword(this.passwordEncoder.encode(passwordField.getValue()))
                         .setPhone(phoneField.getValue())
                         .setRegisteredOn(Date.valueOf(LocalDate.now()))
                         .setRegisteredAt(Time.valueOf(LocalTime.now()))

@@ -1,10 +1,10 @@
 package it.vkod.services.flow;
 
+
 import com.google.zxing.WriterException;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import it.vkod.models.dto.CheckDetails;
-import it.vkod.models.entity.User;
+import it.vkod.models.entities.Check;
 import it.vkod.services.mappers.CSVExporter;
 import it.vkod.services.mappers.ExcelExporter;
 import it.vkod.services.mappers.PDFExporter;
@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -30,16 +31,16 @@ public class ExportService {
     private final CSVExporter csvExporter;
     private final QRExporter qrExporter;
 
-    public void toCSV(HttpServletResponse response, List<CheckDetails> data) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
+    public void toCSV(HttpServletResponse response, List< Check > checks) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
 
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + FILE_NAME + ".csv" + "\"");
 
-        csvExporter.export(response, data);
+        csvExporter.export(response, checks);
 
     }
 
-    public void toPDF(HttpServletResponse response, List<CheckDetails> data, User user) throws IOException {
+    public void toPDF(HttpServletResponse response, List<Check> data) throws IOException {
 
         response.setContentType("application/pdf");
 
@@ -47,11 +48,11 @@ public class ExportService {
         final var headerValue = "attachment; filename=" + FILE_NAME + ".pdf";
         response.setHeader(headerKey, headerValue);
 
-        pdfExporter.export(response, data, user);
+        pdfExporter.export(response, data);
 
     }
 
-    public void toPDF(HttpServletResponse response, String... usernames) throws IOException, WriterException {
+    public void toPDF(HttpServletResponse response, Set<String> usernames) throws IOException, WriterException {
 
         response.setContentType("application/pdf");
 
@@ -63,7 +64,7 @@ public class ExportService {
 
     }
 
-    public void toExcel(HttpServletResponse response, List<CheckDetails> data) throws IOException {
+    public void toExcel(HttpServletResponse response, List<Check> data) throws IOException {
         response.setContentType("application/octet-stream");
 
         final var headerKey = "Content-Disposition";

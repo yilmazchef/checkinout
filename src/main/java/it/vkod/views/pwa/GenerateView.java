@@ -1,4 +1,4 @@
-package it.vkod.views.desktop;
+package it.vkod.views.pwa;
 
 import com.google.zxing.WriterException;
 import com.vaadin.flow.component.UI;
@@ -24,15 +24,15 @@ import java.io.IOException;
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Genereer QR")
-@Route(value = "gen", layout = DesktopAppLayout.class)
-@RouteAlias(value = "generate", layout = DesktopAppLayout.class)
+@Route(value = "gen", layout = DesktopLayout.class)
+@RouteAlias(value = "generate", layout = DesktopLayout.class)
 @AnonymousAllowed
-public class DesktopGenerateView extends VerticalLayout {
+public class GenerateView extends VerticalLayout {
 
     private final UserService userService;
     private final String whatsappRedirectUrl = "https://api.whatsapp.com/send?phone=";
 
-    public DesktopGenerateView(UserService userService) {
+    public GenerateView( UserService userService) {
 
         this.userService = userService;
 

@@ -18,7 +18,7 @@ spring:
   jpa:
     defer-datasource-initialization: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
@@ -32,9 +32,9 @@ spring:
         enabled: true
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/checkinoutdb_prod}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/checkinout_prod}
     username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:pass}
+    password: ${SPRING_DATASOURCE_PASSWORD:P@ssw0rd}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   security:

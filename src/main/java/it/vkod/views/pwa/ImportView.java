@@ -1,4 +1,4 @@
-package it.vkod.views.desktop;
+package it.vkod.views.pwa;
 
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderBuilder;
@@ -19,13 +19,13 @@ import java.io.InputStreamReader;
 import java.util.stream.IntStream;
 
 @PageTitle("Importeer CSV")
-@Route(value = "icsv", layout = DesktopAppLayout.class)
-@RouteAlias(value = "import/csv", layout = DesktopAppLayout.class)
-public class DesktopImportView extends VerticalLayout {
+@Route(value = "icsv", layout = DesktopLayout.class)
+@RouteAlias(value = "import/csv", layout = DesktopLayout.class)
+public class ImportView extends VerticalLayout {
 
     private final Grid<String[]> grid = new Grid<>();
 
-    public DesktopImportView() {
+    public ImportView() {
 
         final var buffer = new MemoryBuffer();
         final var upload = new Upload(buffer);
