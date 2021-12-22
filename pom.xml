@@ -15,7 +15,6 @@
         <maven.compiler.target>11</maven.compiler.target>
         <vaadin.version>21.0.3</vaadin.version>
         <spring.boot.version>2.5.6</spring.boot.version>
-        <spring-boot.build-image.imageName>$DOCKER_USER_NAME$/${parent.artifactId}-${project.artifactId}</spring-boot.build-image.imageName>
         <mysql.host>localhost</mysql.host>
         <mysql.port>3306</mysql.port>
         <mysql.database>checkinout_prod</mysql.database>
@@ -285,6 +284,9 @@
                 <!-- Clean build and startup time for Vaadin apps sometimes may exceed
                      the default Spring Boot's 30sec timeout.  -->
                 <configuration>
+                    <image>
+                        <name>docker.io/yilmazchef/${project.artifactId}:latest</name>
+                    </image>
                     <wait>1000</wait>
                     <maxAttempts>240</maxAttempts>
                 </configuration>
