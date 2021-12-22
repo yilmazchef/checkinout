@@ -392,7 +392,7 @@
 
                         <configuration>
                             <driver>com.mysql.jdbc.Driver</driver>
-                            <url>jdbc:mysql://${mysql.host}:${mysql.port}??useUnicode=TRUE&amp;characterEncoding=UTF-8&amp;useSSL=FALSE&amp;allowPublicKeyRetrieval=TRUE&amp;createDatabaseIfNotExist=TRUE;</url>
+                            <url>jdbc:mysql://${mysql.host}:${mysql.port}??useUnicode=TRUE&amp;characterEncoding=UTF-8&amp;useSSL=FALSE&amp;allowPublicKeyRetrieval=TRUE&amp;</url>
                             <username>${mysql.user}</username>
                             <password>${mysql.pass}</password>
                             <settingsKey>sensibleKey</settingsKey>
@@ -408,7 +408,7 @@
                                     <goal>execute</goal>
                                 </goals>
                                 <configuration>
-                                    <url>jdbc:mysql://${mysql.host}:${mysql.port}?useSSL=false&amp;createDatabaseIfNotExist=TRUE;</url>
+                                    <url>jdbc:mysql://${mysql.host}:${mysql.port}?useSSL=false&amp;</url>
                                     <autocommit>true</autocommit>
                                     <sqlCommand>create table if not exists ${mysql.database}.checks
                                         (
