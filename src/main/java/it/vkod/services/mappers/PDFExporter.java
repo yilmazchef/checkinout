@@ -1,28 +1,34 @@
 package it.vkod.services.mappers;
 
+import java.awt.Color;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.FontFactory;
 import com.lowagie.text.Image;
-import com.lowagie.text.*;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import it.vkod.models.entities.Check;
-import it.vkod.models.entities.User;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
-import javax.servlet.http.HttpServletResponse;
-import java.awt.*;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
+import it.vkod.models.entities.Check;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
 public class PDFExporter {
 
-    public void export( HttpServletResponse response, List< Check > checks) throws IOException {
+    public void export(HttpServletResponse response, List<Check> checks) throws IOException {
 
         final var document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
@@ -50,7 +56,7 @@ public class PDFExporter {
 
         final var table = new PdfPTable(6);
         table.setWidthPercentage(100f);
-        table.setWidths(new float[]{2.5f, 2.5f, 4.5f, 2f, 1.5f, 1.5f});
+        table.setWidths(new float[] { 2.5f, 2.5f, 4.5f, 2f, 1.5f, 1.5f });
         table.setSpacingBefore(50F);
         table.setSpacingAfter(100F);
 

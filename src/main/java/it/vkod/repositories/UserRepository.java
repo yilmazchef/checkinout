@@ -1,15 +1,15 @@
 package it.vkod.repositories;
 
 
-import it.vkod.models.entities.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.query.Param;
-
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
+import javax.validation.constraints.NotEmpty;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import it.vkod.models.entities.User;
 
 public interface UserRepository extends JpaRepository< User, Long >, JpaSpecificationExecutor< User > {
 
