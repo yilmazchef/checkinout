@@ -1,0 +1,3 @@
+java -jar packr-all.jar --platform lin64 --jdk %JAVA_HOME% --useZgcIfSupportedOs --executable installs/lin --classpath target/checkinout.jar --mainclass it.vkod.Application --vmargs Xmx1G --resources src/main/resources --output lin && ^
+java -jar packr-all.jar --platform mac64 --jdk %JAVA_HOME% --useZgcIfSupportedOs --executable installs/mac --classpath target/checkinout.jar --mainclass it.vkod.Application --vmargs Xmx2G --resources src/main/resources --output mac && ^
+java -jar packr-all.jar --platform win64 --jdk %JAVA_HOME% --useZgcIfSupportedOs --executable installs/win --classpath target/checkinout.jar --mainclass it.vkod.Application --vmargs Xmx2G --resources src/main/resources --output win
