@@ -19,7 +19,10 @@ error-screenshots/
 webpack.generated.js
 /.vscode/
 /.mysql/
+.idea/
+.jpb/
 /data/
 lin/
 win/
 mac/
+node_modules/
