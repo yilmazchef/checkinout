@@ -275,6 +275,7 @@
                     <image>
                         <name>docker.io/yilmazchef/${project.artifactId}:latest</name>
                     </image>
+                    <executable>true</executable>
                     <wait>1000</wait>
                     <maxAttempts>240</maxAttempts>
                 </configuration>
