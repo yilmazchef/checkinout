@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>Persistence</ID>
+  <OriginalElement>JavaeeElement:/42592909/entityManagerFactory/checkinout/jpa/JPA/PersistenceModel</OriginalElement>
+  <nodes>
+    <node x="0.0" y="11.0">Check#file://C:/Users/intec/.projects/checkinout/src/main/java/it/vkod/models/entities/Check.java</node>
+    <node x="299.65517241379314" y="0.0">User#file://C:/Users/intec/.projects/checkinout/src/main/java/it/vkod/models/entities/User.java</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="Check#file://C:/Users/intec/.projects/checkinout/src/main/java/it/vkod/models/entities/Check.java" target="User#file://C:/Users/intec/.projects/checkinout/src/main/java/it/vkod/models/entities/User.java" relationship="RELATION">
+      <point x="80.0" y="0.0" />
+      <point x="-70.5" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="0.8499999999999999" showDependencies="false" x="170.65314401622715" y="242.43610547667348" />
+  <SelectedNodes>
+    <node>Check#file://C:/Users/intec/.projects/checkinout/src/main/java/it/vkod/models/entities/Check.java</node>
+    <node>User#file://C:/Users/intec/.projects/checkinout/src/main/java/it/vkod/models/entities/User.java</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Embeddables</Category>
+    <Category>Properties</Category>
+  </Categories>
+</Diagram>
+

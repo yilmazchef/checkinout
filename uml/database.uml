@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>0b74d6b4-f294-4cec-8d36-333a4fb1c167.TABLE:checkinout_prod.checks</OriginalElement>
+  <nodes>
+    <node x="0.0" y="0.0">0b74d6b4-f294-4cec-8d36-333a4fb1c167.TABLE:checkinout_prod.checks</node>
+    <node x="334.1724137931035" y="11.0">0b74d6b4-f294-4cec-8d36-333a4fb1c167.TABLE:checkinout_prod.users</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="0b74d6b4-f294-4cec-8d36-333a4fb1c167.TABLE:checkinout_prod.checks" target="0b74d6b4-f294-4cec-8d36-333a4fb1c167.TABLE:checkinout_prod.users" relationship="REFERENCES">
+      <point x="73.4655172413793" y="162.32758620689657" />
+      <point x="-59.5517241379311" y="-147.3275862068965" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="1.2999999999999996" showDependencies="false" x="292.15384615384625" y="174.85347841813348" />
+  <SelectedNodes>
+    <node>0b74d6b4-f294-4cec-8d36-333a4fb1c167.TABLE:checkinout_prod.checks</node>
+    <node>0b74d6b4-f294-4cec-8d36-333a4fb1c167.TABLE:checkinout_prod.users</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Columns</Category>
+    <Category>Comments</Category>
+    <Category>Key columns</Category>
+    <Category>Virtual foreign keys</Category>
+  </Categories>
+</Diagram>
+

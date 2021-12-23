@@ -45,24 +45,24 @@ public class RecordUtils {
 				createManagerRecord( "pearl.de.smet", profileImg2, "Pearl", "De Smet" );
 				createManagerRecord( "cindy.pipeleers", profileImg1, "Cindy", "Pipeleers" );
 
-				createTeacherRecord( "yilmaz.mustafa", profileImg2, "Yilmaz", "Mustafa", "Java Jun 21" );
-				createTeacherRecord( "patrick.geudens", profileImg1, "Patrick", "Geudens", "Java Sep 20" );
-				createTeacherRecord( "atilla.balin", profileImg2, "Atilla", "Balin", "Frontend Jan 21" );
-				createTeacherRecord( "manuel.cogneau", profileImg1, "Manuel", "Cogneau", "Java Jan 21" );
-				createTeacherRecord( "benedikt.lantsoght", profileImg2, "Benedikt", "Lantsoght", "Frontend Jun 21" );
-				createTeacherRecord( "kenan.kurda", profileImg2, "Kenan", "Kurda", "C# Jan 21" );
-				createTeacherRecord( "alexander.keisse", profileImg1, "Alexander", "Keisse", "Java Sep 21" );
-				createTeacherRecord( "quinten.declerck", profileImg2, "Quinten", "De Clerck", "C# Jun 21" );
+				createTeacherRecord( "yilmaz.mustafa", profileImg2, "Yilmaz", "Mustafa", "JavaJun21" );
+				createTeacherRecord( "patrick.geudens", profileImg1, "Patrick", "Geudens", "JavaSep20" );
+				createTeacherRecord( "atilla.balin", profileImg2, "Atilla", "Balin", "FrontendJan21" );
+				createTeacherRecord( "manuel.cogneau", profileImg1, "Manuel", "Cogneau", "JavaJan21" );
+				createTeacherRecord( "benedikt.lantsoght", profileImg2, "Benedikt", "Lantsoght", "FrontendJun21" );
+				createTeacherRecord( "kenan.kurda", profileImg2, "Kenan", "Kurda", "CSharpJan21" );
+				createTeacherRecord( "alexander.keisse", profileImg1, "Alexander", "Keisse", "JavaSep21" );
+				createTeacherRecord( "quinten.declerck", profileImg2, "Quinten", "De Clerck", "CSharpJun21" );
 
-				createStudentRecord( "hilal.demir", profileImg1, "Hilal", "Demir", "Java Jun 21" );
-				createStudentRecord( "ahmed.faqiri", profileImg2, "Ahmed", "Faqiri", "Java Jun 21" );
-				createStudentRecord( "alexandru.tudorache", profileImg1, "Alexandru", "Tudorache", "Java Jun 21" );
-				createStudentRecord( "sameerun.acchukatla", profileImg2, "Sameerun", "Acchukatla", "Java Jun 21" );
-				createStudentRecord( "rahime.yildiz", profileImg1, "Rahime", "Yildiz", "Java Jun 21" );
-				createStudentRecord( "sinan.hubeyb.cam", profileImg2, "Sinan", "Hubeyb Cam", "Java Jun 21" );
-				createStudentRecord( "joey.de.kort", profileImg1, "Joey", "De Kort", "Java Jun 21" );
-				createStudentRecord( "irina.afanassenko", profileImg2, "Irina", "Afanassenko", "Java Jun 21" );
-				createStudentRecord( "ali.jamal.alwasseti", profileImg2, "Ali Jamal", "Alwasseti", "Java Jun 21" );
+				createStudentRecord( "hilal.demir", profileImg1, "Hilal", "Demir", "JavaJun21" );
+				createStudentRecord( "ahmed.faqiri", profileImg2, "Ahmed", "Faqiri", "JavaJun21" );
+				createStudentRecord( "alexandru.tudorache", profileImg1, "Alexandru", "Tudorache", "JavaJun21" );
+				createStudentRecord( "sameerun.acchukatla", profileImg2, "Sameerun", "Acchukatla", "JavaJun21" );
+				createStudentRecord( "rahime.yildiz", profileImg1, "Rahime", "Yildiz", "JavaJun21" );
+				createStudentRecord( "sinan.hubeyb.cam", profileImg2, "Sinan", "Hubeyb Cam", "JavaJun21" );
+				createStudentRecord( "joey.de.kort", profileImg1, "Joey", "De Kort", "JavaJun21" );
+				createStudentRecord( "irina.afanassenko", profileImg2, "Irina", "Afanassenko", "JavaJun21" );
+				createStudentRecord( "ali.jamal.alwasseti", profileImg2, "Ali Jamal", "Alwasseti", "JavaJun21" );
 
 			}
 
