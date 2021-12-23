@@ -20,4 +20,6 @@ webpack.generated.js
 /.vscode/
 /.mysql/
 /data/
-installs/
+lin/
+win/
+mac/
