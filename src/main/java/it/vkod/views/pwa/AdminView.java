@@ -1,93 +1,68 @@
 package it.vkod.views.pwa;
 
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.KeyDownEvent;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.RouteConfiguration;
 import it.vkod.services.flow.AdminService;
+import it.vkod.services.flow.AuthenticationService;
 import it.vkod.views.components.EmbeddedPdfDocument;
-import lombok.SneakyThrows;
+import it.vkod.views.components.NotificationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.security.RolesAllowed;
-import java.util.concurrent.atomic.AtomicLong;
 
-import static it.vkod.api.ExportController.*;
-
-@PageTitle( "System Admin - Full Access" )
-@Route( value = "adm", layout = DesktopLayout.class )
-@RouteAlias( value = "m/adm", layout = MobileLayout.class )
-@RouteAlias( value = "admin", layout = DesktopLayout.class )
-@RouteAlias( value = "mobile/admin", layout = MobileLayout.class )
-@RolesAllowed( { "ADMIN", "MANAGER", "LEADER" } )
+@PageTitle( "Administratie" )
+@Route( value = "admin", layout = DesktopLayout.class )
+@RouteAlias( value = "m/admin", layout = MobileLayout.class )
+@RolesAllowed( { "ADMIN", "MANAGER", "LEADER", "TEACHER" } )
 public class AdminView extends VerticalLayout {
 
-	@SneakyThrows
-	public AdminView( @Autowired AdminService adminService ) {
 
-		final var courseField = new TextField( "Voer hier de course-code in: " );
-		courseField.setRequired( true );
-		courseField.setRequiredIndicatorVisible( true );
+	public AdminView( @Autowired AuthenticationService authService, @Autowired AdminService adminService ) {
 
-		final var env = System.getenv( "hostname" );
-		final var hostname = env.contains( "localhost" )
-				? env.replaceFirst( "/null", "" )
-				: "https://checkinout.intecbrussel.be";
+		final var authUser = authService.get();
 
-		Notification.show( "The app is running on " + hostname, 5000, Notification.Position.TOP_CENTER ).open();
+		if ( authUser.isEmpty() ) {
+			NotificationUtils.error( "The active user is not authorized!" ).open();
+		} else {
+			final var courseField = new TextField( "Voer hier de course-code in: " );
+			courseField.setRequired( true );
+			courseField.setRequiredIndicatorVisible( true );
+			courseField.addKeyDownListener( com.vaadin.flow.component.Key.ENTER,
+					( ComponentEventListener< KeyDownEvent > ) keyDownEvent -> {
+						final var actionLayout = new HorizontalLayout();
+						final var route = RouteConfiguration.forSessionScope().getUrl( CheckView.class );
 
-		final var managementLayout = new VerticalLayout();
+						final String PDF = route + "/api/v1/export/checks/pdf/" + courseField.getValue();
+						final String CSV = route + "/api/v1/export/checks/pdf/" + courseField.getValue();
+						final String XLS = route + "/api/v1/export/checks/pdf/" + courseField.getValue();
+						final String USERS = route + "/api/v1/export/users/pdf/" + courseField.getValue();
 
-		final AtomicLong deleteCounter = new AtomicLong();
-		final var flushButton = new Button( "Flush Database", onClick -> {
-			final var flushLayout = new VerticalLayout();
-			final var confirmationDialog = new Dialog();
-			confirmationDialog.setCloseOnEsc( true );
-			confirmationDialog.setOpened( true );
-			final var info = new H4( "Please confirm database flush operation?" );
-			flushLayout.add( info );
-			final var confirmationLayout = new HorizontalLayout();
-			final var yesButton = new Button( "Yes", yesClicked -> {
-				long deletedCount = adminService.flushDatabase();
-				deleteCounter.set( deletedCount );
-				confirmationDialog.close();
-			} );
-			final var noButton = new Button( "No", noClicked -> {
-				deleteCounter.lazySet( 0 );
-				confirmationDialog.close();
-			} );
+						final var pdfAnchor = new Anchor( PDF, "Druk als PDF" );
+						final var csvAnchor = new Anchor( CSV, "Druk als CSV" );
+						final var excelAnchor = new Anchor( XLS, "Druk als EXCEL" );
 
-			confirmationLayout.add( yesButton, noButton );
-			flushLayout.add( confirmationLayout );
-			confirmationDialog.add( confirmationLayout );
+						final var viewerLayout = new VerticalLayout();
+						viewerLayout.add( new EmbeddedPdfDocument( USERS ) );
 
-			add( flushLayout );
+						actionLayout.add( pdfAnchor, csvAnchor, excelAnchor );
 
-		} );
+						add( actionLayout, viewerLayout );
 
-		managementLayout.add( flushButton );
+					} );
 
-		final var actionLayout = new VerticalLayout();
 
-		Anchor pdfAnchor = new Anchor( hostname + EXPORT_USERS_PDF_URI + courseField.getValue(), "Exporteer als PDF" );
-		Anchor csvAnchor = new Anchor( hostname + EXPORT_CHECKS_CSV_URI + courseField.getValue(), "Exporteer als CSV" );
-		Anchor excelAnchor = new Anchor( hostname + EXPORT_CHECKS_EXCEL_URI + courseField.getValue(), "Exporteer als PDF" );
+			add( courseField );
+		}
 
-		actionLayout.add( pdfAnchor, csvAnchor, excelAnchor );
-
-		final var viewerLayout = new VerticalLayout();
-
-		viewerLayout.add( new EmbeddedPdfDocument( hostname + EXPORT_USERS_PDF_URI ) );
-
-		add( managementLayout, actionLayout, viewerLayout );
 
 	}
 

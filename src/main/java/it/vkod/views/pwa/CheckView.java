@@ -46,48 +46,54 @@ public class CheckView extends VerticalLayout {
 		final var scanner = new ZXingVaadinReader();
 		scanner.setFrom( Constants.From.camera );
 		scanner.setId( "video" ); // id needs to be 'video' if From.camera.
-		scanner.setStyle( "object-fit: cover; width:95vw; height: 95vh; max-width:400px;" );
+		scanner.setStyle( "object-fit: cover; width:auto; height: 60vh; max-width:96vw;" );
 		add( scanner );
 
-
 		final var authUser = authService.get();
+		if ( authUser.isPresent() ) {
 
-		if ( authUser.isEmpty() ) {
-			NotificationUtils.error( "The user is not authorized to view this page!" ).open();
-		} else {
 			final var organizer = authUser.get();
+			final var userRoles = organizer.getRoles();
+			final var userAuthorized = ( userRoles.contains( "TEACHER" ) || userRoles.contains( "MANAGER" ) || userRoles.contains( "ADMIN" ) );
 
-			scanner.addValueChangeListener( onScan -> {
-				final var check = checkService.create( new Check()
-						.setOrganizer( organizer )
-						.setAttendee( userService.getByUsername( onScan.getValue() ) )
-						.setActive( true )
-						.setCheckedOn( Date.valueOf( LocalDate.now() ) )
-						.setCheckedInAt( Time.valueOf( LocalTime.now() ) )
-						.setCheckedOutAt( Time.valueOf( LocalTime.now() ) )
-						.setCourse( organizer.getCourse() )
-						.setLat( location.getValue().getLatitude() )
-						.setLon( location.getValue().getLongitude() )
-						.setPin( new Random().nextInt( 8999 ) + 1000 )
-						.setSession( VaadinSession.getCurrent().getSession().getId() )
-						.setValidLocation( true )
-						.setType( CheckType.PHYSICAL_IN )
-				);
+			if ( !userAuthorized ) {
+				NotificationUtils.error( "The user is not authorized to view this page!" ).open();
+			} else {
 
-				final var checkLayout = new CheckedUserLayout( check );
-				add( checkLayout );
+				scanner.addValueChangeListener( onScan -> {
+					final var check = checkService.create( new Check()
+							.setOrganizer( organizer )
+							.setAttendee( userService.getByUsername( onScan.getValue() ) )
+							.setActive( true )
+							.setCheckedOn( Date.valueOf( LocalDate.now() ) )
+							.setCheckedInAt( Time.valueOf( LocalTime.now() ) )
+							.setCheckedOutAt( Time.valueOf( LocalTime.now() ) )
+							.setCourse( organizer.getCourse() )
+							.setLat( location.getValue().getLatitude() )
+							.setLon( location.getValue().getLongitude() )
+							.setPin( new Random().nextInt( 8999 ) + 1000 )
+							.setSession( VaadinSession.getCurrent().getSession().getId() )
+							.setValidLocation( true )
+							.setType( CheckType.PHYSICAL_IN )
+					);
 
-				NotificationUtils.success(
-						check.getAttendee().getFirstName()
-								+ " "
-								+ check.getAttendee().getLastName()
-								+ ( check.getType() == CheckType.PHYSICAL_IN ? " heeft ingecheckt " : " heeft uitgecheckt" )
-								+ "."
-				).open();
+					final var checkLayout = new CheckedUserLayout( check );
+					add( checkLayout );
 
-			} );
+					NotificationUtils.success(
+							check.getAttendee().getFirstName()
+									+ " "
+									+ check.getAttendee().getLastName()
+									+ ( check.getType() == CheckType.PHYSICAL_IN ? " heeft ingecheckt " : " heeft uitgecheckt" )
+									+ "."
+					).open();
+
+				} );
+			}
+
+		} else {
+			NotificationUtils.error( "The user NOT found!" ).open();
 		}
-
 
 	}
 
