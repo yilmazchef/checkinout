@@ -8,10 +8,10 @@ services:
     networks:
       - checknet
     ports:
-      - "3333:3306"
+      - "3443:3306"
     environment:
       - MYSQL_DATABASE=checkinout_prod
-      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_ROOT_PASSWORD=P@ssw0rd
       - TZ=Europe/Brussels
     command:
       [
@@ -31,9 +31,9 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://checkinout-db:3306/checkinout_prod
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: pass
+      SPRING_DATASOURCE_PASSWORD: P@ssw0rd
     ports:
-      - "8888:8443"
+      - "443:8443"
 
 networks:
   checknet:
