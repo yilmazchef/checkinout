@@ -15,6 +15,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <vaadin.version>21.0.3</vaadin.version>
         <spring.boot.version>2.6.1</spring.boot.version>
+        <start-class>it.vkod.Application</start-class>
     </properties>
 
     <developers>
@@ -299,41 +300,6 @@
                 </executions>
             </plugin>
 
-            <!-- display active profile in compile phase -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-help-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>show-profiles</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>active-profiles</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Generate PDF from the documentation -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pdf-plugin</artifactId>
-                <version>1.5.1</version>
-                <executions>
-                    <execution>
-                        <id>pdf</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>pdf</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
-                            <includeReports>false</includeReports>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
         </plugins>
     </build>
