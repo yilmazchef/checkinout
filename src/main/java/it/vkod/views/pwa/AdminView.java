@@ -41,10 +41,10 @@ public class AdminView extends VerticalLayout {
 						final var actionLayout = new HorizontalLayout();
 						final var route = RouteConfiguration.forSessionScope().getUrl( CheckView.class );
 
-						final String PDF = route + "/api/v1/export/checks/pdf/" + courseField.getValue();
-						final String CSV = route + "/api/v1/export/checks/pdf/" + courseField.getValue();
-						final String XLS = route + "/api/v1/export/checks/pdf/" + courseField.getValue();
-						final String USERS = route + "/api/v1/export/users/pdf/" + courseField.getValue();
+						final String PDF = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
+						final String CSV = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
+						final String XLS = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
+						final String USERS = route + "/api/v1/export/users/pdf/" + courseField.getValue().replaceAll(" ", "%20");
 
 						final var pdfAnchor = new Anchor( PDF, "Druk als PDF" );
 						final var csvAnchor = new Anchor( CSV, "Druk als CSV" );
