@@ -670,3 +670,33 @@ View layers inside container image (Ensure dive tool is installed):
 ```
 dive <image ID or image tag>
 ```
+
+
+## Github Actions 
+
+  
+
+## [](https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-maven#publishing-packages-to-github-packages)Publishing packages to GitHub Packages
+
+Each time you create a new release, you can trigger a workflow to publish your package. The workflow in the example below runs when the `release` event triggers with type `created`. The workflow publishes the package to GitHub Packages if CI tests pass. For more information on the `release` event, see "[Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)."
+
+In this workflow, you can use the `setup-java` action. This action installs the given version of the JDK into the `PATH`, and also sets up a Maven _settings.xml_ for publishing the package to GitHub Packages. The generated _settings.xml_ defines authentication for a server with an `id` of `github`, using the `GITHUB_ACTOR` environment variable as the username and the `GITHUB_TOKEN` environment variable as the password. The `GITHUB_TOKEN` environment variable is assigned the value of the special `GITHUB_TOKEN` secret.
+
+The `GITHUB_TOKEN` secret is set to an access token for the repository each time a job in a workflow begins. You should set the permissions for this access token in the workflow file to grant read access for the `contents` scope and write access for the `packages` scope. For more information, see "[Authenticating with the GITHUB\_TOKEN](https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token)."
+
+For a Maven-based project, you can make use of these settings by creating a distribution repository in your _pom.xml_ file with an `id` of `github` that points to your GitHub Packages endpoint.
+
+For example, if your organization is named "octocat" and your repository is named "hello-world", then the GitHub Packages configuration in _pom.xml_ would look similar to the below example.
+
+With this configuration, you can create a workflow that publishes your package to GitHub Packages by making use of the automatically generated _settings.xml_.
+
+This workflow performs the following steps:
+
+1.  Checks out a copy of project's repository.
+    
+2.  Sets up the Java JDK, and also automatically configures the Maven _settings.xml_ file to add authentication for the `github` Maven repository to use the `GITHUB_TOKEN` environment variable.
+    
+3.  Runs the `mvn --batch-mode deploy` command to publish to GitHub Packages. The `GITHUB_TOKEN` environment variable will be set with the contents of the `GITHUB_TOKEN` secret. The `permissions` key specifies the access granted to the `GITHUB_TOKEN`.
+    
+    For more information about using secrets in your workflow, see "[Creating and using encrypted secrets](https://docs.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)."
+    
