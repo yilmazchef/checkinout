@@ -1,25 +1,32 @@
 package it.vkod.services.flow;
 
-import java.util.UUID;
 
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
-
-import org.springframework.stereotype.Component;
-
+import it.vkod.models.entities.CheckType;
+import it.vkod.models.entities.User;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.springframework.stereotype.Component;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Component
 @VaadinSessionScope
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults( level = AccessLevel.PRIVATE )
 public class SessionService {
 
-    String uid = UUID.randomUUID().toString();
+	String session = VaadinSession.getCurrent().getSession().getId();
 
-    String checkType;
+	User organizer;
 
-    String trainingCode;
+	Set< User > attendees = new LinkedHashSet<>();
+
+	CheckType type;
+
+	String course;
 
 }

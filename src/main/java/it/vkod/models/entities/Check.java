@@ -1,15 +1,20 @@
 package it.vkod.models.entities;
 
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
-import java.sql.Date;
-import java.sql.Time;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -20,28 +25,37 @@ import java.sql.Time;
 @Entity
 public class Check implements Serializable, Cloneable, Persistable< Long > {
 
+	protected static final String LATITUDE_PATTERN = "^(\\+|-)?(?:90(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\\.[0-9]{1,6})?))$";
+	protected static final String LONGITUDE_PATTERN = "^(\\+|-)?(?:180(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\\.[0-9]{1,6})?))$";
+
+
 	@Id
 	@GeneratedValue( strategy = GenerationType.IDENTITY )
 	Long id;
 
-	Integer pin;
+	@Min( value = 1000 )
+	@Max( 9999 )
+	Integer validation;
 
-	Date checkedOn;
+	@CreationTimestamp
+	ZonedDateTime in;
 
-	Time checkedInAt;
+	@UpdateTimestamp
+	ZonedDateTime out;
 
-	Time checkedOutAt;
-
+	@NotEmpty
+	@Column( unique = true )
 	String session;
 
-	Boolean active;
+	Boolean active = Boolean.TRUE;
 
-	Float lat;
+	@Pattern( regexp = LATITUDE_PATTERN )
+	Float latitude;
 
-	Float lon;
+	@Pattern( regexp = LONGITUDE_PATTERN )
+	Float longitude;
 
-	Boolean validLocation;
-
+	@NotEmpty
 	String course;
 
 	@Enumerated( EnumType.STRING )
@@ -51,49 +65,66 @@ public class Check implements Serializable, Cloneable, Persistable< Long > {
 	@JoinColumn( name = "attendee_id", nullable = false )
 	private User attendee;
 
+
+	public Check setAttendee( @NotNull final User attendee ) {
+
+		attendee.getAttendances().add( this );
+		this.attendee = attendee;
+		return this;
+	}
+
+
 	@ManyToOne( optional = false )
 	@JoinColumn( name = "organizer_id", nullable = false )
 	private User organizer;
 
 
-	public Check setLat( Float lat ) {
+	public Check setOrganizer( @NotNull final User organizer ) {
 
-		this.lat = lat;
+		organizer.getOrganizations().add( this );
+		this.organizer = organizer;
 		return this;
 	}
 
 
-	public Check setLat( Double lat ) {
+	public Check setLatitude( @NotNull Float lat ) {
 
-		this.lat = lat.floatValue();
+		this.latitude = lat;
 		return this;
 	}
 
 
-	public Check setLat( String lat ) {
+	public Check setLat( @NotNull Double lat ) {
 
-		this.lat = Float.parseFloat( lat );
+		this.latitude = lat.floatValue();
 		return this;
 	}
 
 
-	public Check setLon( Float lon ) {
+	public Check setLat( @NotNull String lat ) {
 
-		this.lon = lon;
+		this.latitude = Float.parseFloat( lat );
 		return this;
 	}
 
 
-	public Check setLon( Double lon ) {
+	public Check setLongitude( @NotNull Float lon ) {
 
-		this.lon = lon.floatValue();
+		this.longitude = lon;
 		return this;
 	}
 
 
-	public Check setLon( String lon ) {
+	public Check setLon( @NotNull Double lon ) {
 
-		this.lon = Float.parseFloat( lon );
+		this.longitude = lon.floatValue();
+		return this;
+	}
+
+
+	public Check setLon( @NotNull String lon ) {
+
+		this.longitude = Float.parseFloat( lon );
 		return this;
 	}
 
@@ -111,14 +142,13 @@ public class Check implements Serializable, Cloneable, Persistable< Long > {
 			return ( ( Check ) super.clone() )
 					.setOrganizer( this.getOrganizer() )
 					.setAttendee( this.getAttendee() )
-					.setPin( this.getPin() )
-					.setCheckedOutAt( this.getCheckedOutAt() )
-					.setCheckedInAt( this.getCheckedInAt() )
+					.setValidation( this.getValidation() )
+					.setIn( this.getIn() )
+					.setOut( this.getOut() )
 					.setSession( this.getSession() )
-					.setCheckedOn( this.getCheckedOn() )
 					.setActive( this.getActive() )
-					.setLat( this.getLat() )
-					.setLon( this.getLon() );
+					.setLatitude( this.getLatitude() )
+					.setLongitude( this.getLongitude() );
 
 		} catch ( CloneNotSupportedException e ) {
 			throw new AssertionError();
@@ -129,7 +159,7 @@ public class Check implements Serializable, Cloneable, Persistable< Long > {
 	@Override
 	public String toString() {
 
-		return this.getCheckedOn().toString() + " - " + this.getAttendee().getUsername();
+		return this.getAttendee().getUsername();
 	}
 
 }

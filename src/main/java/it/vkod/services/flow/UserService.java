@@ -37,8 +37,8 @@ public class UserService implements UserDetailsService {
 
 	private static List< GrantedAuthority > getAuthorities( User user ) {
 
-		return Arrays
-				.stream( user.getRoles().split( "," ) )
+		return user.getRoles()
+				.stream()
 				.map( role -> new SimpleGrantedAuthority( "ROLE_" + role ) )
 				.collect( Collectors.toList() );
 

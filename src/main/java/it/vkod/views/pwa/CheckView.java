@@ -2,6 +2,8 @@ package it.vkod.views.pwa;
 
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -10,6 +12,8 @@ import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.models.entities.Check;
 import it.vkod.models.entities.CheckType;
+import it.vkod.models.entities.User;
+import it.vkod.models.entities.UserRole;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
@@ -19,11 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
-import java.sql.Date;
-import java.sql.Time;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @PageTitle( "Inchecken/Uitchecken" )
 @Route( value = "", layout = DesktopLayout.class )
@@ -54,28 +56,20 @@ public class CheckView extends VerticalLayout {
 
 			final var organizer = authUser.get();
 			final var userRoles = organizer.getRoles();
-			final var userAuthorized = ( userRoles.contains( "TEACHER" ) || userRoles.contains( "MANAGER" ) || userRoles.contains( "ADMIN" ) );
+			final var userAuthorized = ( userRoles.stream().anyMatch( role -> ( role == UserRole.MANAGER || role == UserRole.TEACHER ) ) );
 
 			if ( !userAuthorized ) {
-				NotificationUtils.error( "The user is not authorized to view this page!" ).open();
+				NotificationUtils
+						.error( "The " + userRoles.stream().map( Enum::name ).collect(
+								Collectors.joining( " " ) ) + " is not authorized to view this page!" ).open();
 			} else {
 
+				final var type = new RadioButtonGroup< CheckType >();
+				type.setItems( DataProvider.ofItems( CheckType.values() ) );
+				add( type );
+
 				scanner.addValueChangeListener( onScan -> {
-					final var check = checkService.create( new Check()
-							.setOrganizer( organizer )
-							.setAttendee( userService.getByUsername( onScan.getValue() ) )
-							.setActive( true )
-							.setCheckedOn( Date.valueOf( LocalDate.now() ) )
-							.setCheckedInAt( Time.valueOf( LocalTime.now() ) )
-							.setCheckedOutAt( Time.valueOf( LocalTime.now() ) )
-							.setCourse( organizer.getCourse() )
-							.setLat( location.getValue().getLatitude() )
-							.setLon( location.getValue().getLongitude() )
-							.setPin( new Random().nextInt( 8999 ) + 1000 )
-							.setSession( VaadinSession.getCurrent().getSession().getId() )
-							.setValidLocation( true )
-							.setType( CheckType.PHYSICAL_IN )
-					);
+					final var check = checkService.create( check( organizer, userService.getByUsername( onScan.getValue() ), location, type.getValue() ) );
 
 					final var checkLayout = new CheckedUserLayout( check );
 					add( checkLayout );
@@ -95,6 +89,22 @@ public class CheckView extends VerticalLayout {
 			NotificationUtils.error( "The user NOT found!" ).open();
 		}
 
+	}
+
+
+	public Check check( User organizer, User attendee, GeoLocation location, CheckType type ) {
+
+		return new Check()
+				.setOrganizer( organizer )
+				.setAttendee( attendee )
+				.setIn( ZonedDateTime.now() )
+				.setOut( ZonedDateTime.now() )
+				.setCourse( organizer.getCourse() )
+				.setLat( location.getValue().getLatitude() )
+				.setLon( location.getValue().getLongitude() )
+				.setValidation( new Random().nextInt( 8999 ) + 1000 )
+				.setSession( VaadinSession.getCurrent().getSession().getId() )
+				.setType( type );
 	}
 
 }

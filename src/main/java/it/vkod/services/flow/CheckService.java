@@ -57,8 +57,8 @@ public class CheckService {
 		final var oAttendee = userRepository.findByUsername( checkEntity.getAttendee().getUsername() );
 		final var oOrganizer = authenticationService.get();
 
-		final var lat = Coordinate.fromDegrees( checkEntity.getLat() );
-		final var lng = Coordinate.fromDegrees( checkEntity.getLon() );
+		final var lat = Coordinate.fromDegrees( checkEntity.getLatitude() );
+		final var lng = Coordinate.fromDegrees( checkEntity.getLongitude() );
 		final var userLocation = Point.at( lat, lng );
 
 		final var intecLat = Coordinate.fromDegrees( 50.8426647248452 );
@@ -66,10 +66,7 @@ public class CheckService {
 		final var intecLoc = Point.at( intecLat, intecLon );
 		final var area = EarthCalc.gcd.around( intecLoc, 10 );
 
-		final var validLocation = area.contains( userLocation );
-
-		if ( oAttendee.isPresent() && oOrganizer.isPresent() && validLocation ) {
-			checkEntity.setValidLocation( true );
+		if ( oAttendee.isPresent() && oOrganizer.isPresent() ) {
 			checkEntity.setAttendee( oAttendee.get() );
 			checkEntity.setOrganizer( oOrganizer.get() );
 		}

@@ -7,6 +7,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import it.vkod.models.entities.Check;
 
+import java.util.stream.Collectors;
+
 public class CheckedUserLayout extends HorizontalLayout {
 
 	public CheckedUserLayout( Check check ) {
@@ -20,7 +22,7 @@ public class CheckedUserLayout extends HorizontalLayout {
 		avatar.setImage( check.getAttendee().getProfile() );
 
 		final var name = new Span( fullName );
-		final var roles = new Span( check.getAttendee().getRoles() );
+		final var roles = new Span( check.getAttendee().getRoles().stream().map( Enum::name ).collect( Collectors.joining( "," ) ) );
 		roles.getStyle()
 				.set( "color", "var(--lumo-secondary-text-color)" )
 				.set( "font-size", "var(--lumo-font-size-s)" );

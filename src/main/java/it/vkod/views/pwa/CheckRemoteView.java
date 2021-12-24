@@ -2,6 +2,8 @@ package it.vkod.views.pwa;
 
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -10,6 +12,7 @@ import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.models.entities.Check;
 import it.vkod.models.entities.CheckType;
+import it.vkod.models.entities.User;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
@@ -19,10 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
-import java.sql.Date;
-import java.sql.Time;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.Random;
 
 @PageTitle( "Remote Inchecken/Uitchecken" )
@@ -53,22 +53,11 @@ public class CheckRemoteView extends VerticalLayout {
 
 			scanner.addValueChangeListener( onScan -> {
 				{
-					final var check = checkService.create( new Check()
-							.setOrganizer( userService.getByUsername( onScan.getValue() ) )
-							.setAttendee( attendee )
-							.setActive( true )
-							.setCheckedOn( Date.valueOf( LocalDate.now() ) )
-							.setCheckedInAt( Time.valueOf( LocalTime.now() ) )
-							.setCheckedOutAt( Time.valueOf( LocalTime.now() ) )
-							.setCourse( attendee.getCourse() )
-							.setLat( location.getValue().getLatitude() )
-							.setLon( location.getValue().getLongitude() )
-							.setPin( new Random().nextInt( 8999 ) + 1000 )
-							.setSession( VaadinSession.getCurrent().getSession().getId() )
-							.setValidLocation( true )
-							.setType( CheckType.REMOTE_IN )
-					);
+					final var type = new RadioButtonGroup< CheckType >();
+					type.setItems( DataProvider.ofItems( CheckType.values() ) );
+					add(type);
 
+					final var check = checkService.create( check( userService.getByUsername( onScan.getValue() ), attendee, location, type.getValue() ) );
 					checks.add( check );
 
 					final var checkLayout = new CheckedUserLayout( check );
@@ -89,6 +78,22 @@ public class CheckRemoteView extends VerticalLayout {
 
 		} );
 
+	}
+
+
+	public Check check( User organizer, User attendee, GeoLocation location, CheckType type ) {
+
+		return new Check()
+				.setOrganizer( organizer )
+				.setAttendee( attendee )
+				.setIn( ZonedDateTime.now() )
+				.setOut( ZonedDateTime.now() )
+				.setCourse( organizer.getCourse() )
+				.setLat( location.getValue().getLatitude() )
+				.setLon( location.getValue().getLongitude() )
+				.setValidation( new Random().nextInt( 8999 ) + 1000 )
+				.setSession( VaadinSession.getCurrent().getSession().getId() )
+				.setType( type );
 	}
 
 }

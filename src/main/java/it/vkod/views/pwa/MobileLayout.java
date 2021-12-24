@@ -10,10 +10,14 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.server.VaadinSession;
 import it.vkod.models.entities.CheckType;
+import it.vkod.models.entities.UserRole;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.SessionService;
 import it.vkod.views.components.NotificationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static it.vkod.models.entities.CheckType.*;
+import static it.vkod.models.entities.UserRole.*;
 
 public class MobileLayout extends AppLayout {
 
@@ -37,8 +41,8 @@ public class MobileLayout extends AppLayout {
 
 		loginButton.addClickListener( onClick -> {
 			VaadinSession.getCurrent().getSession().invalidate();
-			sessionService.setTrainingCode( "" );
-			sessionService.setCheckType( "" );
+			sessionService.setCourse( "" );
+			sessionService.setType( CheckType.OTHER );
 
 			try {
 				loginButton.getUI().ifPresent( ui -> ui.navigate( LoginView.class ) );
@@ -52,15 +56,20 @@ public class MobileLayout extends AppLayout {
 		tabs.add( restartTab );
 
 		oUser.ifPresent( user -> {
-			sessionService.setTrainingCode( user.getCourse() );
+			sessionService.setCourse( user.getCourse() );
 
-			if ( user.getRoles().contains( "TEACHER" ) || user.getRoles().contains( "MANAGER" )
-					|| user.getRoles().contains( "ADMIN" ) ) {
+			final var isAdmin = ( user.getRoles().stream().anyMatch( role -> ( role == ADMIN ) ) );
+			final var isManager = ( user.getRoles().stream().anyMatch( role -> ( role == UserRole.MANAGER ) ) );
+			final var isTeacher = ( user.getRoles().stream().anyMatch( role -> ( role == UserRole.TEACHER ) ) );
+
+
+			if ( isAdmin || isManager || isTeacher ) {
+
 				inButton.setSizeFull();
 
 				inButton.addClickListener( onClick -> {
 					try {
-						sessionService.setCheckType( "IN" );
+						sessionService.setType( PHYSICAL_IN );
 						inButton.getUI().ifPresent( ui -> ui.navigate( CheckView.class ) );
 						inTab.getStyle().set( "background-color", "green" );
 						outTab.getStyle().set( "background-color", "#161616" );
@@ -73,7 +82,8 @@ public class MobileLayout extends AppLayout {
 				tabs.add( inTab );
 			}
 
-			if ( user.getRoles().contains( "MANAGER" ) ) {
+			if ( isManager ) {
+
 				managerButton.setSizeFull();
 
 				managerButton.addClickListener( onClick -> {
@@ -88,7 +98,7 @@ public class MobileLayout extends AppLayout {
 				tabs.add( managerTab );
 			}
 
-			if ( user.getRoles().contains( "ADMIN" ) ) {
+			if ( isAdmin ) {
 				adminButton.setSizeFull();
 
 				adminButton.addClickListener( onClick -> {
@@ -103,13 +113,12 @@ public class MobileLayout extends AppLayout {
 				tabs.add( adminTab );
 			}
 
-			if ( user.getRoles().contains( "TEACHER" ) || user.getRoles().contains( "MANAGER" )
-					|| user.getRoles().contains( "ADMIN" ) ) {
+			if ( isAdmin || isManager || isTeacher ) {
 				outButton.setSizeFull();
 				outButton.addClickListener( onClick -> {
 					try {
-						sessionService.setCheckType( CheckType.PHYSICAL_OUT.name() );
-						sessionService.setTrainingCode( user.getCourse() );
+						sessionService.setType( PHYSICAL_OUT );
+						sessionService.setCourse( user.getCourse() );
 						outButton.getUI().ifPresent( ui -> ui.navigate( CheckView.class ) );
 						outTab.getStyle().set( "background-color", "red" );
 						inTab.getStyle().set( "background-color", "#161616" );
@@ -126,8 +135,8 @@ public class MobileLayout extends AppLayout {
 
 		logoutButton.addClickListener( onClick -> {
 			VaadinSession.getCurrent().getSession().invalidate();
-			sessionService.setTrainingCode( "" );
-			sessionService.setCheckType( "" );
+			sessionService.setCourse( "" );
+			sessionService.setType( PHYSICAL_OUT );
 			try {
 				logoutButton.getUI().ifPresent( ui -> ui.navigate( "logout" ) );
 			} catch ( NotFoundException notFoundEx ) {

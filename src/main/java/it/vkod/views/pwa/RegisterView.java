@@ -17,6 +17,7 @@ import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import it.vkod.models.entities.User;
+import it.vkod.models.entities.UserRole;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
 import org.springframework.mail.MailException;
@@ -24,187 +25,185 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.sql.Date;
-import java.sql.Time;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.Collections;
 
 import static com.vaadin.flow.component.notification.Notification.Position.BOTTOM_CENTER;
 import static com.vaadin.flow.component.notification.Notification.show;
 import static it.vkod.utils.QRUtils.generateQR;
 
-@PageTitle("Inschrijven")
-@Route(value = "reg", layout = DesktopLayout.class)
-@RouteAlias(value = "register", layout = DesktopLayout.class)
+@PageTitle( "Inschrijven" )
+@Route( value = "reg", layout = DesktopLayout.class )
+@RouteAlias( value = "register", layout = DesktopLayout.class )
 @AnonymousAllowed
 public class RegisterView extends VerticalLayout {
 
-    private final UserService userService;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+	private final UserService userService;
+	private final BCryptPasswordEncoder passwordEncoder;
+	private final EmailService emailService;
 
-    public RegisterView( UserService userService,
-                         BCryptPasswordEncoder passwordEncoder,
-                         EmailService emailService) {
 
-        this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
+	public RegisterView( UserService userService,
+	                     BCryptPasswordEncoder passwordEncoder,
+	                     EmailService emailService ) {
 
-        final var formLayout = new FormLayout();
+		this.userService = userService;
+		this.passwordEncoder = passwordEncoder;
+		this.emailService = emailService;
 
-        final var phoneField = new TextField();
+		final var formLayout = new FormLayout();
 
-        final var emailField = new EmailField();
-        emailField.setReadOnly(true);
+		final var phoneField = new TextField();
 
-        final var usernameField = new TextField();
-        usernameField.setRequiredIndicatorVisible(true);
-        usernameField.setRequired(true);
+		final var emailField = new EmailField();
+		emailField.setReadOnly( true );
 
-        usernameField.addValueChangeListener(onChange -> {
-            emailField.setValue(onChange.getValue().toLowerCase().concat("@intecbrussel.be"));
-            if (emailField.isInvalid()) {
-                usernameField.clear();
-            }
-        });
+		final var usernameField = new TextField();
+		usernameField.setRequiredIndicatorVisible( true );
+		usernameField.setRequired( true );
 
-        final var firstNameField = new TextField();
-        firstNameField.setAutofocus(true);
+		usernameField.addValueChangeListener( onChange -> {
+			emailField.setValue( onChange.getValue().toLowerCase().concat( "@intecbrussel.be" ) );
+			if ( emailField.isInvalid() ) {
+				usernameField.clear();
+			}
+		} );
 
-        final var lastNameField = new TextField();
-        lastNameField.addValueChangeListener(onChange -> {
-            usernameField.setValue(
-                    firstNameField.getValue().toLowerCase().concat(".").concat(lastNameField.getValue().toLowerCase()));
-        });
+		final var firstNameField = new TextField();
+		firstNameField.setAutofocus( true );
 
-        final var passwordField = new PasswordField();
-        passwordField.setRequired(true);
-        passwordField.setClearButtonVisible(true);
-        passwordField.setMinLength(8);
-        passwordField.setRequiredIndicatorVisible(true);
+		final var lastNameField = new TextField();
+		lastNameField.addValueChangeListener( onChange -> {
+			usernameField.setValue(
+					firstNameField.getValue().toLowerCase().concat( "." ).concat( lastNameField.getValue().toLowerCase() ) );
+		} );
 
-        final var repeatField = new PasswordField();
-        repeatField.setRequired(true);
-        repeatField.setClearButtonVisible(true);
-        repeatField.setMinLength(8);
-        repeatField.setRequiredIndicatorVisible(true);
+		final var passwordField = new PasswordField();
+		passwordField.setRequired( true );
+		passwordField.setClearButtonVisible( true );
+		passwordField.setMinLength( 8 );
+		passwordField.setRequiredIndicatorVisible( true );
 
-        repeatField.addValueChangeListener(onChange -> {
-            final var passwordsMatch = passwordField.getValue().equalsIgnoreCase(onChange.getValue());
-            if (!passwordsMatch && (!passwordField.isEmpty() && !repeatField.isEmpty())) {
-                passwordField.getStyle().set("color", "red");
-                passwordField.setInvalid(true);
-                repeatField.getStyle().set("color", "red");
-                repeatField.setInvalid(true);
-            } else {
-                passwordField.getStyle().set("color", "green");
-                passwordField.setInvalid(true);
-                repeatField.getStyle().set("color", "green");
-                repeatField.setInvalid(true);
-            }
-        });
+		final var repeatField = new PasswordField();
+		repeatField.setRequired( true );
+		repeatField.setClearButtonVisible( true );
+		repeatField.setMinLength( 8 );
+		repeatField.setRequiredIndicatorVisible( true );
 
-        final var acceptCheck = new Checkbox("I accept terms and conditions.");
+		repeatField.addValueChangeListener( onChange -> {
+			final var passwordsMatch = passwordField.getValue().equalsIgnoreCase( onChange.getValue() );
+			if ( !passwordsMatch && ( !passwordField.isEmpty() && !repeatField.isEmpty() ) ) {
+				passwordField.getStyle().set( "color", "red" );
+				passwordField.setInvalid( true );
+				repeatField.getStyle().set( "color", "red" );
+				repeatField.setInvalid( true );
+			} else {
+				passwordField.getStyle().set( "color", "green" );
+				passwordField.setInvalid( true );
+				repeatField.getStyle().set( "color", "green" );
+				repeatField.setInvalid( true );
+			}
+		} );
 
-        formLayout.addFormItem(firstNameField, "First name");
-        formLayout.addFormItem(lastNameField, "Last name");
-        formLayout.addFormItem(usernameField, "Username");
-        formLayout.addFormItem(emailField, "E-mail");
-        formLayout.addFormItem(phoneField, "Phone");
-        formLayout.addFormItem(passwordField, "Password");
-        formLayout.addFormItem(repeatField, "Repeat Password");
+		final var acceptCheck = new Checkbox( "I accept terms and conditions." );
 
-        final var submitButton = new Button("Submit Form", onClick -> {
+		formLayout.addFormItem( firstNameField, "First name" );
+		formLayout.addFormItem( lastNameField, "Last name" );
+		formLayout.addFormItem( usernameField, "Username" );
+		formLayout.addFormItem( emailField, "E-mail" );
+		formLayout.addFormItem( phoneField, "Phone" );
+		formLayout.addFormItem( passwordField, "Password" );
+		formLayout.addFormItem( repeatField, "Repeat Password" );
 
-            final var exists = this.userService.existsByUsername(usernameField.getValue());
+		final var submitButton = new Button( "Submit Form", onClick -> {
 
-            if (exists.equals(Boolean.FALSE)) {
-                final var user = new User()
-                        .setFirstName(firstNameField.getValue().toLowerCase())
-                        .setLastName(lastNameField.getValue().toLowerCase())
-                        .setUsername(usernameField.getValue().toLowerCase())
-                        .setEmail(emailField.getValue().toLowerCase())
-                        .setPassword(this.passwordEncoder.encode(passwordField.getValue()))
-                        .setPhone(phoneField.getValue())
-                        .setRegisteredOn(Date.valueOf(LocalDate.now()))
-                        .setRegisteredAt(Time.valueOf(LocalTime.now()))
-                        .setUpdatedAt(Time.valueOf(LocalTime.now()))
-                        .setRoles("USER");
+			final var exists = this.userService.existsByUsername( usernameField.getValue() );
 
-                final var savedUser = this.userService.createUser(user);
+			if ( exists.equals( Boolean.FALSE ) ) {
+				final var user = new User()
+						.setFirstName( firstNameField.getValue().toLowerCase() )
+						.setLastName( lastNameField.getValue().toLowerCase() )
+						.setUsername( usernameField.getValue().toLowerCase() )
+						.setEmail( emailField.getValue().toLowerCase() )
+						.setPassword( this.passwordEncoder.encode( passwordField.getValue() ) )
+						.setPhone( phoneField.getValue() )
+						.setRoles( Collections.singleton( UserRole.STUDENT ) );
 
-                if (!savedUser.isNew()) {
+				final var savedUser = this.userService.createUser( user );
 
-                    try {
-                        emailService.sendSimpleMessage(
-                                savedUser.getEmail(),
-                                "Your << CheckInOut >> Account is successfully created.",
-                                "Username: ".concat(savedUser.getUsername()).concat("\n").concat("Password: ")
-                                        .concat(passwordField.getValue()));
-                    } catch (MailException mailException) {
-                        show(mailException.getMessage(), 4000, BOTTOM_CENTER).open();
-                    }
+				if ( !savedUser.isNew() ) {
 
-                    generateQRLayout(user);
+					try {
+						emailService.sendSimpleMessage(
+								savedUser.getEmail(),
+								"Your << CheckInOut >> Account is successfully created.",
+								"Username: ".concat( savedUser.getUsername() ).concat( "\n" ).concat( "Password: " )
+										.concat( passwordField.getValue() ) );
+					} catch ( MailException mailException ) {
+						show( mailException.getMessage(), 4000, BOTTOM_CENTER ).open();
+					}
 
-                    show("Your << CheckInOut >> Account is successfully created.", 3000, BOTTOM_CENTER).open();
-                }
-            } else {
-                show("Error! Make sure you have read and accepted 'Terms and Conditions'. Please double" +
-                        " check that all required information is entered.",
-                        4000, BOTTOM_CENTER).open();
+					generateQRLayout( user );
 
-            }
-        });
+					show( "Your << CheckInOut >> Account is successfully created.", 3000, BOTTOM_CENTER ).open();
+				}
+			} else {
+				show( "Error! Make sure you have read and accepted 'Terms and Conditions'. Please double" +
+								" check that all required information is entered.",
+						4000, BOTTOM_CENTER ).open();
 
-        submitButton.setEnabled(false);
+			}
+		} );
 
-        acceptCheck.addValueChangeListener(onValueChange -> submitButton.setEnabled(onValueChange.getValue()));
+		submitButton.setEnabled( false );
 
-        add(formLayout, acceptCheck, submitButton);
+		acceptCheck.addValueChangeListener( onValueChange -> submitButton.setEnabled( onValueChange.getValue() ) );
 
-    }
+		add( formLayout, acceptCheck, submitButton );
 
-    public void initLayout() {
+	}
 
-        setPadding(false);
-        setMargin(false);
-        setSpacing(false);
-        setSizeFull();
 
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setHorizontalComponentAlignment(Alignment.CENTER);
-        setAlignItems(Alignment.CENTER);
-    }
+	public void initLayout() {
 
-    public void generateQRLayout(User user) {
+		setPadding( false );
+		setMargin( false );
+		setSpacing( false );
+		setSizeFull();
 
-        final var layout = new VerticalLayout();
+		setJustifyContentMode( JustifyContentMode.CENTER );
+		setHorizontalComponentAlignment( Alignment.CENTER );
+		setAlignItems( Alignment.CENTER );
+	}
 
-        try {
 
-            layout.add(convertToImage(generateQR(user.getUsername(), 512, 512), user.getUsername()));
+	public void generateQRLayout( User user ) {
 
-            show(("Generated a QR Code for " + user.getUsername()), 8000,
-                    BOTTOM_CENTER).open();
+		final var layout = new VerticalLayout();
 
-        } catch (WriterException | IOException fileEx) {
-            show(fileEx.getMessage(), 3000, BOTTOM_CENTER).open();
-        }
+		try {
 
-        layout.setMargin(false);
-        layout.setPadding(false);
-        layout.setJustifyContentMode(JustifyContentMode.CENTER);
-        layout.setAlignItems(Alignment.CENTER);
+			layout.add( convertToImage( generateQR( user.getUsername(), 512, 512 ), user.getUsername() ) );
 
-        add(layout);
-    }
+			show( ( "Generated a QR Code for " + user.getUsername() ), 8000,
+					BOTTOM_CENTER ).open();
 
-    private Image convertToImage(final byte[] imageData, final String username) {
+		} catch ( WriterException | IOException fileEx ) {
+			show( fileEx.getMessage(), 3000, BOTTOM_CENTER ).open();
+		}
 
-        return new Image(new StreamResource(username.concat("_QR.png"),
-                (InputStreamFactory) () -> new ByteArrayInputStream(imageData)), username);
-    }
+		layout.setMargin( false );
+		layout.setPadding( false );
+		layout.setJustifyContentMode( JustifyContentMode.CENTER );
+		layout.setAlignItems( Alignment.CENTER );
+
+		add( layout );
+	}
+
+
+	private Image convertToImage( final byte[] imageData, final String username ) {
+
+		return new Image( new StreamResource( username.concat( "_QR.png" ),
+				( InputStreamFactory ) () -> new ByteArrayInputStream( imageData ) ), username );
+	}
 
 }

@@ -7,16 +7,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.sql.Date;
-import java.sql.Time;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -34,6 +38,7 @@ public class User implements Serializable, Cloneable, Persistable< Long > {
 	@NotEmpty
 	String username;
 
+	@Pattern( regexp = "^\\+[1-9]{1}[0-9]{3,14}$" )
 	String phone;
 
 	@Email
@@ -48,14 +53,14 @@ public class User implements Serializable, Cloneable, Persistable< Long > {
 	@NotEmpty
 	String password;
 
-	@NotEmpty
-	String roles;
+	@ElementCollection( fetch = FetchType.EAGER )
+	Set< UserRole > roles = new LinkedHashSet<>();
 
-	Date registeredOn;
+	@CreationTimestamp
+	ZonedDateTime registered;
 
-	Time registeredAt;
-
-	Time updatedAt;
+	@UpdateTimestamp
+	ZonedDateTime updated;
 
 	String profile;
 
