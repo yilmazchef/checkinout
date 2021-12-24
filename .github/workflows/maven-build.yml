@@ -1,4 +1,4 @@
-name: Maven Build Flow
+name: Maven Build Flow for Development
 
 on: [push]
 
@@ -16,5 +16,5 @@ jobs:
       - run: mkdir staging && cp target/*.jar staging
       - uses: actions/upload-artifact@v2
         with:
-          name: Package
+          name: checkinout-dev
           path: staging
