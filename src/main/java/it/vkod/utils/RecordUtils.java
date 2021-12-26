@@ -12,8 +12,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static it.vkod.models.entities.UserRole.*;
 
@@ -36,10 +38,10 @@ public class RecordUtils {
 
 			if ( userRepository.count() <= 0L ) {
 
-				mock( "wouter.vandenberge", "Wouter", "Van den Berge", ADMIN );
+				mock( "wouter.vandenberge", "Wouter", "Van den Berge", "Administratie", ADMIN );
 
-				mock( "pearl.de.smet", "Pearl", "De Smet", MANAGER, TEACHER );
-				mock( "cindy.pipeleers", "Cindy", "Pipeleers" );
+				mock( "pearl.de.smet", "Pearl", "De Smet", "Team-lead Developers", MANAGER, TEACHER );
+				mock( "cindy.pipeleers", "Cindy", "Pipeleers", "Tewerkstelling", MANAGER );
 
 				mock( "yilmaz.mustafa", "Yilmaz", "Mustafa", "JavaJun21", TEACHER );
 				mock( "patrick.geudens", "Patrick", "Geudens", "JavaSep20", TEACHER );
@@ -68,22 +70,16 @@ public class RecordUtils {
 
 	private void mock( String username, String firstName, String lastName, String course, UserRole... roles ) {
 
-		mock( username, firstName, lastName, "Administratie", roles );
-	}
-
-
-	private void mock( String username, String firstName, String lastName, UserRole... roles ) {
-
-		User user = new User()
+		final var entity = userRepository.save( new User()
 				.setUsername( username ).setPassword( passwordEncoder.encode( "P@ssw0rd" ) )
 				.setProfile( "https://i.pravatar.cc/300" )
 				.setFirstName( firstName ).setLastName( lastName )
-				.setCourse( "Administratie" )
+				.setCourse( course )
 				.setEmail( username.concat( "@" ).concat( "intecbrussel.be" ) )
-				.setPhone( String.format( "0467334%d", username.length() * new Random().nextInt( 1000 ) ) )
-				.setRoles( Set.of( roles ) );
+				.setPhone( String.format( "+3246734%d", username.length() * new Random().nextInt( 8999 ) + 1000 ) )
+				.setRoles( Set.of( roles ) ) );
 
-		logger.info( "New ADMIN is added: " + userRepository.save( user ) );
+		logger.info( Arrays.stream( roles ).map( Enum::name ).collect( Collectors.joining( "," ) ) + " is added: " + entity );
 	}
 
 }

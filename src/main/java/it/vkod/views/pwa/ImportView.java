@@ -1,5 +1,6 @@
 package it.vkod.views.pwa;
 
+
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
@@ -10,7 +11,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.shared.util.SharedUtil;
 
 import java.io.IOException;
@@ -19,8 +19,7 @@ import java.io.InputStreamReader;
 import java.util.stream.IntStream;
 
 @PageTitle("Importeer CSV")
-@Route(value = "icsv", layout = DesktopLayout.class)
-@RouteAlias(value = "import/csv", layout = DesktopLayout.class)
+@Route(value = "imp", layout = BaseLayout.class)
 public class ImportView extends VerticalLayout {
 
     private final Grid<String[]> grid = new Grid<>();

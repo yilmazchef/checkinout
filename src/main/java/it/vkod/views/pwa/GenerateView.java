@@ -1,5 +1,6 @@
 package it.vkod.views.pwa;
 
+
 import com.google.zxing.WriterException;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -12,7 +13,6 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -24,8 +24,7 @@ import java.io.IOException;
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Genereer QR")
-@Route(value = "gen", layout = DesktopLayout.class)
-@RouteAlias(value = "generate", layout = DesktopLayout.class)
+@Route(value = "gen", layout = BaseLayout.class)
 @AnonymousAllowed
 public class GenerateView extends VerticalLayout {
 

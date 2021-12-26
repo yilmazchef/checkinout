@@ -11,8 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,25 +28,25 @@ public class CheckService {
 
 	public List< Check > today() {
 
-		return checkRepository.findAllByActiveAndCheckedOn( TRUE, Date.valueOf( LocalDate.now() ) );
+		return checkRepository.findAllByActiveAndCreated( TRUE, ZonedDateTime.now() );
 	}
 
 
-	public List< Check > on( final Date checkedOn ) {
+	public List< Check > on( final ZonedDateTime checkedOn ) {
 
-		return checkRepository.findAllByActiveAndCheckedOn( TRUE, checkedOn );
+		return checkRepository.findAllByActiveAndCreated( TRUE, checkedOn );
 	}
 
 
 	public Optional< Check > ofAttendee( final String username ) {
 
-		return checkRepository.findByActiveAndCheckedOnAndAttendee_Username( TRUE, Date.valueOf( LocalDate.now() ), username );
+		return checkRepository.findByActiveAndCreatedAndAttendee_Username( TRUE, ZonedDateTime.now(), username );
 	}
 
 
-	public List< Check > fromOrganizer( final Date checkedOn, final String username ) {
+	public List< Check > fromOrganizer( final ZonedDateTime checkedOn, final String username ) {
 
-		return checkRepository.findAllByActiveAndCheckedOnAndOrganizer_Username( TRUE, checkedOn, username );
+		return checkRepository.findAllByActiveAndCreatedAndOrganizer_Username( TRUE, checkedOn, username );
 	}
 
 

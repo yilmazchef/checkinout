@@ -89,8 +89,8 @@ public class ExcelExporter {
 			createCell( row, columnCount++, check.getAttendee().getFirstName(), style );
 			createCell( row, columnCount++, check.getAttendee().getEmail(), style );
 			createCell( row, columnCount++, check.getType(), style );
-			createCell( row, columnCount++, check.getIn(), style );
-			createCell( row, columnCount++, check.getOut(), style );
+			createCell( row, columnCount++, check.getCreated(), style );
+			createCell( row, columnCount++, check.getUpdated(), style );
 
 		}
 	}

@@ -9,7 +9,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import it.vkod.services.flow.AdminService;
 import it.vkod.services.flow.AuthenticationService;
@@ -20,8 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.security.RolesAllowed;
 
 @PageTitle( "Administratie" )
-@Route( value = "admin", layout = DesktopLayout.class )
-@RouteAlias( value = "m/admin", layout = MobileLayout.class )
+@Route( value = "adm", layout = BaseLayout.class )
 @RolesAllowed( { "ADMIN", "MANAGER", "LEADER", "TEACHER" } )
 public class AdminView extends VerticalLayout {
 

@@ -7,24 +7,28 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import it.vkod.models.entities.User;
 import it.vkod.models.entities.UserRole;
+import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static com.vaadin.flow.component.notification.Notification.Position.BOTTOM_CENTER;
@@ -32,31 +36,28 @@ import static com.vaadin.flow.component.notification.Notification.show;
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle( "Inschrijven" )
-@Route( value = "reg", layout = DesktopLayout.class )
-@RouteAlias( value = "register", layout = DesktopLayout.class )
+@Route( value = "reg", layout = BaseLayout.class )
 @AnonymousAllowed
 public class RegisterView extends VerticalLayout {
 
-	private final UserService userService;
-	private final BCryptPasswordEncoder passwordEncoder;
-	private final EmailService emailService;
+	public RegisterView( @Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired BCryptPasswordEncoder passwordEncoder, @Autowired EmailService emailService ) {
 
 
-	public RegisterView( UserService userService,
-	                     BCryptPasswordEncoder passwordEncoder,
-	                     EmailService emailService ) {
+		final var userRole = new RadioButtonGroup< UserRole >();
+		userRole.setItems( DataProvider.ofItems( UserRole.values() ) );
 
-		this.userService = userService;
-		this.passwordEncoder = passwordEncoder;
-		this.emailService = emailService;
+		if ( authService.get().isPresent() ) {
+			final var roles = authService.get().get().getRoles().toArray( UserRole[]::new );
+
+			if ( isAdmin( roles ) || isManager( roles ) ) {
+				add( userRole );
+			}
+		}
 
 		final var formLayout = new FormLayout();
-
 		final var phoneField = new TextField();
-
 		final var emailField = new EmailField();
 		emailField.setReadOnly( true );
-
 		final var usernameField = new TextField();
 		usernameField.setRequiredIndicatorVisible( true );
 		usernameField.setRequired( true );
@@ -116,7 +117,7 @@ public class RegisterView extends VerticalLayout {
 
 		final var submitButton = new Button( "Submit Form", onClick -> {
 
-			final var exists = this.userService.existsByUsername( usernameField.getValue() );
+			final var exists = userService.existsByUsername( usernameField.getValue() );
 
 			if ( exists.equals( Boolean.FALSE ) ) {
 				final var user = new User()
@@ -124,11 +125,11 @@ public class RegisterView extends VerticalLayout {
 						.setLastName( lastNameField.getValue().toLowerCase() )
 						.setUsername( usernameField.getValue().toLowerCase() )
 						.setEmail( emailField.getValue().toLowerCase() )
-						.setPassword( this.passwordEncoder.encode( passwordField.getValue() ) )
+						.setPassword( passwordEncoder.encode( passwordField.getValue() ) )
 						.setPhone( phoneField.getValue() )
 						.setRoles( Collections.singleton( UserRole.STUDENT ) );
 
-				final var savedUser = this.userService.createUser( user );
+				final var savedUser = userService.createUser( user );
 
 				if ( !savedUser.isNew() ) {
 
@@ -204,6 +205,30 @@ public class RegisterView extends VerticalLayout {
 
 		return new Image( new StreamResource( username.concat( "_QR.png" ),
 				( InputStreamFactory ) () -> new ByteArrayInputStream( imageData ) ), username );
+	}
+
+
+	public boolean isAdmin( UserRole... roles ) {
+
+		return Arrays.asList( roles ).contains( UserRole.ADMIN );
+	}
+
+
+	public boolean isManager( UserRole... roles ) {
+
+		return Arrays.asList( roles ).contains( UserRole.MANAGER );
+	}
+
+
+	public boolean isTeacher( UserRole... roles ) {
+
+		return Arrays.asList( roles ).contains( UserRole.TEACHER );
+	}
+
+
+	public boolean isStudent( UserRole... roles ) {
+
+		return Arrays.asList( roles ).contains( UserRole.STUDENT );
 	}
 
 }

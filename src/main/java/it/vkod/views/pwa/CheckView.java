@@ -1,8 +1,14 @@
 package it.vkod.views.pwa;
 
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -23,72 +29,101 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @PageTitle( "Inchecken/Uitchecken" )
-@Route( value = "", layout = DesktopLayout.class )
-@RouteAlias( value = "m", layout = MobileLayout.class )
-@RouteAlias( value = "check", layout = DesktopLayout.class )
-@RouteAlias( value = "mobile/check", layout = MobileLayout.class )
+@Route( value = "", layout = BaseLayout.class )
+@RouteAlias( value = "check", layout = BaseLayout.class )
 @PermitAll
 public class CheckView extends VerticalLayout {
 
-	public CheckView( @Autowired AuthenticationService authService, @Autowired UserService userService,
-	                  @Autowired CheckService checkService ) {
 
-		final var location = new GeoLocation();
-		location.setWatch( true );
-		location.setHighAccuracy( true );
-		location.setTimeout( 100000 );
-		location.setMaxAge( 200000 );
-		add( location );
+	public CheckView( @Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired CheckService checkService ) {
 
-		final var scanner = new ZXingVaadinReader();
-		scanner.setFrom( Constants.From.camera );
-		scanner.setId( "video" ); // id needs to be 'video' if From.camera.
-		scanner.setStyle( "object-fit: cover; width:auto; height: 60vh; max-width:96vw;" );
-		add( scanner );
+		setHorizontalComponentAlignment( Alignment.CENTER );
 
-		final var authUser = authService.get();
-		if ( authUser.isPresent() ) {
+		final var oUser = authService.get();
 
-			final var organizer = authUser.get();
-			final var userRoles = organizer.getRoles();
-			final var userAuthorized = ( userRoles.stream().anyMatch( role -> ( role == UserRole.MANAGER || role == UserRole.TEACHER ) ) );
+		// IF PRESENT
+		oUser.ifPresent( user -> {
 
-			if ( !userAuthorized ) {
-				NotificationUtils
-						.error( "The " + userRoles.stream().map( Enum::name ).collect(
-								Collectors.joining( " " ) ) + " is not authorized to view this page!" ).open();
-			} else {
+			final var type = new RadioButtonGroup< CheckType >();
+			type.setItems( DataProvider.ofItems( CheckType.values() ) );
+			add( type );
 
-				final var type = new RadioButtonGroup< CheckType >();
-				type.setItems( DataProvider.ofItems( CheckType.values() ) );
-				add( type );
+			final var location = new GeoLocation();
+			location.setWatch( true );
+			location.setHighAccuracy( true );
+			location.setTimeout( 100000 );
+			location.setMaxAge( 200000 );
+			add( location );
 
-				scanner.addValueChangeListener( onScan -> {
-					final var check = checkService.create( check( organizer, userService.getByUsername( onScan.getValue() ), location, type.getValue() ) );
+			final var scanner = new ZXingVaadinReader();
+			scanner.setFrom( Constants.From.camera );
+			scanner.setId( "video" ); // id needs to be 'video' if From.camera.
+			scanner.setStyle( "object-fit: cover; width:auto; height: 60vh; max-width:96vw;" );
+			add( scanner );
 
-					final var checkLayout = new CheckedUserLayout( check );
-					add( checkLayout );
+			final var failSafeForm = new FormLayout();
 
-					NotificationUtils.success(
-							check.getAttendee().getFirstName()
-									+ " "
-									+ check.getAttendee().getLastName()
-									+ ( check.getType() == CheckType.PHYSICAL_IN ? " heeft ingecheckt " : " heeft uitgecheckt" )
-									+ "."
-					).open();
+			scanner.addValueChangeListener( onScan -> {
 
-				} );
-			}
+				if ( type.getValue() == CheckType.OTHER && user.getUsername().equalsIgnoreCase( onScan.getValue() )
+						&& ( isAdmin( user.getRoles() ) || isManager( user.getRoles() ) || isTeacher( user.getRoles() ) ) ) {
 
-		} else {
-			NotificationUtils.error( "The user NOT found!" ).open();
-		}
+					final var safeCheck = new Select<>( CheckType.values() );
+					failSafeForm.add( safeCheck );
 
+					final var safeDate = new DateTimePicker();
+					safeDate.setLabel( "Het datum van de check" );
+					safeDate.setHelperText( "Het datum moet tussen de laatste 60 dagen zijn." );
+					safeDate.setAutoOpen( true );
+					safeDate.setMin( LocalDateTime.now().minusDays( 1 ) );
+					safeDate.setMax( LocalDateTime.now().plusDays( 7 ) );
+					safeDate.setValue( LocalDateTime.now() );
+
+					final var safeUsername = new TextField( "Gebruikersnaam:" );
+
+					final var safeSubmit = new Button( "Safe Submit", VaadinIcon.SIGN_IN_ALT.create() );
+					safeSubmit.addClickListener( onSafeSubmit -> {
+
+						final var check = checkService.create( check( user, userService.getByUsername( safeUsername.getValue() ), location, safeCheck.getValue() ) );
+						processCheckedData( check );
+
+					} );
+
+					failSafeForm.add( safeUsername, safeDate, safeSubmit );
+					add( failSafeForm );
+
+				} else if ( ( type.getValue() == CheckType.REMOTE_IN || type.getValue() == CheckType.REMOTE_OUT )
+						&& isStudent( user.getRoles() ) ) {
+
+					final var check = checkService.create( check( userService.getByUsername( onScan.getValue() ), user, location, type.getValue() ) );
+					processCheckedData( check );
+
+				} else {
+
+					getUI().ifPresent( ui -> ui.remove( failSafeForm ) );
+
+					final var check = checkService.create( check( user, userService.getByUsername( onScan.getValue() ), location, type.getValue() ) );
+					processCheckedData( check );
+				}
+
+
+			} );
+		} );
+
+	}
+
+
+	public void processCheckedData( Check check ) {
+
+		final var checkLayout = new CheckedUserLayout( check );
+		add( checkLayout );
+
+		NotificationUtils.success( check.getAttendee().toString() + ": " + check.getType().name() ).open();
 	}
 
 
@@ -97,14 +132,38 @@ public class CheckView extends VerticalLayout {
 		return new Check()
 				.setOrganizer( organizer )
 				.setAttendee( attendee )
-				.setIn( ZonedDateTime.now() )
-				.setOut( ZonedDateTime.now() )
-				.setCourse( organizer.getCourse() )
+				.setCourse( attendee.getCourse() )
 				.setLat( location.getValue().getLatitude() )
 				.setLon( location.getValue().getLongitude() )
 				.setValidation( new Random().nextInt( 8999 ) + 1000 )
 				.setSession( VaadinSession.getCurrent().getSession().getId() )
 				.setType( type );
+	}
+
+
+	public boolean isAdmin( Set< UserRole > roles ) {
+
+		return roles.parallelStream().anyMatch( role -> role == UserRole.ADMIN );
+	}
+
+
+	public boolean isManager( Set< UserRole > roles ) {
+
+		return roles.parallelStream().anyMatch( role -> role == UserRole.MANAGER );
+	}
+
+
+	public boolean isTeacher( Set< UserRole > roles ) {
+
+		return roles.parallelStream().anyMatch( role -> role == UserRole.TEACHER );
+	}
+
+
+	public boolean isStudent( Set< UserRole > roles ) {
+
+		final var student = roles.parallelStream().anyMatch( role -> role == UserRole.STUDENT );
+
+		return student && !isAdmin( roles ) && !isManager( roles ) && !isTeacher( roles );
 	}
 
 }

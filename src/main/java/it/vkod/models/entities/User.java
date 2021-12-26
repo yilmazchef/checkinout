@@ -1,14 +1,9 @@
 package it.vkod.models.entities;
 
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
@@ -17,11 +12,10 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
+@ToString( onlyExplicitlyIncluded = true )
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -35,6 +29,7 @@ public class User implements Serializable, Cloneable, Persistable< Long > {
 	@GeneratedValue( strategy = GenerationType.IDENTITY )
 	Long id;
 
+	@ToString.Include
 	@NotEmpty
 	String username;
 
@@ -53,22 +48,15 @@ public class User implements Serializable, Cloneable, Persistable< Long > {
 	@NotEmpty
 	String password;
 
+	@CollectionTable( name = "roles" )
 	@ElementCollection( fetch = FetchType.EAGER )
 	Set< UserRole > roles = new LinkedHashSet<>();
 
-	@CreationTimestamp
 	ZonedDateTime registered;
 
-	@UpdateTimestamp
 	ZonedDateTime updated;
 
 	String profile;
-
-	@OneToMany( fetch = FetchType.EAGER, mappedBy = "attendee", orphanRemoval = true )
-	private List< Check > attendances = new ArrayList<>();
-
-	@OneToMany( fetch = FetchType.EAGER, mappedBy = "organizer", orphanRemoval = true )
-	private List< Check > organizations = new ArrayList<>();
 
 	@NotEmpty
 	private String course;
@@ -99,10 +87,17 @@ public class User implements Serializable, Cloneable, Persistable< Long > {
 	}
 
 
-	@Override
-	public String toString() {
+	@PrePersist
+	public void prePersist() {
 
-		return this.getFirstName() + " " + this.getLastName();
+		this.registered = ZonedDateTime.now();
+	}
+
+
+	@PreUpdate
+	public void preUpdate() {
+
+		this.updated = ZonedDateTime.now();
 	}
 
 }

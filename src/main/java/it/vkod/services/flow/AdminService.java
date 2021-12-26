@@ -1,16 +1,17 @@
 package it.vkod.services.flow;
 
-import org.springframework.stereotype.Service;
 
-import it.vkod.repositories.CheckRepository;
-import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
 public class AdminService {
 
-	private final CheckRepository checkRepository;
-	private final UserRepository userRepository;
+
+	public AdminService( @Autowired AuthenticationService authenticationService ) {
+
+	}
 
 }

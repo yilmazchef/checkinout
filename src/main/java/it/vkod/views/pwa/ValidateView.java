@@ -4,7 +4,6 @@ package it.vkod.views.pwa;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.services.flow.AuthenticationService;
@@ -15,8 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.security.PermitAll;
 
 @PageTitle( "Valideer QR" )
-@Route( value = "val", layout = DesktopLayout.class )
-@RouteAlias( value = "validate", layout = DesktopLayout.class )
+@Route( value = "val", layout = BaseLayout.class )
 @PermitAll
 public class ValidateView extends VerticalLayout {
 
@@ -32,34 +30,29 @@ public class ValidateView extends VerticalLayout {
 		setHorizontalComponentAlignment( Alignment.CENTER );
 		setAlignItems( Alignment.CENTER );
 
-		final var user = authService.get();
+		final var scanLayout = new VerticalLayout();
+		final var reader = new ZXingVaadinReader();
 
-		if ( user.isPresent() ) {
+		reader.setFrom( Constants.From.camera );
+		reader.setId( "video" ); // id needs to be 'video' if From.camera.
+		reader.setStyle( "object-fit: cover; width:100; height:100vh; max-height:100" );
 
-			final var scanLayout = new VerticalLayout();
-			final var reader = new ZXingVaadinReader();
+		reader.addValueChangeListener( scannedQRCode -> {
+			final var oAttendee = userService.findByUsername( scannedQRCode.getValue() );
+			if ( oAttendee.isPresent() ) {
+				NotificationUtils.success( "GELDIG" ).open();
+			} else {
+				NotificationUtils.error( "ONGELDIG!" ).open();
+			}
+		} );
 
-			reader.setFrom( Constants.From.camera );
-			reader.setId( "video" ); // id needs to be 'video' if From.camera.
-			reader.setStyle( "object-fit: cover; width:100; height:100vh; max-height:100" );
+		scanLayout.setMargin( false );
+		scanLayout.setPadding( false );
+		scanLayout.setJustifyContentMode( JustifyContentMode.CENTER );
+		scanLayout.setAlignItems( Alignment.CENTER );
+		scanLayout.add( reader );
 
-			reader.addValueChangeListener( scannedQRCode -> {
-				final var oAttendee = userService.findByUsername( scannedQRCode.getValue() );
-				if ( oAttendee.isPresent() ) {
-					NotificationUtils.success( "GELDIG" ).open();
-				} else {
-					NotificationUtils.error( "ONGELDIG!" ).open();
-				}
-			} );
-
-			scanLayout.setMargin( false );
-			scanLayout.setPadding( false );
-			scanLayout.setJustifyContentMode( JustifyContentMode.CENTER );
-			scanLayout.setAlignItems( Alignment.CENTER );
-			scanLayout.add( reader );
-
-			add( scanLayout );
-		}
+		add( scanLayout );
 
 	}
 
