@@ -42,7 +42,8 @@ public class CheckView extends VerticalLayout {
 
 	public CheckView( @Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired CheckService checkService ) {
 
-		setHorizontalComponentAlignment( Alignment.CENTER );
+		setAlignItems( Alignment.CENTER );
+		setJustifyContentMode( JustifyContentMode.CENTER );
 
 		final var oUser = authService.get();
 
