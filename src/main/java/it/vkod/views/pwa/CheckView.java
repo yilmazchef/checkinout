@@ -8,6 +8,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -31,6 +32,7 @@ import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -42,6 +44,9 @@ public class CheckView extends VerticalLayout {
 
 	private final HorizontalLayout usersLayout = new HorizontalLayout();
 	private final VerticalLayout failSafeLayout = new VerticalLayout();
+
+	// TODO: failSafeForm disposal does not work.
+	// TODO: when the page is loaded, load all checked users..
 
 
 	public CheckView( @Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired CheckService checkService ) {
@@ -57,8 +62,11 @@ public class CheckView extends VerticalLayout {
 		// IF PRESENT
 		oUser.ifPresent( user -> {
 
+			initAllCheckedData( checkService.fromCourse( user.getCourse() ) );
+
 			final var type = new RadioButtonGroup< CheckType >();
 			type.setItems( DataProvider.ofItems( CheckType.values() ) );
+			type.addThemeVariants( RadioGroupVariant.LUMO_HELPER_ABOVE_FIELD );
 			add( type );
 
 			final var location = new GeoLocation();
@@ -131,6 +139,15 @@ public class CheckView extends VerticalLayout {
 
 		add( usersLayout, failSafeLayout );
 
+	}
+
+
+	public void initAllCheckedData( List< Check > checks ) {
+
+		for ( final Check check : checks ) {
+			final var checkLayout = new CheckedUserLayout( check );
+			usersLayout.add( checkLayout );
+		}
 	}
 
 
