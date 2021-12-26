@@ -41,6 +41,7 @@ import java.util.Set;
 public class CheckView extends VerticalLayout {
 
 	private final HorizontalLayout usersLayout = new HorizontalLayout();
+	private final VerticalLayout failSafeLayout = new VerticalLayout();
 
 
 	public CheckView( @Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired CheckService checkService ) {
@@ -77,7 +78,7 @@ public class CheckView extends VerticalLayout {
 
 			type.addValueChangeListener( onCheckTypeChange -> {
 				if ( onCheckTypeChange.getValue() != CheckType.OTHER ) {
-					getUI().ifPresent( ui -> ui.remove( failSafeForm ) );
+					failSafeLayout.getUI().ifPresent( ui -> ui.remove( failSafeForm ) );
 				}
 			} );
 
@@ -108,7 +109,7 @@ public class CheckView extends VerticalLayout {
 					} );
 
 					failSafeForm.add( safeUsername, safeDate, safeSubmit );
-					add( failSafeForm );
+					failSafeLayout.add( failSafeForm );
 
 				} else if ( ( type.getValue() == CheckType.REMOTE_IN || type.getValue() == CheckType.REMOTE_OUT )
 						&& isStudent( user.getRoles() ) ) {
@@ -118,7 +119,7 @@ public class CheckView extends VerticalLayout {
 
 				} else {
 
-					getUI().ifPresent( ui -> ui.remove( failSafeForm ) );
+					failSafeLayout.getUI().ifPresent( ui -> ui.remove( failSafeForm ) );
 
 					final var check = checkService.create( check( user, userService.getByUsername( onScan.getValue() ), location, type.getValue() ) );
 					processCheckedData( check );
@@ -128,7 +129,7 @@ public class CheckView extends VerticalLayout {
 			} );
 		} );
 
-		add( usersLayout );
+		add( usersLayout, failSafeLayout );
 
 	}
 
