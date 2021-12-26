@@ -75,6 +75,12 @@ public class CheckView extends VerticalLayout {
 
 			final var failSafeForm = new FormLayout();
 
+			type.addValueChangeListener( onCheckTypeChange -> {
+				if ( onCheckTypeChange.getValue() != CheckType.OTHER ) {
+					getUI().ifPresent( ui -> ui.remove( failSafeForm ) );
+				}
+			} );
+
 			scanner.addValueChangeListener( onScan -> {
 
 				if ( type.getValue() == CheckType.OTHER && user.getUsername().equalsIgnoreCase( onScan.getValue() )
