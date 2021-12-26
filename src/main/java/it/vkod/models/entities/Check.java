@@ -4,12 +4,15 @@ package it.vkod.models.entities;
 import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 @ToString( onlyExplicitlyIncluded = true )
 @Getter
@@ -139,6 +142,36 @@ public class Check implements Serializable, Cloneable, Persistable< Long > {
 	public void preUpdate() {
 
 		this.updated = ZonedDateTime.now();
+	}
+
+
+	@Override
+	public boolean equals( final Object o ) {
+
+		if ( this == o ) {
+			return true;
+		}
+
+		if ( !( o instanceof Check ) ) {
+			return false;
+		}
+
+		final Check check = ( Check ) o;
+
+		return new EqualsBuilder().append( ofDate( getCreated() ), ofDate( check.getCreated() ) ).append( ofDate( getUpdated() ), ofDate( check.getUpdated() ) ).append( getCourse(), check.getCourse() ).append( getType(), check.getType() ).append( getAttendee(), check.getAttendee() ).append( getOrganizer(), check.getOrganizer() ).isEquals();
+	}
+
+
+	@Override
+	public int hashCode() {
+
+		return new HashCodeBuilder( 17, 37 ).append( ofDate( getCreated() ) ).append( ofDate( getUpdated() ) ).append( getCourse() ).append( getType() ).append( getAttendee() ).append( getOrganizer() ).toHashCode();
+	}
+
+
+	public Date ofDate( ZonedDateTime zdt ) {
+
+		return Date.from( zdt.toInstant() );
 	}
 
 }

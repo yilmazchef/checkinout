@@ -4,6 +4,8 @@ package it.vkod.models.entities;
 import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
@@ -98,6 +100,30 @@ public class User implements Serializable, Cloneable, Persistable< Long > {
 	public void preUpdate() {
 
 		this.updated = ZonedDateTime.now();
+	}
+
+
+	@Override
+	public boolean equals( final Object o ) {
+
+		if ( this == o ) {
+			return true;
+		}
+
+		if ( !( o instanceof User ) ) {
+			return false;
+		}
+
+		final User user = ( User ) o;
+
+		return new EqualsBuilder().append( getUsername(), user.getUsername() ).append( getPhone(), user.getPhone() ).append( getEmail(), user.getEmail() ).isEquals();
+	}
+
+
+	@Override
+	public int hashCode() {
+
+		return new HashCodeBuilder( 17, 37 ).append( getUsername() ).append( getPhone() ).append( getEmail() ).toHashCode();
 	}
 
 }
