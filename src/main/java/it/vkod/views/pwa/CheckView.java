@@ -5,6 +5,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.select.Select;
@@ -39,11 +40,16 @@ import java.util.Set;
 @PermitAll
 public class CheckView extends VerticalLayout {
 
+	private final HorizontalLayout usersLayout = new HorizontalLayout();
+
 
 	public CheckView( @Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired CheckService checkService ) {
 
 		setAlignItems( Alignment.CENTER );
 		setJustifyContentMode( JustifyContentMode.CENTER );
+
+		usersLayout.setAlignItems( Alignment.CENTER );
+		usersLayout.getStyle().set( "line-height", "var(--lumo-line-height-m)" );
 
 		final var oUser = authService.get();
 
@@ -116,13 +122,15 @@ public class CheckView extends VerticalLayout {
 			} );
 		} );
 
+		add( usersLayout );
+
 	}
 
 
 	public void processCheckedData( Check check ) {
 
 		final var checkLayout = new CheckedUserLayout( check );
-		add( checkLayout );
+		usersLayout.add( checkLayout );
 
 		NotificationUtils.success( check.getAttendee().toString() + ": " + check.getType().name() ).open();
 	}
