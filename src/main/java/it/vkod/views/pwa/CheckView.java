@@ -3,21 +3,17 @@ package it.vkod.views.pwa;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -31,6 +27,7 @@ import it.vkod.models.entities.UserRole;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
+import it.vkod.views.components.CheckTypeSelectionLayout;
 import it.vkod.views.components.CheckedUserLayout;
 import it.vkod.views.components.NotificationUtils;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
@@ -76,12 +73,16 @@ public class CheckView extends VerticalLayout {
 
 		setAlignItems( Alignment.CENTER );
 		setJustifyContentMode( JustifyContentMode.CENTER );
+		setMargin( false );
+		setPadding( false );
+		setSpacing( false );
+		setSizeFull();
 
-		physical = new Tab( "Fysiek in/uit" );
-		remote = new Tab( "Afstand in/uit" );
-		failsafe = new Tab( "Teamleid" );
-		statistics = new Tab( "Tewerkstelling" );
-		admin = new Tab( "Administratie" );
+		physical = new Tab( VaadinIcon.OFFICE.create() );
+		remote = new Tab( VaadinIcon.HOME.create() );
+		failsafe = new Tab( VaadinIcon.SAFE.create() );
+		statistics = new Tab( VaadinIcon.SPLINE_CHART.create() );
+		admin = new Tab( VaadinIcon.TOOLBOX.create() );
 
 		location = new GeoLocation();
 		location.setWatch( true );
@@ -90,22 +91,32 @@ public class CheckView extends VerticalLayout {
 		location.setMaxAge( 200000 );
 		add( location );
 
-		tabs = new Tabs( physical, remote, admin );
+		tabs = new Tabs( physical, remote, failsafe, statistics, admin );
+		tabs.setWidthFull();
+		tabs.setHeight( "3vh" );
 		tabs.addThemeVariants( TabsVariant.LUMO_EQUAL_WIDTH_TABS, TabsVariant.LUMO_HIDE_SCROLL_BUTTONS );
 		tabs.addSelectedChangeListener( event -> switchTab( event.getSelectedTab() ) );
 
 		events = new HorizontalLayout();
+		events.setWidthFull();
+		events.setMargin( false );
+		events.setPadding( false );
 		events.setSpacing( false );
-		events.setAlignItems( Alignment.CENTER );
-		events.getStyle().set( "line-height", "var(--lumo-line-height-m)" );
+		events.setHeight( "10vh" );
 
 		content = new VerticalLayout();
+		content.setWidthFull();
+		content.setMargin( false );
+		content.setPadding( false );
 		content.setSpacing( false );
+		content.setHeight( "82vh" );
+
 		switchTab( tabs.getSelectedTab() );
 
-		splitter = new SplitLayout(content, events);
-		splitter.setOrientation(SplitLayout.Orientation.VERTICAL);
-		splitter.setMaxHeight("350px");
+		splitter = new SplitLayout( content, events );
+		splitter.setWidthFull();
+		splitter.setHeight( "92vh" );
+		splitter.setOrientation( SplitLayout.Orientation.VERTICAL );
 
 		add( tabs, splitter );
 
@@ -118,107 +129,155 @@ public class CheckView extends VerticalLayout {
 
 		final var oUser = authService.get();
 
+		if ( oUser.isPresent() ) {
+			final var user = oUser.get();
+			physical.setEnabled( isAdmin( user.getRoles() ) || isManager( user.getRoles() ) || isTeacher( user.getRoles() ) );
+			remote.setEnabled( isStudent( user.getRoles() ) || isAdmin( user.getRoles() ) || isManager( user.getRoles() ) || isTeacher( user.getRoles() ) );
+			failsafe.setEnabled( isAdmin( user.getRoles() ) || isManager( user.getRoles() ) || isTeacher( user.getRoles() ) );
+			statistics.setEnabled( isAdmin( user.getRoles() ) || isManager( user.getRoles() ) );
+			admin.setEnabled( isAdmin( user.getRoles() ) );
+		}
+
+
 		if ( tab.equals( physical ) && oUser.isPresent() ) {
 
-			content.addAndExpand( new Paragraph( "Fysiek in/uit-checken" ) );
+			getUI().ifPresent( ui -> ui.getPage().setTitle( "Fysiek in/uit-checken" ) );
 			final var user = oUser.get();
+
+			final var typeDialog = new Dialog();
+			typeDialog.getElement().setAttribute( "aria-label", "Selecteer de juiste typ" );
+			final var typeSelection = new CheckTypeSelectionLayout( typeDialog, PHYSICAL_IN, PHYSICAL_IN, PHYSICAL_OUT );
+			typeDialog.add( typeSelection );
+
+			add( typeDialog );
+			typeDialog.open();
 
 			final var checks = checkService.fromCourse( user.getCourse() );
 			initAllCheckedData( checks );
-			createBadge(checks.size());
-
-			final var type = new RadioButtonGroup< CheckType >();
-			type.setItems( DataProvider.ofItems( PHYSICAL_IN, PHYSICAL_OUT ) );
-			type.addThemeVariants( RadioGroupVariant.LUMO_HELPER_ABOVE_FIELD );
-			content.addAndExpand( type );
+			physical.add( createBadge( checks.size() ) );
 
 			// IF PRESENT
 			final var scanner = new ZXingVaadinReader();
 			scanner.setFrom( Constants.From.camera );
 			scanner.setId( "video" ); // id needs to be 'video' if From.camera.
-			scanner.setStyle( "object-fit: cover; width:auto; height: 35vh;" );
-			content.addAndExpand( scanner );
+			scanner.setStyle( "object-fit: cover; width:96vw; max-height: 70vh;" );
+			content.add( scanner );
 
 			scanner.addValueChangeListener( onScan -> {
-				final var check = checkService.create( check( user, userService.getByUsername( onScan.getValue() ), location, type.getValue() ) );
+				final var check = checkService.create(
+						check( user, userService.getByUsername( onScan.getValue() ), location, typeSelection.getSelectedType() ) );
+
 				processCheckedData( check );
 			} );
 
 		} else if ( tab.equals( remote ) && oUser.isPresent() ) {
 
-			content.add( new Paragraph( "Afstand (Remote) in/uit-checken" ) );
+			getUI().ifPresent( ui -> ui.getPage().setTitle( "Afstand (Remote) in/uit-checken" ) );
 			final var user = oUser.get();
+
+			final var typeDialog = new Dialog();
+			typeDialog.getElement().setAttribute( "aria-label", "Selecteer de juiste typ" );
+			final var typeSelection = new CheckTypeSelectionLayout( typeDialog, REMOTE_IN, REMOTE_IN, REMOTE_OUT );
+			typeDialog.add( typeSelection );
+
+			add( typeDialog );
+			typeDialog.open();
 
 			final var checks = checkService.fromCourse( user.getCourse() );
 			initAllCheckedData( checks );
-			createBadge(checks.size());
-
-			final var type = new RadioButtonGroup< CheckType >();
-			type.setItems( DataProvider.ofItems( REMOTE_IN, REMOTE_OUT ) );
-			type.addThemeVariants( RadioGroupVariant.LUMO_HELPER_ABOVE_FIELD );
-			content.add( type );
+			remote.add( createBadge( checks.size() ) );
 
 			// IF PRESENT
 			final var scanner = new ZXingVaadinReader();
 			scanner.setFrom( Constants.From.camera );
 			scanner.setId( "video" ); // id needs to be 'video' if From.camera.
-			scanner.setStyle( "object-fit: cover; width:auto; height: 95vh; max-width:50vw;" );
+			scanner.setStyle( "object-fit: cover; width:96vw; max-height: 70vh;" );
 			content.add( scanner );
 
 			scanner.addValueChangeListener( onScan -> {
-				final var check = checkService.create( check( userService.getByUsername( onScan.getValue() ), user, location, type.getValue() ) );
+				final var check = checkService.create( check( userService.getByUsername( onScan.getValue() ), user, location, typeSelection.getSelectedType() ) );
 				processCheckedData( check );
 			} );
 
 
 		} else if ( tab.equals( failsafe ) && oUser.isPresent() ) {
 
-			content.add( new Paragraph( "Manueel in/uit-checken " ) );
+			getUI().ifPresent( ui -> ui.getPage().setTitle( "Manueel in/uit-checken " ) );
 			final var user = oUser.get();
 
-			final var checks = checkService.fromCourse( user.getCourse() );
-			initAllCheckedData( checks );
-			createBadge(checks.size());
+			// IF PRESENT
+			final var scanner = new ZXingVaadinReader();
+			scanner.setFrom( Constants.From.camera );
+			scanner.setId( "video" ); // id needs to be 'video' if From.camera.
+			scanner.setStyle( "object-fit: cover; width:96vw; max-height: 70vh;" );
+			content.add( scanner );
 
-			final var failSafeForm = new FormLayout();
+			scanner.addValueChangeListener( onScan -> {
 
-			final var safeCheck = new Select<>( values() );
-			failSafeForm.add( safeCheck );
+				if ( onScan.getValue().equalsIgnoreCase( user.getUsername() ) ) {
 
-			final var safeDate = new DateTimePicker();
-			safeDate.setLabel( "Het datum van de check" );
-			safeDate.setHelperText( "Het datum moet tussen de laatste 60 dagen zijn." );
-			safeDate.setAutoOpen( true );
-			safeDate.setMin( LocalDateTime.now().minusDays( 1 ) );
-			safeDate.setMax( LocalDateTime.now().plusDays( 7 ) );
-			safeDate.setValue( LocalDateTime.now() );
+					final var typeDialog = new Dialog();
+					typeDialog.getElement().setAttribute( "aria-label", "Selecteer de juiste typ" );
+					final var typeSelection = new CheckTypeSelectionLayout( typeDialog, OTHER, CheckType.values() );
+					typeDialog.add( typeSelection );
 
-			final var safeUsername = new TextField( "Gebruikersnaam:" );
+					add( typeDialog );
+					typeDialog.open();
 
-			final var safeSubmit = new Button( "Safe Submit", VaadinIcon.SIGN_IN_ALT.create() );
-			safeSubmit.addClickListener( onSafeSubmit -> {
+					final var checks = checkService.fromCourse( user.getCourse() );
+					initAllCheckedData( checks );
+					failsafe.add( createBadge( checks.size() ) );
 
-				final var check = checkService.create( check( user, userService.getByUsername( safeUsername.getValue() ), location, safeCheck.getValue() ) );
-				processCheckedData( check );
+					final var failSafeForm = new FormLayout();
+
+					final var safeDate = new DateTimePicker();
+					safeDate.setLabel( "Het datum van de check" );
+					safeDate.setHelperText( "Het datum moet tussen de laatste 60 dagen zijn." );
+					safeDate.setAutoOpen( true );
+					safeDate.setMin( LocalDateTime.now().minusDays( 1 ) );
+					safeDate.setMax( LocalDateTime.now().plusDays( 7 ) );
+					safeDate.setValue( LocalDateTime.now() );
+
+					final var safeUsername = new TextField( "Gebruikersnaam:" );
+
+					final var safeSubmit = new Button( "Verzenden", VaadinIcon.CHECK_SQUARE.create() );
+					safeSubmit.addClickListener( onSafeSubmit -> {
+
+						final var check = checkService.create( check( user, userService.getByUsername( safeUsername.getValue() ), location, typeSelection.getSelectedType() ) );
+						processCheckedData( check );
+
+					} );
+
+					final var reActiveScan = new Button( "Heractiveer Scan", VaadinIcon.QRCODE.create() );
+					reActiveScan.addClickListener( onSafeSubmit -> {
+
+						scanner.setVisible( !scanner.isVisible() );
+
+					} );
+
+					failSafeForm.add( safeUsername, safeDate, safeSubmit, reActiveScan );
+					content.add( failSafeForm );
+
+					scanner.setVisible( false );
+
+				} else {
+					NotificationUtils.error( "Uw account heeft GEEN toegang tot de failsafe-modus." ).open();
+				}
+
 
 			} );
 
-			failSafeForm.add( safeUsername, safeDate, safeSubmit );
-			content.add( failSafeForm );
-
-
 		} else if ( tab.equals( statistics ) && oUser.isPresent() ) {
 
-			content.add( new Paragraph( "This is the Payment tab" ) );
+			getUI().ifPresent( ui -> ui.getPage().setTitle( "This is the Payment tab" ) );
 
 
 		} else if ( tab.equals( admin ) && oUser.isPresent() ) {
-			content.add( new Paragraph( "This is the Payment tab" ) );
+			getUI().ifPresent( ui -> ui.getPage().setTitle( "This is the Payment tab" ) );
 
 
 		} else {
-			content.add( new Paragraph( "There has been a technical conflict. Please contact the system administrator via helpdesk@intecbrussel.be" ) );
-
+			NotificationUtils.error( "There has been a technical conflict. Please contact the system administrator via helpdesk@intecbrussel.be" ).open();
 
 		}
 	}

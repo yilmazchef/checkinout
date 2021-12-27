@@ -15,13 +15,13 @@ public class CheckedUserLayout extends HorizontalLayout {
 
 		this.setAlignItems( Alignment.CENTER );
 
-		final var fullName = check.getAttendee().getFirstName() + " " + check.getAttendee().getLastName();
+		final var checkType = check.getAttendee().getFirstName() + " " + check.getAttendee().getLastName();
 
 		final var avatar = new Avatar();
-		avatar.setName( fullName );
+		avatar.setName( checkType );
 		avatar.setImage( check.getAttendee().getProfile() );
 
-		final var name = new Span( fullName );
+		final var name = new Span( checkType );
 		final var roles = new Span( check.getAttendee().getRoles().stream().map( Enum::name ).collect( Collectors.joining( "," ) ) );
 		roles.getStyle()
 				.set( "color", "var(--lumo-secondary-text-color)" )
