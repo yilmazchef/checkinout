@@ -168,7 +168,7 @@ public class CheckView extends VerticalLayout {
 			content.add( scanner );
 
 			scanner.addValueChangeListener( onScan -> {
-				final var check = checkService.create(
+				final var check = checkService.createOrUpdate(
 						check( user, userService.getByUsername( onScan.getValue() ), location, typeSelection.getSelectedType() ) );
 
 				processCheckedData( check );
@@ -200,7 +200,7 @@ public class CheckView extends VerticalLayout {
 			content.add( scanner );
 
 			scanner.addValueChangeListener( onScan -> {
-				final var check = checkService.create( check( userService.getByUsername( onScan.getValue() ), user, location, typeSelection.getSelectedType() ) );
+				final var check = checkService.createOrUpdate( check( userService.getByUsername( onScan.getValue() ), user, location, typeSelection.getSelectedType() ) );
 				processCheckedData( check );
 			} );
 
@@ -249,7 +249,7 @@ public class CheckView extends VerticalLayout {
 					final var safeSubmit = new Button( "Verzenden", VaadinIcon.CHECK_SQUARE.create() );
 					safeSubmit.addClickListener( onSafeSubmit -> {
 
-						final var check = checkService.create( check( user, userService.getByUsername( safeUsername.getValue() ), location, typeSelection.getSelectedType() ) );
+						final var check = checkService.createOrUpdate( check( user, userService.getByUsername( safeUsername.getValue() ), location, typeSelection.getSelectedType() ) );
 						processCheckedData( check );
 
 					} );
