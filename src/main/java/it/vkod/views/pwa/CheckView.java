@@ -57,6 +57,7 @@ public class CheckView extends VerticalLayout {
 
 	private final Tabs tabs;
 	private final Tab physical;
+
 	private final Tab remote;
 	private final Tab failsafe;
 	private final Tab statistics;
@@ -145,6 +146,7 @@ public class CheckView extends VerticalLayout {
 			final var user = oUser.get();
 
 			final var typeDialog = new Dialog();
+			typeDialog.setCloseOnOutsideClick( false );
 			typeDialog.getElement().setAttribute( "aria-label", "Selecteer de juiste typ" );
 			final var typeSelection = new CheckTypeSelectionLayout( typeDialog, PHYSICAL_IN, PHYSICAL_IN, PHYSICAL_OUT );
 			typeDialog.add( typeSelection );
@@ -176,6 +178,7 @@ public class CheckView extends VerticalLayout {
 			final var user = oUser.get();
 
 			final var typeDialog = new Dialog();
+			typeDialog.setCloseOnOutsideClick( false );
 			typeDialog.getElement().setAttribute( "aria-label", "Selecteer de juiste typ" );
 			final var typeSelection = new CheckTypeSelectionLayout( typeDialog, REMOTE_IN, REMOTE_IN, REMOTE_OUT );
 			typeDialog.add( typeSelection );
@@ -217,6 +220,7 @@ public class CheckView extends VerticalLayout {
 				if ( onScan.getValue().equalsIgnoreCase( user.getUsername() ) ) {
 
 					final var typeDialog = new Dialog();
+					typeDialog.setCloseOnOutsideClick( false );
 					typeDialog.getElement().setAttribute( "aria-label", "Selecteer de juiste typ" );
 					final var typeSelection = new CheckTypeSelectionLayout( typeDialog, OTHER, CheckType.values() );
 					typeDialog.add( typeSelection );
@@ -248,17 +252,11 @@ public class CheckView extends VerticalLayout {
 
 					} );
 
-					final var reActiveScan = new Button( "Heractiveer Scan", VaadinIcon.QRCODE.create() );
-					reActiveScan.addClickListener( onSafeSubmit -> {
-
-						scanner.setVisible( !scanner.isVisible() );
-
-					} );
-
-					failSafeForm.add( safeUsername, safeDate, safeSubmit, reActiveScan );
+					failSafeForm.add( safeUsername, safeDate, safeSubmit );
 					content.add( failSafeForm );
 
 					scanner.setVisible( false );
+
 
 				} else {
 					NotificationUtils.error( "Uw account heeft GEEN toegang tot de failsafe-modus." ).open();
