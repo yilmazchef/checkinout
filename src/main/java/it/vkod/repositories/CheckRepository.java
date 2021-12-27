@@ -26,4 +26,6 @@ public interface CheckRepository extends JpaRepository< Check, Long >, JpaSpecif
 
 	List< Check > findAllByActiveAndCourse( final Boolean active, final String course );
 
+	List< Check > findAllByActiveAndCourseAndCreatedOrUpdatedAndTypeIsIn( final Boolean active, final @NotEmpty String course, final ZonedDateTime created, final ZonedDateTime updated, final Collection< CheckType > type );
+
 }

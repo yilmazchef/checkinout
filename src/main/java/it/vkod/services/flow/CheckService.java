@@ -5,6 +5,7 @@ import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
 import it.vkod.models.entities.Check;
+import it.vkod.models.entities.CheckType;
 import it.vkod.repositories.CheckRepository;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.lang.Boolean.TRUE;
 
@@ -77,6 +79,12 @@ public class CheckService {
 	public List< Check > fromCourse( final String course ) {
 
 		return checkRepository.findAllByActiveAndCourse( TRUE, course );
+	}
+
+
+	public List< Check > fromTodayAndCourse( final String course, CheckType... types ) {
+
+		return checkRepository.findAllByActiveAndCourseAndCreatedOrUpdatedAndTypeIsIn( TRUE, course, ZonedDateTime.now(), ZonedDateTime.now(), Set.of( types ) );
 	}
 
 }

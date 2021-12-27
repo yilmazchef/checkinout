@@ -154,7 +154,7 @@ public class CheckView extends VerticalLayout {
 			add( typeDialog );
 			typeDialog.open();
 
-			final var checks = checkService.fromCourse( user.getCourse() );
+			final var checks = checkService.fromTodayAndCourse( user.getCourse(), typeSelection.getSelectedType() );
 			initAllCheckedData( checks );
 			physical.add( createBadge( checks.size() ) );
 
@@ -186,7 +186,7 @@ public class CheckView extends VerticalLayout {
 			add( typeDialog );
 			typeDialog.open();
 
-			final var checks = checkService.fromCourse( user.getCourse() );
+			final var checks = checkService.fromTodayAndCourse( user.getCourse(), typeSelection.getSelectedType() );
 			initAllCheckedData( checks );
 			remote.add( createBadge( checks.size() ) );
 
@@ -228,7 +228,7 @@ public class CheckView extends VerticalLayout {
 					add( typeDialog );
 					typeDialog.open();
 
-					final var checks = checkService.fromCourse( user.getCourse() );
+					final var checks = checkService.fromTodayAndCourse( user.getCourse(), typeSelection.getSelectedType() );
 					initAllCheckedData( checks );
 					failsafe.add( createBadge( checks.size() ) );
 
