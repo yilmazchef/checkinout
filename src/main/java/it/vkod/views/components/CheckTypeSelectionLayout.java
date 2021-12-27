@@ -10,13 +10,13 @@ import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.data.provider.DataProvider;
 import it.vkod.models.entities.CheckType;
 import lombok.Getter;
-
-import static it.vkod.models.entities.CheckType.OTHER;
+import lombok.Setter;
 
 public class CheckTypeSelectionLayout extends VerticalLayout {
 
+	@Setter
 	@Getter
-	private CheckType selectedType = OTHER;
+	private CheckType selectedType;
 
 
 	public CheckTypeSelectionLayout( Dialog dialog, CheckType defaultType, CheckType... options ) {
@@ -40,7 +40,11 @@ public class CheckTypeSelectionLayout extends VerticalLayout {
 		setAlignSelf( FlexComponent.Alignment.END );
 
 		typeSelect.addValueChangeListener( onTypeSelect -> {
-			selectedType = onTypeSelect.getValue();
+			if ( onTypeSelect.getValue() != onTypeSelect.getValue() ) {
+				setSelectedType( onTypeSelect.getValue() );
+			} else {
+				setSelectedType( defaultType );
+			}
 			dialog.close();
 		} );
 

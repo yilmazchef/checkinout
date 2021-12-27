@@ -93,6 +93,7 @@ public class CheckView extends VerticalLayout {
 		add( location );
 
 		tabs = new Tabs( physical, remote, failsafe, statistics, admin );
+		tabs.setSelectedIndex( 0 );
 		tabs.setWidthFull();
 		tabs.setHeight( "3vh" );
 		tabs.addThemeVariants( TabsVariant.LUMO_EQUAL_WIDTH_TABS, TabsVariant.LUMO_HIDE_SCROLL_BUTTONS );
@@ -132,6 +133,7 @@ public class CheckView extends VerticalLayout {
 
 		if ( oUser.isPresent() ) {
 			final var user = oUser.get();
+
 			physical.setEnabled( isAdmin( user.getRoles() ) || isManager( user.getRoles() ) || isTeacher( user.getRoles() ) );
 			remote.setEnabled( isStudent( user.getRoles() ) || isAdmin( user.getRoles() ) || isManager( user.getRoles() ) || isTeacher( user.getRoles() ) );
 			failsafe.setEnabled( isAdmin( user.getRoles() ) || isManager( user.getRoles() ) || isTeacher( user.getRoles() ) );
