@@ -24,7 +24,7 @@ import java.io.IOException;
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Genereer QR")
-@Route(value = "gen", layout = BaseLayout.class)
+@Route(value = "generate")
 @AnonymousAllowed
 public class GenerateView extends VerticalLayout {
 

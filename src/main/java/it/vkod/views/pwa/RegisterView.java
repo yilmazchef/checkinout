@@ -36,7 +36,7 @@ import static com.vaadin.flow.component.notification.Notification.show;
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle( "Inschrijven" )
-@Route( value = "reg", layout = BaseLayout.class )
+@Route( value = "register" )
 @AnonymousAllowed
 public class RegisterView extends VerticalLayout {
 

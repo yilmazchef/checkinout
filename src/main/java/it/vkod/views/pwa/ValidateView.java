@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.security.PermitAll;
 
 @PageTitle( "Valideer QR" )
-@Route( value = "val", layout = BaseLayout.class )
+@Route( value = "validate")
 @PermitAll
 public class ValidateView extends VerticalLayout {
 

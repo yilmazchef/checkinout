@@ -3,6 +3,8 @@ package it.vkod.views.pwa;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.KeyDownEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -10,6 +12,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.server.VaadinSession;
 import it.vkod.services.flow.AdminService;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.views.components.EmbeddedPdfDocument;
@@ -18,50 +21,56 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.security.RolesAllowed;
 
-@PageTitle( "Administratie" )
-@Route( value = "adm", layout = BaseLayout.class )
-@RolesAllowed( { "ADMIN", "MANAGER", "LEADER", "TEACHER" } )
+@PageTitle("Administratie")
+@Route(value = "admin")
+@RolesAllowed({"ADMIN", "MANAGER", "LEADER", "TEACHER"})
 public class AdminView extends VerticalLayout {
 
 
-	public AdminView( @Autowired AuthenticationService authService, @Autowired AdminService adminService ) {
+    public AdminView(@Autowired AuthenticationService authService, @Autowired AdminService adminService) {
 
-		final var authUser = authService.get();
+        final var authUser = authService.get();
 
-		if ( authUser.isEmpty() ) {
-			NotificationUtils.error( "The active user is not authorized!" ).open();
-		} else {
-			final var courseField = new TextField( "Voer hier de course-code in: " );
-			courseField.setRequired( true );
-			courseField.setRequiredIndicatorVisible( true );
-			courseField.addKeyDownListener( com.vaadin.flow.component.Key.ENTER,
-					( ComponentEventListener< KeyDownEvent > ) keyDownEvent -> {
-						final var actionLayout = new HorizontalLayout();
-						final var route = RouteConfiguration.forSessionScope().getUrl( CheckView.class );
+        if (authUser.isEmpty()) {
+            NotificationUtils.error("The active user is not authorized!").open();
+        } else {
 
-						final String PDF = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
-						final String CSV = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
-						final String XLS = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
-						final String USERS = route + "/api/v1/export/users/pdf/" + courseField.getValue().replaceAll(" ", "%20");
+            Button closeButton = new Button("Close session", event -> {
+                VaadinSession.getCurrent().getSession().invalidate();
+                UI.getCurrent().getPage().reload();
+            });
 
-						final var pdfAnchor = new Anchor( PDF, "Druk als PDF" );
-						final var csvAnchor = new Anchor( CSV, "Druk als CSV" );
-						final var excelAnchor = new Anchor( XLS, "Druk als EXCEL" );
+            final var courseField = new TextField("Voer hier de course-code in: ");
+            courseField.setRequired(true);
+            courseField.setRequiredIndicatorVisible(true);
+            courseField.addKeyDownListener(com.vaadin.flow.component.Key.ENTER,
+                    (ComponentEventListener<KeyDownEvent>) keyDownEvent -> {
+                        final var actionLayout = new HorizontalLayout();
+                        final var route = RouteConfiguration.forSessionScope().getUrl(HomeView.class);
 
-						final var viewerLayout = new VerticalLayout();
-						viewerLayout.add( new EmbeddedPdfDocument( USERS ) );
+                        final String PDF = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
+                        final String CSV = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
+                        final String XLS = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
+                        final String USERS = route + "/api/v1/export/users/pdf/" + courseField.getValue().replaceAll(" ", "%20");
 
-						actionLayout.add( pdfAnchor, csvAnchor, excelAnchor );
+                        final var pdfAnchor = new Anchor(PDF, "Druk als PDF");
+                        final var csvAnchor = new Anchor(CSV, "Druk als CSV");
+                        final var excelAnchor = new Anchor(XLS, "Druk als EXCEL");
 
-						add( actionLayout, viewerLayout );
+                        final var viewerLayout = new VerticalLayout();
+                        viewerLayout.add(new EmbeddedPdfDocument(USERS));
 
-					} );
+                        actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
+
+                        add(actionLayout, viewerLayout);
+
+                    });
 
 
-			add( courseField );
-		}
+            add(courseField);
+        }
 
 
-	}
+    }
 
 }

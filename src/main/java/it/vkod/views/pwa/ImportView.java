@@ -18,8 +18,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.IntStream;
 
-@PageTitle("Importeer CSV")
-@Route(value = "imp", layout = BaseLayout.class)
+@PageTitle("Importeer data")
+@Route(value = "import")
 public class ImportView extends VerticalLayout {
 
     private final Grid<String[]> grid = new Grid<>();

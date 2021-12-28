@@ -37,7 +37,7 @@ public class ExportController {
 	@GetMapping( value = "/checks/csv/{course}" )
 	public void toCSV( HttpServletResponse response, @PathVariable final String course ) {
 
-		exportService.toCSV( response, checkRepository.findAllByActiveAndCourse( TRUE, course ) );
+		exportService.toCSV( response, checkRepository.findAllByCourse( course ) );
 	}
 
 
@@ -45,7 +45,7 @@ public class ExportController {
 	@GetMapping( "/checks/pdf/{course}" )
 	public void toPDF( HttpServletResponse response, @PathVariable final String course ) {
 
-		exportService.toPDF( response, checkRepository.findAllByActiveAndCourse( TRUE, course ) );
+		exportService.toPDF( response, checkRepository.findAllByCourse( course ) );
 	}
 
 
@@ -53,7 +53,7 @@ public class ExportController {
 	@GetMapping( "/checks/xlsx/{course}" )
 	public void toExcel( HttpServletResponse response, @PathVariable final String course ) {
 
-		exportService.toExcel( response, checkRepository.findAllByActiveAndCourse( TRUE, course ) );
+		exportService.toExcel( response, checkRepository.findAllByCourse( course ) );
 	}
 
 
