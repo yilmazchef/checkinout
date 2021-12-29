@@ -93,10 +93,9 @@ public class GuestCheckinLayout extends VerticalLayout {
                 // Use one column by default
                 new FormLayout.ResponsiveStep("0", 1),
                 // Use two columns, if layout's width exceeds 500px
-                new FormLayout.ResponsiveStep("500px", 2)
+                new FormLayout.ResponsiveStep("480px", 2),
+                new FormLayout.ResponsiveStep("640px", 3)
         );
-        // Stretch the username field over 2 columns
-        formLayout.setColspan(username, 2);
 
         submit.addClickListener(onSubmit -> {
             String pwd = UUID.randomUUID().toString();
@@ -110,10 +109,7 @@ public class GuestCheckinLayout extends VerticalLayout {
                     .setPassword(pwd)
             );
 
-            final var newCheck = initCheckinLayout(
-                    course.getValue(),
-                    organizers.getValue(),
-                    attendee);
+            final var newCheck = initCheckinLayout(course.getValue(), organizers.getValue(), attendee);
 
             scanner.addValueChangeListener(onScan -> {
 

@@ -10,11 +10,12 @@ import org.springframework.data.jpa.repository.Query;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface UserRepository extends JpaRepository< User, Long >, JpaSpecificationExecutor< User > {
 
-	@Query("select u from User u where u.roles in :role")
-	List<User> findAllByRole(final UserRole role);
+	@Query("select u from User u where u.roles in (:role)")
+	List<User> findAllByRoles(final Set<UserRole> roles);
 
 	List< User > findAllByUsernameLikeOrPhoneContaining( final @NotEmpty String username, final String phone );
 
