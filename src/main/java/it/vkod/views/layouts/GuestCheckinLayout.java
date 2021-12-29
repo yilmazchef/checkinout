@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.server.InputStreamFactory;
@@ -42,6 +43,17 @@ public class GuestCheckinLayout extends VerticalLayout {
     private final ZXingVaadinReader scanner;
     private final VerticalLayout generate;
 
+    private final FormLayout formLayout;
+
+    private final Select<User> organizers;
+    private final TextField course;
+    private final TextField firstName;
+    private final TextField lastName;
+    private final TextField username;
+    private final TextField email;
+    private final TextField phone;
+    private final Button submit;
+
     private static final String WHATSAPP_REDIRECT_URL = "https://api.whatsapp.com/send?phone=";
 
     public GuestCheckinLayout(final UserService userService, final CheckService checkService) {
@@ -55,25 +67,25 @@ public class GuestCheckinLayout extends VerticalLayout {
         events = initEventsLayout();
         scanner = initScannerLayout();
         generate = initGenerateLayout();
+        organizers = initOrganizersLayout();
 
-        final var course = new TextField("Course");
-        final var organizer = new TextField("Organizer");
+        course = new TextField("Course");
 
-        final var firstName = new TextField("Voornaam");
-        final var lastName = new TextField("Familienaam");
-        final var username = new TextField("Gebruikersnaam");
-        final var email = new TextField("Email");
-        final var phone = new TextField("GSM-nummer");
+        firstName = new TextField("Voornaam");
+        lastName = new TextField("Familienaam");
+        username = new TextField("Gebruikersnaam");
+        email = new TextField("Email");
+        phone = new TextField("GSM-nummer");
         phone.setRequiredIndicatorVisible(true);
         phone.setClearButtonVisible(true);
         phone.setPlaceholder("+32XXXXXXXXX");
-        final var submit = new Button("Submit");
+        submit = new Button("Submit");
 
-        final var formLayout = new FormLayout();
+        formLayout = new FormLayout();
         formLayout.add(
                 firstName, lastName,
                 username, email, phone,
-                organizer,
+                organizers,
                 course,
                 submit
         );
@@ -100,7 +112,7 @@ public class GuestCheckinLayout extends VerticalLayout {
 
             final var newCheck = initCheckinLayout(
                     course.getValue(),
-                    userService.getByUsername(organizer.getValue()),
+                    organizers.getValue(),
                     attendee);
 
             scanner.addValueChangeListener(onScan -> {
@@ -144,6 +156,14 @@ public class GuestCheckinLayout extends VerticalLayout {
         add(location, events);
 
 
+    }
+
+    private Select<User> initOrganizersLayout() {
+        final var layout = new Select<>(userService.teachers().toArray(User[]::new));
+        layout.setEmptySelectionAllowed(false);
+        layout.setRequiredIndicatorVisible(true);
+        layout.setTextRenderer(User::getUsername);
+        return layout;
     }
 
     private Image convertToImage(final byte[] imageData, final String username) {

@@ -2,6 +2,7 @@ package it.vkod.services.flow;
 
 
 import it.vkod.models.entities.User;
+import it.vkod.models.entities.UserRole;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,115 +20,135 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
 
-	@Override
-	public UserDetails loadUserByUsername( String username ) throws UsernameNotFoundException {
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		final var oUser = userRepository.findByUsername( username );
-		if ( oUser.isEmpty() ) {
-			throw new UsernameNotFoundException( "No user present with username: " + username );
-		} else {
-			return new org.springframework.security.core.userdetails.User( oUser.get().getUsername(), oUser.get().getPassword(),
-					getAuthorities( oUser.get() ) );
-		}
-	}
-
-
-	private static List< GrantedAuthority > getAuthorities( User user ) {
-
-		return user.getRoles()
-				.stream()
-				.map( role -> new SimpleGrantedAuthority( "ROLE_" + role ) )
-				.collect( Collectors.toList() );
-
-	}
+        final var oUser = userRepository.findByUsername(username);
+        if (oUser.isEmpty()) {
+            throw new UsernameNotFoundException("No user present with username: " + username);
+        } else {
+            return new org.springframework.security.core.userdetails.User(oUser.get().getUsername(), oUser.get().getPassword(),
+                    getAuthorities(oUser.get()));
+        }
+    }
 
 
-	public Set< User > fetchAll() {
+    private static List<GrantedAuthority> getAuthorities(User user) {
 
-		final var userIterator = userRepository.findAll().iterator();
-		final var userSet = new LinkedHashSet< User >();
+        return user.getRoles()
+                .stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .collect(Collectors.toList());
 
-		while ( userIterator.hasNext() ) {
-			userSet.add( userIterator.next() );
-		}
-
-		return userSet;
-	}
+    }
 
 
-	public List< User > fetchAll( final String course ) {
+    public Set<User> all() {
 
-		return userRepository.findAllByCourse( course );
-	}
+        final var userIterator = userRepository.findAll().iterator();
+        final var userSet = new LinkedHashSet<User>();
 
+        while (userIterator.hasNext()) {
+            userSet.add(userIterator.next());
+        }
 
-	public Optional< User > findByUsernameAndHashedPassword( final String username, final String hashedPassword ) {
-
-		return userRepository.findByUsernameAndPassword( username, hashedPassword );
-	}
-
-
-	public Optional< User > findByEmailAndHashedPassword( final String email, final String hashedPassword ) {
-
-		return userRepository.findByEmailAndPassword( email, hashedPassword );
-	}
+        return userSet;
+    }
 
 
-	public Optional< User > findByPhoneAndHashedPassword( final String phone, final String hashedPassword ) {
+    public List<User> fromCourse(final String course) {
 
-		return userRepository.findByPhoneAndPassword( phone, hashedPassword );
-	}
+        return userRepository.findAllByCourse(course);
+    }
 
+    public List<User> students() {
 
-	public Optional< User > findByUsername( final String username ) {
+        return userRepository.findAllByRole(UserRole.STUDENT);
+    }
 
-		return userRepository.findByUsername( username );
-	}
+    public List<User> teachers() {
 
+        return userRepository.findAllByRole(UserRole.TEACHER);
+    }
 
-	public Optional< User > findByUsernameOrEmailOrPhone( final String username, final String email, final String phone ) {
+    public List<User> managers() {
 
-		return userRepository.findByUsernameOrEmailOrPhone( username, email, phone );
-	}
+        return userRepository.findAllByRole(UserRole.MANAGER);
+    }
 
+    public List<User> admins() {
 
-	public User getByUsername( final String username ) {
-
-		return userRepository.getByUsername( username );
-	}
-
-
-	public Boolean existsByUsername( final String username ) {
-
-		return userRepository.existsByUsername( username );
-	}
+        return userRepository.findAllByRole(UserRole.ADMIN);
+    }
 
 
-	public Optional< User > findUserById( Long userId ) {
+    public Optional<User> findByUsernameAndHashedPassword(final String username, final String hashedPassword) {
 
-		return userRepository.findById( userId );
-	}
-
-
-	@Transactional
-	public User createUser( User entity ) {
-
-		return userRepository.save( entity );
-	}
+        return userRepository.findByUsernameAndPassword(username, hashedPassword);
+    }
 
 
-	public List< String > fetchAllUsernames( final String keyword ) {
+    public Optional<User> findByEmailAndHashedPassword(final String email, final String hashedPassword) {
 
-		return userRepository.findAllByUsernameLikeOrPhoneContaining( keyword, keyword ).stream().map( User::getUsername ).collect( Collectors.toUnmodifiableList() );
-	}
+        return userRepository.findByEmailAndPassword(email, hashedPassword);
+    }
 
 
-	public List< String > fetchAllUsernamesByCourse( final String course ) {
+    public Optional<User> findByPhoneAndHashedPassword(final String phone, final String hashedPassword) {
 
-		return userRepository.findAllByCourse( course ).stream().map( User::getUsername ).collect( Collectors.toUnmodifiableList() );
-	}
+        return userRepository.findByPhoneAndPassword(phone, hashedPassword);
+    }
+
+
+    public Optional<User> findByUsername(final String username) {
+
+        return userRepository.findByUsername(username);
+    }
+
+
+    public Optional<User> findByUsernameOrEmailOrPhone(final String username, final String email, final String phone) {
+
+        return userRepository.findByUsernameOrEmailOrPhone(username, email, phone);
+    }
+
+
+    public User getByUsername(final String username) {
+
+        return userRepository.getByUsername(username);
+    }
+
+
+    public Boolean existsByUsername(final String username) {
+
+        return userRepository.existsByUsername(username);
+    }
+
+
+    public Optional<User> findUserById(Long userId) {
+
+        return userRepository.findById(userId);
+    }
+
+
+    @Transactional
+    public User createUser(User entity) {
+
+        return userRepository.save(entity);
+    }
+
+
+    public List<String> fetchAllUsernames(final String keyword) {
+
+        return userRepository.findAllByUsernameLikeOrPhoneContaining(keyword, keyword).stream().map(User::getUsername).collect(Collectors.toUnmodifiableList());
+    }
+
+
+    public List<String> fetchAllUsernamesByCourse(final String course) {
+
+        return userRepository.findAllByCourse(course).stream().map(User::getUsername).collect(Collectors.toUnmodifiableList());
+    }
 
 }
