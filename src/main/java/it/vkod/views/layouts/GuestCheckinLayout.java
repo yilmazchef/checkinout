@@ -1,11 +1,18 @@
 package it.vkod.views.layouts;
 
 
+import com.google.zxing.WriterException;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PreserveOnRefresh;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
@@ -16,11 +23,15 @@ import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
 
 import static it.vkod.models.entities.CheckType.GUEST_IN;
+import static it.vkod.utils.QRUtils.generateQR;
 
+@PreserveOnRefresh
 public class GuestCheckinLayout extends VerticalLayout {
 
     private final UserService userService;
@@ -29,7 +40,9 @@ public class GuestCheckinLayout extends VerticalLayout {
     private final HorizontalLayout events;
     private final GeoLocation location;
     private final ZXingVaadinReader scanner;
+    private final VerticalLayout generate;
 
+    private static final String WHATSAPP_REDIRECT_URL = "https://api.whatsapp.com/send?phone=";
 
     public GuestCheckinLayout(final UserService userService, final CheckService checkService) {
 
@@ -41,6 +54,7 @@ public class GuestCheckinLayout extends VerticalLayout {
         location = initLocationLayout();
         events = initEventsLayout();
         scanner = initScannerLayout();
+        generate = initGenerateLayout();
 
         final var course = new TextField("Course");
         final var organizer = new TextField("Organizer");
@@ -48,13 +62,17 @@ public class GuestCheckinLayout extends VerticalLayout {
         final var firstName = new TextField("Voornaam");
         final var lastName = new TextField("Familienaam");
         final var username = new TextField("Gebruikersnaam");
-        final var email = new TextField("email");
+        final var email = new TextField("Email");
+        final var phone = new TextField("GSM-nummer");
+        phone.setRequiredIndicatorVisible(true);
+        phone.setClearButtonVisible(true);
+        phone.setPlaceholder("+32XXXXXXXXX");
         final var submit = new Button("Submit");
 
         final var formLayout = new FormLayout();
         formLayout.add(
                 firstName, lastName,
-                username,
+                username, email, phone,
                 organizer,
                 course,
                 submit
@@ -73,6 +91,7 @@ public class GuestCheckinLayout extends VerticalLayout {
             User attendee = userService.createUser(new User()
                     .setUsername(username.getValue())
                     .setEmail(email.getValue())
+                    .setPhone(phone.getValue())
                     .setFirstName(firstName.getValue())
                     .setLastName(lastName.getValue())
                     .setCourse(course.getValue())
@@ -87,15 +106,37 @@ public class GuestCheckinLayout extends VerticalLayout {
             scanner.addValueChangeListener(onScan -> {
 
                 if (onScan.getValue().equalsIgnoreCase(String.valueOf(newCheck.getValidation()))) {
-                    final var checkLayout = new CheckedUserLayout(newCheck);
-                    events.add(checkLayout);
+
+                    try {
+
+                        generate.add(
+                                convertToImage(generateQR(attendee.getUsername(), 512, 512), attendee.getUsername()));
+                        Notification.show(
+                                        ("Generated a QR Code for " + attendee.getUsername()),
+                                        8000,
+                                        Notification.Position.BOTTOM_CENTER)
+                                .open();
+
+                        final var sendWhatsAppButton = new Button("Verzenden via Whatsapp", onSendClick -> {
+                            UI.getCurrent().getPage().setLocation(WHATSAPP_REDIRECT_URL.concat(attendee.getPhone()));
+                        });
+
+                        generate.add(sendWhatsAppButton);
+                        generate.setVisible(true);
+                        scanner.setVisible(false);
+                        events.setVisible(false);
+
+                    } catch (WriterException | IOException fileEx) {
+                        Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER).open();
+                    }
+
                 }
 
                 NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
 
             });
 
-            add(scanner);
+            add(scanner, generate);
         });
 
         events.add(formLayout);
@@ -103,6 +144,26 @@ public class GuestCheckinLayout extends VerticalLayout {
         add(location, events);
 
 
+    }
+
+    private Image convertToImage(final byte[] imageData, final String username) {
+
+        return new Image(new StreamResource(
+                username.concat("_QR.png"),
+                (InputStreamFactory) () -> new ByteArrayInputStream(imageData)),
+                username);
+    }
+
+    private VerticalLayout initGenerateLayout() {
+        final VerticalLayout layout;
+        layout = new VerticalLayout();
+        layout.setWidthFull();
+        layout.setMargin(false);
+        layout.setPadding(false);
+        layout.setSpacing(false);
+        layout.setVisible(false);
+        layout.setHeight("100vh");
+        return layout;
     }
 
     private HorizontalLayout initEventsLayout() {
