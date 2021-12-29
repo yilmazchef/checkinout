@@ -66,12 +66,12 @@ public class UserService implements UserDetailsService {
 
     public List<User> students() {
 
-        return userRepository.findAllByRoles(Collections.singleton(UserRole.STUDENT));
+        return userRepository.findAllByRoles(Set.of(UserRole.STUDENT));
     }
 
     public List<User> teachers() {
 
-        return userRepository.findAllByRoles(Collections.singleton(UserRole.TEACHER));
+        return userRepository.findAllByRoles(Set.of(UserRole.TEACHER));
     }
 
     public List<User> managers() {
