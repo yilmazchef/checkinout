@@ -10,7 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import it.vkod.views.pwa.LoginView;
+import it.vkod.views.pages.LoginPage;
 
 @EnableWebSecurity
 @Configuration
@@ -27,7 +27,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 
         super.configure(http);
-        setLoginView(http, LoginView.class, LOGOUT_URL);
+        setLoginView(http, LoginPage.class, LOGOUT_URL);
     }
 
     @Override

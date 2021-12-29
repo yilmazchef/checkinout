@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.pages;
 
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -8,7 +8,7 @@ import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.UserService;
-import it.vkod.views.components.NotificationUtils;
+import it.vkod.views.layouts.NotificationLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.security.PermitAll;
@@ -16,9 +16,9 @@ import javax.annotation.security.PermitAll;
 @PageTitle( "Valideer QR" )
 @Route( value = "validate")
 @PermitAll
-public class ValidateView extends VerticalLayout {
+public class ValidatePage extends VerticalLayout {
 
-	public ValidateView( @Autowired AuthenticationService authService, @Autowired UserService userService ) {
+	public ValidatePage(@Autowired AuthenticationService authService, @Autowired UserService userService ) {
 
 		addClassNames( "flex", "flex-col", "h-full" );
 		setMargin( false );
@@ -40,9 +40,9 @@ public class ValidateView extends VerticalLayout {
 		reader.addValueChangeListener( scannedQRCode -> {
 			final var oAttendee = userService.findByUsername( scannedQRCode.getValue() );
 			if ( oAttendee.isPresent() ) {
-				NotificationUtils.success( "GELDIG" ).open();
+				NotificationLayout.success( "GELDIG" ).open();
 			} else {
-				NotificationUtils.error( "ONGELDIG!" ).open();
+				NotificationLayout.error( "ONGELDIG!" ).open();
 			}
 		} );
 

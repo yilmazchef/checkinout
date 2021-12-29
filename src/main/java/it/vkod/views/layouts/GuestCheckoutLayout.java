@@ -1,11 +1,8 @@
-package it.vkod.views.pwa;
+package it.vkod.views.layouts;
 
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
@@ -15,17 +12,13 @@ import it.vkod.models.entities.User;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
-import it.vkod.views.components.CheckedUserLayout;
-import it.vkod.views.components.NotificationUtils;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import javax.annotation.security.PermitAll;
 import java.util.Random;
 
-import static it.vkod.models.entities.CheckType.REMOTE_IN;
+import static it.vkod.models.entities.CheckType.REMOTE_OUT;
 
-@PermitAll
-public class RemoteCheckinLayout extends VerticalLayout {
+public class GuestCheckoutLayout extends VerticalLayout {
 
     private final AuthenticationService authService;
     private final UserService userService;
@@ -36,7 +29,7 @@ public class RemoteCheckinLayout extends VerticalLayout {
     private final ZXingVaadinReader scanner;
 
 
-    public RemoteCheckinLayout(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
+    public GuestCheckoutLayout(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
 
         this.authService = authService;
         this.userService = userService;
@@ -87,7 +80,7 @@ public class RemoteCheckinLayout extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fromTodayAndCourse(user.getCourse(), REMOTE_IN);
+        final var checks = checkService.fromTodayAndCourse(user.getCourse(), REMOTE_OUT);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);
@@ -97,14 +90,14 @@ public class RemoteCheckinLayout extends VerticalLayout {
         scanner.addValueChangeListener(onScan -> {
 
             final var newCheck = checkService.createOrUpdate(
-                    check(userService.getByUsername(onScan.getValue()), user, location, REMOTE_IN));
+                    check(userService.getByUsername(onScan.getValue()), user, location, REMOTE_OUT));
 
             if (!checks.contains(newCheck)) {
                 final var checkLayout = new CheckedUserLayout(newCheck);
                 events.add(checkLayout);
             }
 
-            NotificationUtils.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
+            NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
 
         });
 

@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.pages;
 
 
 import com.vaadin.flow.component.UI;
@@ -11,16 +11,16 @@ import it.vkod.models.entities.UserRole;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
-import it.vkod.views.components.NotificationUtils;
+import it.vkod.views.layouts.*;
 
 import javax.annotation.security.PermitAll;
 
 @PageTitle("Inchecken")
-@Route(value = "in", layout = AppLayoutBottomNavbar.class)
-@RouteAlias(value = "checkin", layout = AppLayoutBottomNavbar.class)
+@Route(value = "in", layout = ResponsiveLayout.class)
+@RouteAlias(value = "checkin", layout = ResponsiveLayout.class)
 @PermitAll
 @PreserveOnRefresh
-public class CheckinView extends VerticalLayout {
+public class CheckinPage extends VerticalLayout {
 
     private final AuthenticationService authService;
     private final UserService userService;
@@ -28,8 +28,9 @@ public class CheckinView extends VerticalLayout {
 
     private final PhysicalCheckinLayout physicalCheckinLayout;
     private final RemoteCheckinLayout remoteCheckinLayout;
+    private final CheckTypeDialogLayout type;
 
-    public CheckinView(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
+    public CheckinPage(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
 
         this.authService = authService;
         this.userService = userService;
@@ -37,6 +38,7 @@ public class CheckinView extends VerticalLayout {
 
         physicalCheckinLayout = new PhysicalCheckinLayout(authService, userService, checkService);
         remoteCheckinLayout = new RemoteCheckinLayout(authService, userService, checkService);
+        type = new CheckTypeDialogLayout();
 
         authService.get().ifPresentOrElse(user -> {
                     if (user.getRoles().stream().anyMatch(role -> role == UserRole.STUDENT)) {
@@ -44,13 +46,10 @@ public class CheckinView extends VerticalLayout {
                     } else if (user.getRoles().stream().anyMatch(role -> role == UserRole.TEACHER)) {
                         add(physicalCheckinLayout);
                     } else {
-                        UI.getCurrent().navigate(RegisterView.class);
+                        UI.getCurrent().navigate(RegisterPage.class);
                     }
                 },
-                () -> {
-                    NotificationUtils.error("Deze gebruiker heeft GEEN toegang.").open();
-
-                });
+                () -> NotificationLayout.error("Deze gebruiker heeft GEEN toegang.").open());
 
 
     }

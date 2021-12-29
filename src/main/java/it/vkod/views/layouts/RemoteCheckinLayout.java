@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.layouts;
 
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -12,15 +12,14 @@ import it.vkod.models.entities.User;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
-import it.vkod.views.components.CheckedUserLayout;
-import it.vkod.views.components.NotificationUtils;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
+import javax.annotation.security.PermitAll;
 import java.util.Random;
 
-import static it.vkod.models.entities.CheckType.PHYSICAL_OUT;
+import static it.vkod.models.entities.CheckType.REMOTE_IN;
 
-public class PhysicalCheckoutLayout extends VerticalLayout {
+public class RemoteCheckinLayout extends VerticalLayout {
 
     private final AuthenticationService authService;
     private final UserService userService;
@@ -31,7 +30,7 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
     private final ZXingVaadinReader scanner;
 
 
-    public PhysicalCheckoutLayout(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
+    public RemoteCheckinLayout(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
 
         this.authService = authService;
         this.userService = userService;
@@ -82,7 +81,7 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fromTodayAndCourse(user.getCourse(), PHYSICAL_OUT);
+        final var checks = checkService.fromTodayAndCourse(user.getCourse(), REMOTE_IN);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);
@@ -92,14 +91,14 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
         scanner.addValueChangeListener(onScan -> {
 
             final var newCheck = checkService.createOrUpdate(
-                    check(user, userService.getByUsername(onScan.getValue()), location, PHYSICAL_OUT));
+                    check(userService.getByUsername(onScan.getValue()), user, location, REMOTE_IN));
 
             if (!checks.contains(newCheck)) {
                 final var checkLayout = new CheckedUserLayout(newCheck);
                 events.add(checkLayout);
             }
 
-            NotificationUtils.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
+            NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
 
         });
 

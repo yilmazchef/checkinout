@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.pages;
 
 
 import com.vaadin.flow.component.ComponentEventListener;
@@ -15,8 +15,8 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinSession;
 import it.vkod.services.flow.AdminService;
 import it.vkod.services.flow.AuthenticationService;
-import it.vkod.views.components.EmbeddedPdfDocument;
-import it.vkod.views.components.NotificationUtils;
+import it.vkod.views.layouts.PdfLayout;
+import it.vkod.views.layouts.NotificationLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.security.RolesAllowed;
@@ -24,15 +24,15 @@ import javax.annotation.security.RolesAllowed;
 @PageTitle("Administratie")
 @Route(value = "admin")
 @RolesAllowed({"ADMIN", "MANAGER", "LEADER", "TEACHER"})
-public class AdminView extends VerticalLayout {
+public class AdminPage extends VerticalLayout {
 
 
-    public AdminView(@Autowired AuthenticationService authService, @Autowired AdminService adminService) {
+    public AdminPage(@Autowired AuthenticationService authService, @Autowired AdminService adminService) {
 
         final var authUser = authService.get();
 
         if (authUser.isEmpty()) {
-            NotificationUtils.error("The active user is not authorized!").open();
+            NotificationLayout.error("The active user is not authorized!").open();
         } else {
 
             Button closeButton = new Button("Close session", event -> {
@@ -46,7 +46,7 @@ public class AdminView extends VerticalLayout {
             courseField.addKeyDownListener(com.vaadin.flow.component.Key.ENTER,
                     (ComponentEventListener<KeyDownEvent>) keyDownEvent -> {
                         final var actionLayout = new HorizontalLayout();
-                        final var route = RouteConfiguration.forSessionScope().getUrl(HomeView.class);
+                        final var route = RouteConfiguration.forSessionScope().getUrl(HomePage.class);
 
                         final String PDF = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
                         final String CSV = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
@@ -58,7 +58,7 @@ public class AdminView extends VerticalLayout {
                         final var excelAnchor = new Anchor(XLS, "Druk als EXCEL");
 
                         final var viewerLayout = new VerticalLayout();
-                        viewerLayout.add(new EmbeddedPdfDocument(USERS));
+                        viewerLayout.add(new PdfLayout(USERS));
 
                         actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
 

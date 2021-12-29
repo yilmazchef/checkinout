@@ -1,18 +1,18 @@
-package it.vkod.views.components;
+package it.vkod.views.layouts;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-public class ScrollableHorizontalLayout extends HorizontalLayout {
+public class ScrollableVerticalLayout extends VerticalLayout {
 
-    private HorizontalLayout content;
+    private VerticalLayout content;
 
-    public ScrollableHorizontalLayout() {
+    public ScrollableVerticalLayout() {
         super();
         preparePanel();
     }
 
-    public ScrollableHorizontalLayout(Component... children) {
+    public ScrollableVerticalLayout(Component... children) {
         super();
         preparePanel();
         this.add(children);
@@ -20,14 +20,14 @@ public class ScrollableHorizontalLayout extends HorizontalLayout {
 
     private void preparePanel() {
         getStyle().set("overflow", "auto");
-        content = new HorizontalLayout();
+        content = new VerticalLayout();
         content.getStyle().set("display", "block");
         content.setWidth("100%");
         super.add(content);
         setHeight("100%");
     }
 
-    public HorizontalLayout getContent() {
+    public VerticalLayout getContent() {
         return content;
     }
 

@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.pages;
 
 
 import com.vaadin.flow.component.UI;
@@ -11,16 +11,19 @@ import it.vkod.models.entities.UserRole;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
-import it.vkod.views.components.NotificationUtils;
+import it.vkod.views.layouts.NotificationLayout;
+import it.vkod.views.layouts.ResponsiveLayout;
+import it.vkod.views.layouts.PhysicalCheckoutLayout;
+import it.vkod.views.layouts.RemoteCheckoutLayout;
 
 import javax.annotation.security.PermitAll;
 
 @PageTitle("Uitchecken")
-@Route(value = "out", layout = AppLayoutBottomNavbar.class)
-@RouteAlias(value = "checkout", layout = AppLayoutBottomNavbar.class)
+@Route(value = "out", layout = ResponsiveLayout.class)
+@RouteAlias(value = "checkout", layout = ResponsiveLayout.class)
 @PermitAll
 @PreserveOnRefresh
-public class CheckoutView extends VerticalLayout {
+public class CheckoutPage extends VerticalLayout {
 
     private final AuthenticationService authService;
     private final UserService userService;
@@ -29,7 +32,7 @@ public class CheckoutView extends VerticalLayout {
     private final PhysicalCheckoutLayout physicalCheckoutLayout;
     private final RemoteCheckoutLayout remoteCheckoutLayout;
 
-    public CheckoutView(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
+    public CheckoutPage(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
 
         this.authService = authService;
         this.userService = userService;
@@ -45,13 +48,10 @@ public class CheckoutView extends VerticalLayout {
                     } else if (user.getRoles().stream().anyMatch(role -> role == UserRole.TEACHER)) {
                         add(physicalCheckoutLayout);
                     } else {
-                        UI.getCurrent().navigate(RegisterView.class);
+                        UI.getCurrent().navigate(RegisterPage.class);
                     }
                 },
-                () -> {
-                    NotificationUtils.error("Deze gebruiker heeft GEEN toegang.").open();
-
-                });
+                () -> NotificationLayout.error("Deze gebruiker heeft GEEN toegang.").open());
 
 
     }

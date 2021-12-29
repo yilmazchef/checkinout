@@ -1,10 +1,8 @@
-package it.vkod.views.pwa;
+package it.vkod.views.layouts;
 
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -14,21 +12,17 @@ import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.models.entities.Check;
 import it.vkod.models.entities.CheckType;
 import it.vkod.models.entities.User;
-import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
-import it.vkod.views.components.CheckedUserLayout;
-import it.vkod.views.components.NotificationUtils;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.UUID;
 
-import static it.vkod.models.entities.CheckType.PHYSICAL_OUT;
+import static it.vkod.models.entities.CheckType.GUEST_IN;
 
-public class SafeCheckoutLayout extends VerticalLayout {
+public class GuestCheckinLayout extends VerticalLayout {
 
-    private final AuthenticationService authService;
     private final UserService userService;
     private final CheckService checkService;
 
@@ -37,9 +31,8 @@ public class SafeCheckoutLayout extends VerticalLayout {
     private final ZXingVaadinReader scanner;
 
 
-    public SafeCheckoutLayout(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
+    public GuestCheckinLayout(final UserService userService, final CheckService checkService) {
 
-        this.authService = authService;
         this.userService = userService;
         this.checkService = checkService;
 
@@ -49,9 +42,66 @@ public class SafeCheckoutLayout extends VerticalLayout {
         events = initEventsLayout();
         scanner = initScannerLayout();
 
-        add(location, events, scanner);
+        final var course = new TextField("Course");
+        final var organizer = new TextField("Organizer");
 
-        authService.get().ifPresent(this::initCheckinLayout);
+        final var firstName = new TextField("Voornaam");
+        final var lastName = new TextField("Familienaam");
+        final var username = new TextField("Gebruikersnaam");
+        final var email = new TextField("email");
+        final var submit = new Button("Submit");
+
+        final var formLayout = new FormLayout();
+        formLayout.add(
+                firstName, lastName,
+                username,
+                organizer,
+                course,
+                submit
+        );
+        formLayout.setResponsiveSteps(
+                // Use one column by default
+                new FormLayout.ResponsiveStep("0", 1),
+                // Use two columns, if layout's width exceeds 500px
+                new FormLayout.ResponsiveStep("500px", 2)
+        );
+        // Stretch the username field over 2 columns
+        formLayout.setColspan(username, 2);
+
+        submit.addClickListener(onSubmit -> {
+            String pwd = UUID.randomUUID().toString();
+            User attendee = userService.createUser(new User()
+                    .setUsername(username.getValue())
+                    .setEmail(email.getValue())
+                    .setFirstName(firstName.getValue())
+                    .setLastName(lastName.getValue())
+                    .setCourse(course.getValue())
+                    .setPassword(pwd)
+            );
+
+            final var newCheck = initCheckinLayout(
+                    course.getValue(),
+                    userService.getByUsername(organizer.getValue()),
+                    attendee);
+
+            scanner.addValueChangeListener(onScan -> {
+
+                if (onScan.getValue().equalsIgnoreCase(String.valueOf(newCheck.getValidation()))) {
+                    final var checkLayout = new CheckedUserLayout(newCheck);
+                    events.add(checkLayout);
+                }
+
+                NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
+
+            });
+
+            add(scanner);
+        });
+
+        events.add(formLayout);
+
+        add(location, events);
+
 
     }
 
@@ -86,57 +136,17 @@ public class SafeCheckoutLayout extends VerticalLayout {
     }
 
 
-    private void initCheckinLayout(User user) {
+    private Check initCheckinLayout(final String course, final User organizer, final User attendee) {
 
-        final var checks = checkService.fromTodayAndCourse(user.getCourse(), PHYSICAL_OUT);
+        final var checks = checkService.fromTodayAndCourse(course, GUEST_IN);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);
             events.add(checkLayout);
         }
 
-        scanner.addValueChangeListener(onScan -> {
+        return checkService.createOrUpdate(check(organizer, attendee, location, GUEST_IN));
 
-            if (onScan.getValue().equalsIgnoreCase(user.getUsername())) {
-
-                final var failSafeForm = new FormLayout();
-
-                final var safeDate = new DateTimePicker();
-                safeDate.setLabel("Het datum van de check");
-                safeDate.setHelperText("Het datum moet tussen de laatste 60 dagen zijn.");
-                safeDate.setAutoOpen(true);
-                safeDate.setMin(LocalDateTime.now().minusDays(1));
-                safeDate.setMax(LocalDateTime.now().plusDays(7));
-                safeDate.setValue(LocalDateTime.now());
-
-                final var safeUsername = new TextField("Gebruikersnaam:");
-
-                final var safeSubmit = new Button("Verzenden", VaadinIcon.CHECK_SQUARE.create());
-                safeSubmit.addClickListener(onSafeSubmit -> {
-
-                    final var newCheck = checkService.createOrUpdate(
-                            check(user, userService.getByUsername(onScan.getValue()), location, PHYSICAL_OUT));
-
-                    if (!checks.contains(newCheck)) {
-                        final var checkLayout = new CheckedUserLayout(newCheck);
-                        events.add(checkLayout);
-                    }
-
-                    NotificationUtils.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
-
-
-                });
-
-                failSafeForm.add(safeUsername, safeDate, safeSubmit);
-                add(failSafeForm);
-
-                scanner.setVisible(false);
-
-
-            } else {
-                NotificationUtils.error("Uw account heeft GEEN toegang tot de failsafe-modus.").open();
-            }
-        });
 
     }
 

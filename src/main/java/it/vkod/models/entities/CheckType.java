@@ -2,6 +2,8 @@ package it.vkod.models.entities;
 
 public enum CheckType {
 
+    GUEST_IN,
+    GUEST_OUT,
     PHYSICAL_IN,
     PHYSICAL_OUT,
     REMOTE_IN,

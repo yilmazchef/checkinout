@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.layouts;
 
 
 import com.opencsv.CSVParserBuilder;
@@ -9,8 +9,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.util.SharedUtil;
 
 import java.io.IOException;
@@ -18,13 +16,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.IntStream;
 
-@PageTitle("Importeer data")
-@Route(value = "import")
-public class ImportView extends VerticalLayout {
+public class CsvLayout extends VerticalLayout {
 
     private final Grid<String[]> grid = new Grid<>();
 
-    public ImportView() {
+    public CsvLayout() {
 
         final var buffer = new MemoryBuffer();
         final var upload = new Upload(buffer);

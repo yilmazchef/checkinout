@@ -1,4 +1,4 @@
-package it.vkod.views.components;
+package it.vkod.views.layouts;
 
 
 import com.vaadin.flow.component.notification.Notification;
@@ -6,7 +6,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public class NotificationUtils {
+public class NotificationLayout {
 
 	public Notification success( final String message ) {
 

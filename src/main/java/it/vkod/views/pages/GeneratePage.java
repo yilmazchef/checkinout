@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.pages;
 
 
 import com.google.zxing.WriterException;
@@ -26,12 +26,12 @@ import static it.vkod.utils.QRUtils.generateQR;
 @PageTitle("Genereer QR")
 @Route(value = "generate")
 @AnonymousAllowed
-public class GenerateView extends VerticalLayout {
+public class GeneratePage extends VerticalLayout {
 
     private final UserService userService;
     private final String whatsappRedirectUrl = "https://api.whatsapp.com/send?phone=";
 
-    public GenerateView( UserService userService) {
+    public GeneratePage(UserService userService) {
 
         this.userService = userService;
 
@@ -68,8 +68,7 @@ public class GenerateView extends VerticalLayout {
                                     Notification.Position.BOTTOM_CENTER)
                                     .open();
 
-                            final var sendWhatsAppButton = new Button("Send to Whatsapp", onSendClick -> {
-                                // UI.getCurrent().navigate(whatsappRedirectUrl.concat(user.getPhone()));
+                            final var sendWhatsAppButton = new Button("Verzenden via Whatsapp", onSendClick -> {
                                 UI.getCurrent().getPage().setLocation(whatsappRedirectUrl.concat(user.getPhone()));
                             });
 
@@ -83,12 +82,12 @@ public class GenerateView extends VerticalLayout {
                     }
                 });
 
-        formLayout.addFormItem(usernameField, "Username");
-        formLayout.addFormItem(passwordField, "Password");
+        formLayout.addFormItem(usernameField, "Gebruikersnaam");
+        formLayout.addFormItem(passwordField, "Wachtwoord");
 
         final var confirmCheck = new Checkbox(
                 "I confirm that the event organizer can change my password in this session.");
-        formLayout.addFormItem(confirmCheck, "Confirmation");
+        formLayout.addFormItem(confirmCheck, "Aanvaardan");
 
         generateLayout.setMargin(false);
         generateLayout.setPadding(false);

@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.pages;
 
 
 import com.google.zxing.WriterException;
@@ -38,9 +38,9 @@ import static it.vkod.utils.QRUtils.generateQR;
 @PageTitle( "Inschrijven" )
 @Route( value = "register" )
 @AnonymousAllowed
-public class RegisterView extends VerticalLayout {
+public class RegisterPage extends VerticalLayout {
 
-	public RegisterView( @Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired BCryptPasswordEncoder passwordEncoder, @Autowired EmailService emailService ) {
+	public RegisterPage(@Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired BCryptPasswordEncoder passwordEncoder, @Autowired EmailService emailService ) {
 
 
 		final var userRole = new RadioButtonGroup< UserRole >();

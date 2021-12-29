@@ -1,4 +1,4 @@
-package it.vkod.views.pwa;
+package it.vkod.views.pages;
 
 
 import com.vaadin.flow.component.login.LoginI18n;
@@ -10,9 +10,9 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @PageTitle( "Inloggen" )
 @Route( value = "login" )
 @AnonymousAllowed
-public class LoginView extends LoginOverlay {
+public class LoginPage extends LoginOverlay {
 
-	public LoginView() {
+	public LoginPage() {
 
 		setAction( "login" );
 
