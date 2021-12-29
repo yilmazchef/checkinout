@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
@@ -17,113 +18,117 @@ import java.time.ZonedDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@ToString( onlyExplicitlyIncluded = true )
+@ToString(onlyExplicitlyIncluded = true)
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Accessors( chain = true )
-@FieldDefaults( level = AccessLevel.PRIVATE )
-@Table( name = "users" )
+@Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "users")
 @Entity
-public class User implements Serializable, Cloneable, Persistable< Long > {
+public class User implements Serializable, Cloneable, Persistable<Long> {
 
-	@Id
-	@GeneratedValue( strategy = GenerationType.IDENTITY )
-	Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
 
-	@ToString.Include
-	@NotEmpty
-	String username;
+    @ToString.Include
+    @NotEmpty
+    String username;
 
-	@Pattern( regexp = "^\\+[1-9]{1}[0-9]{3,14}$" )
-	String phone;
+    @Pattern(regexp = "^\\+[1-9]{1}[0-9]{3,14}$")
+    String phone;
 
-	@Email
-	String email;
+    @Email
+    String email;
 
-	@NotEmpty
-	String firstName;
+    @NotEmpty
+    String firstName;
 
-	@NotEmpty
-	String lastName;
+    @NotEmpty
+    String lastName;
 
-	@NotEmpty
-	String password;
+    @NotEmpty
+    String password;
 
-	@CollectionTable( name = "roles" )
-	@ElementCollection( fetch = FetchType.EAGER )
-	Set< UserRole > roles = new LinkedHashSet<>();
+    @CollectionTable(name = "roles")
+    @ElementCollection(fetch = FetchType.EAGER)
+    Set<UserRole> roles = new LinkedHashSet<>();
 
-	ZonedDateTime registered;
+    ZonedDateTime registered;
 
-	ZonedDateTime updated;
+    ZonedDateTime updated;
 
-	String profile;
+    @URL
+    String profile;
 
-	@NotEmpty
-	private String course;
-
-
-	@Override
-	public boolean isNew() {
-
-		return this.id == null;
-	}
+    @NotEmpty
+    private String course;
 
 
-	@Override
-	public User clone() {
+    @Override
+    public boolean isNew() {
 
-		try {
-			return ( ( User ) super.clone() )
-					.setEmail( this.getEmail() )
-					.setFirstName( this.getEmail() )
-					.setLastName( this.getEmail() )
-					.setPhone( this.getPhone() )
-					.setProfile( this.getProfile() )
-					.setCourse( this.getCourse() );
-
-		} catch ( CloneNotSupportedException e ) {
-			throw new AssertionError();
-		}
-	}
+        return this.id == null;
+    }
 
 
-	@PrePersist
-	public void prePersist() {
+    /**
+     * @return Clone of user without ID
+     */
+    @Override
+    public User clone() {
 
-		this.registered = ZonedDateTime.now();
-	}
+        try {
+            return ((User) super.clone())
+                    .setEmail(this.getEmail())
+                    .setFirstName(this.getEmail())
+                    .setLastName(this.getEmail())
+                    .setPhone(this.getPhone())
+                    .setProfile(this.getProfile())
+                    .setCourse(this.getCourse());
 
-
-	@PreUpdate
-	public void preUpdate() {
-
-		this.updated = ZonedDateTime.now();
-	}
-
-
-	@Override
-	public boolean equals( final Object o ) {
-
-		if ( this == o ) {
-			return true;
-		}
-
-		if ( !( o instanceof User ) ) {
-			return false;
-		}
-
-		final User user = ( User ) o;
-
-		return new EqualsBuilder().append( getUsername(), user.getUsername() ).append( getPhone(), user.getPhone() ).append( getEmail(), user.getEmail() ).isEquals();
-	}
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 
 
-	@Override
-	public int hashCode() {
+    @PrePersist
+    public void prePersist() {
 
-		return new HashCodeBuilder( 17, 37 ).append( getUsername() ).append( getPhone() ).append( getEmail() ).toHashCode();
-	}
+        this.registered = ZonedDateTime.now();
+    }
+
+
+    @PreUpdate
+    public void preUpdate() {
+
+        this.updated = ZonedDateTime.now();
+    }
+
+
+    @Override
+    public boolean equals(final Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof User)) {
+            return false;
+        }
+
+        final User user = (User) o;
+
+        return new EqualsBuilder().append(getUsername(), user.getUsername()).append(getPhone(), user.getPhone()).append(getEmail(), user.getEmail()).isEquals();
+    }
+
+
+    @Override
+    public int hashCode() {
+
+        return new HashCodeBuilder(17, 37).append(getUsername()).append(getPhone()).append(getEmail()).toHashCode();
+    }
 
 }

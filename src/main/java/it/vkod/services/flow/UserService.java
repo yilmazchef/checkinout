@@ -70,8 +70,8 @@ public class UserService implements UserDetailsService {
     }
 
     public List<User> teachers() {
-
-        return userRepository.findAllByRoles(Set.of(UserRole.TEACHER));
+        return all().stream().filter(user -> user.getRoles().stream().anyMatch(userRole -> userRole == UserRole.TEACHER)).collect(Collectors.toUnmodifiableList());
+//        return userRepository.findAllByRoles(Set.of(UserRole.TEACHER));
     }
 
     public List<User> managers() {
