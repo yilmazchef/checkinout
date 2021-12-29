@@ -6,10 +6,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import it.vkod.models.entities.User;
 import it.vkod.models.entities.UserRole;
-import it.vkod.services.flow.AdminService;
-import it.vkod.services.flow.AuthenticationService;
-import it.vkod.services.flow.CheckService;
-import it.vkod.services.flow.UserService;
+import it.vkod.services.flow.*;
 import it.vkod.views.layouts.GuestCheckinLayout;
 import it.vkod.views.layouts.ResponsiveLayout;
 
@@ -24,20 +21,22 @@ public class HomePage extends VerticalLayout {
     private final CheckService checkService;
     private final AuthenticationService authService;
     private final AdminService adminService;
+    private final EmailService emailService;
 
     public HomePage(UserService userService, CheckService checkService,
-                    AuthenticationService authService, AdminService adminService) {
+                    AuthenticationService authService, AdminService adminService, EmailService emailService) {
 
         this.userService = userService;
         this.checkService = checkService;
         this.authService = authService;
         this.adminService = adminService;
+        this.emailService = emailService;
 
         setAlignItems(Alignment.CENTER);
 
         Optional<User> oUser = authService.get();
         if (oUser.isEmpty()) {
-            add(new GuestCheckinLayout(this.userService, this.checkService));
+            add(new GuestCheckinLayout(this.userService, this.checkService, emailService));
         } else {
 
             if (hasRole(oUser.get(), UserRole.TEACHER)) {

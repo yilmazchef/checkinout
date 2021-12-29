@@ -20,13 +20,16 @@ import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.models.entities.Check;
 import it.vkod.models.entities.CheckType;
 import it.vkod.models.entities.User;
+import it.vkod.models.entities.UserRole;
 import it.vkod.services.flow.CheckService;
+import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import static it.vkod.models.entities.CheckType.GUEST_IN;
@@ -56,7 +59,7 @@ public class GuestCheckinLayout extends VerticalLayout {
 
     private static final String WHATSAPP_REDIRECT_URL = "https://api.whatsapp.com/send?phone=";
 
-    public GuestCheckinLayout(final UserService userService, final CheckService checkService) {
+    public GuestCheckinLayout(final UserService userService, final CheckService checkService, final EmailService emailService) {
 
         this.userService = userService;
         this.checkService = checkService;
@@ -107,6 +110,7 @@ public class GuestCheckinLayout extends VerticalLayout {
                     .setLastName(lastName.getValue())
                     .setCourse(course.getValue())
                     .setPassword(pwd)
+                    .setRoles(Set.of(UserRole.GUEST))
             );
 
             final var newCheck = initCheckinLayout(course.getValue(), organizers.getValue(), attendee);
@@ -117,19 +121,21 @@ public class GuestCheckinLayout extends VerticalLayout {
 
                     try {
 
+                        final var image = convertToImage(generateQR(attendee.getUsername(), 256, 256), attendee.getUsername());
                         generate.add(
-                                convertToImage(generateQR(attendee.getUsername(), 512, 512), attendee.getUsername()));
-                        Notification.show(
-                                        ("Generated a QR Code for " + attendee.getUsername()),
-                                        8000,
-                                        Notification.Position.BOTTOM_CENTER)
-                                .open();
+                                image);
+                        Notification.show((
+                                "Generated a QR Code for " + attendee.getUsername()), 8000, Notification.Position.BOTTOM_CENTER).open();
 
-                        final var sendWhatsAppButton = new Button("Verzenden via Whatsapp", onSendClick -> {
+                        final var sendWhatsAppButton = new Button("Whatsapp", onSendClick -> {
                             UI.getCurrent().getPage().setLocation(WHATSAPP_REDIRECT_URL.concat(attendee.getPhone()));
                         });
 
-                        generate.add(sendWhatsAppButton);
+                        final var sendEmailButton = new Button("Email", onSendClick -> {
+                            emailService.sendSimpleMessage(attendee.getEmail(), "Welcome bij Intec. Je QR code is nu klaar.", image.getSrc());
+                        });
+
+                        generate.add(sendWhatsAppButton, sendEmailButton);
                         generate.setVisible(true);
                         scanner.setVisible(false);
                         events.setVisible(false);
@@ -156,6 +162,7 @@ public class GuestCheckinLayout extends VerticalLayout {
 
     private Select<User> initOrganizersLayout() {
         final var layout = new Select<>(userService.teachers().toArray(User[]::new));
+        layout.setLabel("Organisator");
         layout.setEmptySelectionAllowed(false);
         layout.setRequiredIndicatorVisible(true);
         layout.setTextRenderer(User::getUsername);
