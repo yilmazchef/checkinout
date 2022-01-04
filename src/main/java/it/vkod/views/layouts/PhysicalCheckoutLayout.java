@@ -59,7 +59,7 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
                     events.add(checkLayout);
                     success(checkRequest.getAttendee().toString() + ": " + checkRequest.getType().name()).open();
                 } else {
-                    error("User has checked in before. Checkout process is rolled-back.").open();
+                    error("User has already checked out before. Checkout process is rolled-back.").open();
                 }
 
             });
