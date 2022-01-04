@@ -11,9 +11,8 @@ import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import static it.vkod.models.entities.CheckType.PHYSICAL_IN;
-import static it.vkod.views.layouts.NotificationLayout.error;
-import static it.vkod.views.layouts.NotificationLayout.success;
+import static it.vkod.models.entities.CheckType.*;
+import static it.vkod.views.layouts.NotificationLayout.*;
 
 public class PhysicalCheckinLayout extends VerticalLayout {
 
@@ -37,6 +36,7 @@ public class PhysicalCheckinLayout extends VerticalLayout {
         scanner = initScannerLayout();
 
         authService.get().ifPresent(user -> {
+
             final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_IN);
 
             for (final Check check : checks) {
@@ -46,11 +46,12 @@ public class PhysicalCheckinLayout extends VerticalLayout {
 
             scanner.addValueChangeListener(onScan -> {
 
-                final var checkRequest = checkService.checkinToday(
+                final var checkRequest = checkService.checkin(
                         VaadinSession.getCurrent().getSession().getId(),
                         user.getCourse(), user.getUsername(), onScan.getValue(),
                         location.getValue().getLatitude(),
-                        location.getValue().getLongitude()
+                        location.getValue().getLongitude(),
+                        false, false
                 );
 
                 if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {

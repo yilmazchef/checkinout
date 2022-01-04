@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import static it.vkod.models.entities.CheckType.*;
+import static it.vkod.models.entities.CheckType.REMOTE_IN;
+
 @RequiredArgsConstructor
 @Service
 public class CheckService {
@@ -76,19 +79,45 @@ public class CheckService {
     }
 
     @Transactional
-    public Check checkinToday(@NotEmpty final String session, @NotEmpty final String course,
-                              @NotEmpty final String organizer, @NotEmpty final String attendee,
-                              @NotEmpty final Double latitude, @NotEmpty final Double longitude) {
+    public Check checkin(@NotEmpty final String session, @NotEmpty final String course,
+                         @NotEmpty final String organizer, @NotEmpty final String attendee,
+                         @NotEmpty final Double latitude, @NotEmpty final Double longitude,
+                         final boolean remote, final boolean guest) {
 
-        final var existing = this.checkRepository.findAllCheckinsByAttendee(attendee);
+        final var checkins = this.checkRepository.findAllCheckinsByAttendee(attendee);
+        var type = PHYSICAL_IN;
+        if (remote) type = REMOTE_IN;
+        if (guest) type = GUEST_IN;
 
-        return existing.isEmpty() ?
+        return checkins.isEmpty() ?
                 this.checkRepository.save(
                         generate(
-                                session, CheckType.PHYSICAL_IN, organizer, attendee, course, new Double[]{latitude, longitude}
+                                session, type, organizer, attendee, course, new Double[]{latitude, longitude}
                         )
                 ).setDuplicated(false)
-                : existing.get(0).setDuplicated(true);
+                : checkins.get(0).setDuplicated(true);
+
+    }
+
+    @Transactional
+    public Check checkout(@NotEmpty final String session, @NotEmpty final String course,
+                          @NotEmpty final String organizer, @NotEmpty final String attendee,
+                          @NotEmpty final Double latitude, @NotEmpty final Double longitude,
+                          final boolean remote, final boolean guest) {
+
+        final var checkins = this.checkRepository.findAllCheckinsByAttendee(attendee);
+        final var checkouts = this.checkRepository.findAllCheckoutsByAttendee(attendee);
+        var type = PHYSICAL_OUT;
+        if (remote) type = REMOTE_OUT;
+        if (guest) type = GUEST_OUT;
+
+        return (!checkins.isEmpty() && checkouts.isEmpty()) ?
+                this.checkRepository.save(
+                        generate(
+                                session, type, organizer, attendee, course, new Double[]{latitude, longitude}
+                        )
+                ).setDuplicated(false)
+                : checkouts.get(0).setDuplicated(true);
 
     }
 
@@ -97,7 +126,7 @@ public class CheckService {
     public Check createOrUpdate(Check check) {
 
         final var existing = this.checkRepository.findAllByAttendee(
-                check.getOnDate(), Collections.singleton(CheckType.PHYSICAL_IN), check.getAttendee().getUsername());
+                check.getOnDate(), Collections.singleton(PHYSICAL_IN), check.getAttendee().getUsername());
 
         return existing.isEmpty() ?
                 this.checkRepository.save(check).setDuplicated(false)

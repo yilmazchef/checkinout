@@ -7,21 +7,16 @@ import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.models.entities.Check;
-import it.vkod.models.entities.CheckType;
-import it.vkod.models.entities.User;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
-import it.vkod.services.flow.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import java.util.Random;
-
-import static it.vkod.models.entities.CheckType.PHYSICAL_OUT;
+import static it.vkod.models.entities.CheckType.*;
+import static it.vkod.views.layouts.NotificationLayout.*;
 
 public class PhysicalCheckoutLayout extends VerticalLayout {
 
     private final AuthenticationService authService;
-    private final UserService userService;
     private final CheckService checkService;
 
     private final HorizontalLayout events;
@@ -29,10 +24,9 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
     private final ZXingVaadinReader scanner;
 
 
-    public PhysicalCheckoutLayout(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
+    public PhysicalCheckoutLayout(final AuthenticationService authService, final CheckService checkService) {
 
         this.authService = authService;
-        this.userService = userService;
         this.checkService = checkService;
 
         initCheckinLayoutStyle();
@@ -41,9 +35,37 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
         events = initEventsLayout();
         scanner = initScannerLayout();
 
-        add(location, events, scanner);
+        authService.get().ifPresent(user -> {
 
-        authService.get().ifPresent(this::initCheckinLayout);
+            final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_OUT);
+
+            for (final Check check : checks) {
+                final var checkLayout = new CheckedUserLayout(check);
+                events.add(checkLayout);
+            }
+
+            scanner.addValueChangeListener(onScan -> {
+
+                final var checkRequest = checkService.checkout(
+                        VaadinSession.getCurrent().getSession().getId(),
+                        user.getCourse(), user.getUsername(), onScan.getValue(),
+                        location.getValue().getLatitude(),
+                        location.getValue().getLongitude(),
+                        false, false
+                );
+
+                if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
+                    final var checkLayout = new CheckedUserLayout(checkRequest);
+                    events.add(checkLayout);
+                    success(checkRequest.getAttendee().toString() + ": " + checkRequest.getType().name()).open();
+                } else {
+                    error("User has checked in before. Checkout process is rolled-back.").open();
+                }
+
+            });
+        });
+
+        add(location, events, scanner);
 
     }
 
@@ -77,32 +99,6 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
         setSizeFull();
     }
 
-
-    private void initCheckinLayout(User user) {
-
-        final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_OUT);
-
-        for (final Check check : checks) {
-            final var checkLayout = new CheckedUserLayout(check);
-            events.add(checkLayout);
-        }
-
-        scanner.addValueChangeListener(onScan -> {
-
-            final var newCheck = checkService.createOrUpdate(
-                    check(user, userService.getByUsername(onScan.getValue()), location, PHYSICAL_OUT));
-
-            if (!checks.contains(newCheck)) {
-                final var checkLayout = new CheckedUserLayout(newCheck);
-                events.add(checkLayout);
-            }
-
-            NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
-
-        });
-
-    }
-
     private ZXingVaadinReader initScannerLayout() {
         final var style = "position: absolute;" +
                 " top: 0;" +
@@ -119,18 +115,5 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
         return layout;
     }
 
-
-    public Check check(User organizer, User attendee, GeoLocation location, CheckType type) {
-
-        return new Check()
-                .setOrganizer(organizer)
-                .setAttendee(attendee)
-                .setCourse(attendee.getCourse())
-                .setLat(location.getValue().getLatitude())
-                .setLon(location.getValue().getLongitude())
-                .setValidation(new Random().nextInt(8999) + 1000)
-                .setSession(VaadinSession.getCurrent().getSession().getId())
-                .setType(type);
-    }
 
 }

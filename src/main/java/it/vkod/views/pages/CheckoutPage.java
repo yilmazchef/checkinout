@@ -38,7 +38,7 @@ public class CheckoutPage extends VerticalLayout {
         this.userService = userService;
         this.checkService = checkService;
 
-        physicalCheckoutLayout = new PhysicalCheckoutLayout(authService, userService, checkService);
+        physicalCheckoutLayout = new PhysicalCheckoutLayout(authService, checkService);
         remoteCheckoutLayout = new RemoteCheckoutLayout(authService, userService, checkService);
 
         authService.get().ifPresentOrElse(user -> {
