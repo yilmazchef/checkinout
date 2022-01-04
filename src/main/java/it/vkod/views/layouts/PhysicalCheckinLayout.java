@@ -55,7 +55,7 @@ public class PhysicalCheckinLayout extends VerticalLayout {
 
                 final var checkRequest = checkService.checkinToday(
                         VaadinSession.getCurrent().getSession().getId(),
-                        user.getCourse(), user.getUsername(), user.getUsername(),
+                        user.getCourse(), user.getUsername(), onScan.getValue(),
                         location.getValue().getLatitude(),
                         location.getValue().getLongitude()
                 );
