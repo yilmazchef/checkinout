@@ -110,12 +110,12 @@ public class Check implements Serializable, Cloneable, Persistable<Long> {
         return this;
     }
 
+    private boolean duplicated;
 
     public boolean isNew() {
 
         return this.id == null;
     }
-
 
     @Override
     public Check clone() {

@@ -17,6 +17,8 @@ import org.vaadin.elmot.flow.sensors.GeoLocation;
 import java.util.Random;
 
 import static it.vkod.models.entities.CheckType.PHYSICAL_IN;
+import static it.vkod.views.layouts.NotificationLayout.error;
+import static it.vkod.views.layouts.NotificationLayout.success;
 
 public class PhysicalCheckinLayout extends VerticalLayout {
 
@@ -51,15 +53,20 @@ public class PhysicalCheckinLayout extends VerticalLayout {
 
             scanner.addValueChangeListener(onScan -> {
 
-                final var newCheck = checkService.createOrUpdate(
-                        check(user, userService.getByUsername(onScan.getValue()), location, PHYSICAL_IN));
+                final var checkRequest = checkService.checkinToday(
+                        VaadinSession.getCurrent().getSession().getId(),
+                        user.getCourse(), user.getUsername(), user.getUsername(),
+                        location.getValue().getLatitude(),
+                        location.getValue().getLongitude()
+                );
 
-                if (!checks.contains(newCheck)) {
-                    final var checkLayout = new CheckedUserLayout(newCheck);
+                if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
+                    final var checkLayout = new CheckedUserLayout(checkRequest);
                     events.add(checkLayout);
+                    success(checkRequest.getAttendee().toString() + ": " + checkRequest.getType().name()).open();
+                } else {
+                    error("User has checked in before. Checkin process is rolled-back.").open();
                 }
-
-                NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
 
             });
         });

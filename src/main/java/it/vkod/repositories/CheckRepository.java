@@ -26,6 +26,15 @@ public interface CheckRepository extends JpaRepository<Check, Long>, JpaSpecific
     @Query("select c from Check c where c.active = true and c.onDate = :onDate and c.type in :type and c.attendee.username = :username")
     List<Check> findAllByAttendee(@Param("onDate") final java.sql.Date onDate, @Param("type") final Collection<CheckType> type, final @Param("username") @NotEmpty String username);
 
+    @Query("select c from Check c where c.active = true and c.onDate = :onDate and c.type = :type and c.attendee.username = :username")
+    List<Check> findAllByAttendee(@Param("onDate") final java.sql.Date onDate, @Param("type") final CheckType type, @Param("username") @NotEmpty final String username);
+
+    @Query("select c from Check c where c.active = true and c.onDate = current_date and c.type = :type and c.attendee.username = :username")
+    List<Check> findAllByAttendee(@Param("type") final CheckType type, @Param("username") @NotEmpty final String username);
+
+    @Query("select c from Check c where c.active = true and c.onDate = current_date and c.type = 'PHYSICAL_IN' and c.attendee.username = :username")
+    List<Check> findAllCheckinsByAttendee(@Param("username") @NotEmpty final String username);
+
 
     @Query("select c from Check c where c.active = true and c.onDate = :onDate and c.atTime = :atTime and c.type in :type and c.attendee.username = :username")
     List<Check> findAllByAttendee(@Param("onDate") final java.sql.Date onDate, @Param("atTime") final java.sql.Time atTime, @Param("type") final Collection<CheckType> type, final @Param("username") @NotEmpty String username);
