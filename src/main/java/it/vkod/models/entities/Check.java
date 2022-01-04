@@ -16,6 +16,8 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @ToString(onlyExplicitlyIncluded = true)
 @Getter
@@ -137,6 +139,11 @@ public class Check implements Serializable, Cloneable, Persistable<Long> {
 
     @PrePersist
     public void prePersist() {
+
+        final var zone = ZoneId.of("Europe/Brussels");
+        final var current = ZonedDateTime.now(zone);
+
+        this.gmtZone = ZonedDateTime.now(zone).getOffset().getTotalSeconds();
         this.onDate = java.sql.Date.valueOf(LocalDate.now());
         this.atTime = java.sql.Time.valueOf(LocalTime.now());
     }
