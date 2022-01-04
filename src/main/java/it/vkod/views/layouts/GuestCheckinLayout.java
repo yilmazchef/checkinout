@@ -229,7 +229,7 @@ public class GuestCheckinLayout extends VerticalLayout {
 
     private Check initCheckinLayout(final String course, final User organizer, final User attendee) {
 
-        final var checks = checkService.fromTodayAndCourse(course, GUEST_IN);
+        final var checks = checkService.fetchAllByCourse(course, GUEST_IN);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);

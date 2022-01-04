@@ -14,7 +14,6 @@ import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import javax.annotation.security.PermitAll;
 import java.util.Random;
 
 import static it.vkod.models.entities.CheckType.REMOTE_OUT;
@@ -81,7 +80,7 @@ public class RemoteCheckoutLayout extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fromTodayAndCourse(user.getCourse(), REMOTE_OUT);
+        final var checks = checkService.fetchAllByCourse(user.getCourse(), REMOTE_OUT);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);

@@ -80,7 +80,7 @@ public class GuestCheckoutLayout extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fromTodayAndCourse(user.getCourse(), REMOTE_OUT);
+        final var checks = checkService.fetchAllByCourse(user.getCourse(), REMOTE_OUT);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);

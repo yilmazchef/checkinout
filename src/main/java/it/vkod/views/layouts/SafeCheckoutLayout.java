@@ -86,7 +86,7 @@ public class SafeCheckoutLayout extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fromTodayAndCourse(user.getCourse(), PHYSICAL_OUT);
+        final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_OUT);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);

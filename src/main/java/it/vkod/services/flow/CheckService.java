@@ -112,7 +112,7 @@ public class CheckService {
     }
 
 
-    public List<Check> fromTodayAndCourse(final String course, CheckType... types) {
+    public List<Check> fetchAllByCourse(final String course, CheckType... types) {
 
         final var nowDate = java.sql.Date.valueOf(LocalDate.now());
         final var nowTime = java.sql.Time.valueOf(LocalTime.now());
