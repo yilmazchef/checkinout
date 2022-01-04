@@ -128,7 +128,7 @@ public class PDFExporter {
     private void writeTableData(PdfPTable table, List<Check> checks) {
 
         final var cFont = FontFactory.getFont(FontFactory.TIMES_ROMAN);
-        cFont.setSize(10F);
+        cFont.setSize(9F);
 
         for (Check check : checks) {
             table.addCell(new Phrase(check.getAttendee().getLastName(), cFont));
