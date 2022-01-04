@@ -11,19 +11,16 @@ import it.vkod.models.entities.CheckType;
 import it.vkod.models.entities.User;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
-import it.vkod.services.flow.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import java.util.Random;
 
-import static it.vkod.models.entities.CheckType.PHYSICAL_IN;
-import static it.vkod.views.layouts.NotificationLayout.error;
-import static it.vkod.views.layouts.NotificationLayout.success;
+import static it.vkod.models.entities.CheckType.*;
+import static it.vkod.views.layouts.NotificationLayout.*;
 
 public class PhysicalCheckinLayout extends VerticalLayout {
 
     private final AuthenticationService authService;
-    private final UserService userService;
     private final CheckService checkService;
 
     private final HorizontalLayout events;
@@ -31,10 +28,9 @@ public class PhysicalCheckinLayout extends VerticalLayout {
     private final ZXingVaadinReader scanner;
 
 
-    public PhysicalCheckinLayout(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
+    public PhysicalCheckinLayout(final AuthenticationService authService, final CheckService checkService) {
 
         this.authService = authService;
-        this.userService = userService;
         this.checkService = checkService;
 
         initCheckinLayoutStyle();

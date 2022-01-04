@@ -36,7 +36,7 @@ public class CheckinPage extends VerticalLayout {
         this.userService = userService;
         this.checkService = checkService;
 
-        physicalCheckinLayout = new PhysicalCheckinLayout(authService, userService, checkService);
+        physicalCheckinLayout = new PhysicalCheckinLayout(authService, checkService);
         remoteCheckinLayout = new RemoteCheckinLayout(authService, userService, checkService);
         type = new CheckTypeDialogLayout();
 
