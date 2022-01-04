@@ -124,4 +124,8 @@ public class User implements Serializable, Cloneable, Persistable<Long> {
         return new HashCodeBuilder(17, 37).append(getUsername()).append(getPhone()).append(getEmail()).toHashCode();
     }
 
+    @Override
+    public String toString() {
+        return this.getFirstName() + " " + this.getLastName();
+    }
 }

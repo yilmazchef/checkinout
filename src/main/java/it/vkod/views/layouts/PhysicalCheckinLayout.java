@@ -3,25 +3,28 @@ package it.vkod.views.layouts;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.models.entities.Check;
+import it.vkod.models.entities.Course;
+import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import static it.vkod.models.entities.Event.*;
-import static it.vkod.views.layouts.NotificationLayout.*;
+import static it.vkod.models.entities.Event.PHYSICAL_IN;
+import static it.vkod.views.layouts.NotificationLayout.error;
+import static it.vkod.views.layouts.NotificationLayout.success;
 
 public class PhysicalCheckinLayout extends VerticalLayout {
 
     private final AuthenticationService authService;
     private final CheckService checkService;
 
-    private final HorizontalLayout events;
     private final GeoLocation location;
     private final ZXingVaadinReader scanner;
+    private final Select<Course> course;
 
 
     public PhysicalCheckinLayout(final AuthenticationService authService, final CheckService checkService) {
@@ -32,17 +35,19 @@ public class PhysicalCheckinLayout extends VerticalLayout {
         initCheckinLayoutStyle();
 
         location = initLocationLayout();
-        events = initEventsLayout();
         scanner = initScannerLayout();
+        course = initCourseLayout();
 
         authService.get().ifPresent(user -> {
 
-            final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_IN);
+            course.setValue(user.getCourse());
+            final var authorized = (user.getRoles().stream().anyMatch(role -> role == Role.MANAGER || role == Role.ADMIN));
 
-            for (final Check check : checks) {
-                final var checkLayout = new CheckedUserLayout(check);
-                events.add(checkLayout);
+            if (!authorized) {
+                course.setReadOnly(true);
             }
+
+            final var checks = checkService.fetchAllByCourse(course.getValue(), PHYSICAL_IN);
 
             scanner.addValueChangeListener(onScan -> {
 
@@ -55,8 +60,6 @@ public class PhysicalCheckinLayout extends VerticalLayout {
                 );
 
                 if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
-                    final var checkLayout = new CheckedUserLayout(checkRequest);
-                    events.add(checkLayout);
                     success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
                 } else {
                     error("User has checked in before. Checkin process is rolled-back.").open();
@@ -65,18 +68,42 @@ public class PhysicalCheckinLayout extends VerticalLayout {
             });
         });
 
-        add(location, events, scanner);
+        add(course, location, scanner);
 
+    }
+
+    private Select<Course> initCourseLayout() {
+        final var layout = new Select<>(Course.values());
+        layout.setRequiredIndicatorVisible(true);
+
+        layout.setEmptySelectionAllowed(false);
+        layout.getStyle()
+                .set("position", "absolute")
+                .set("margin-top", "0")
+                .set("margin-left", "0")
+                .set("padding", "0")
+                .set("width", "200px")
+                .set("max-width", "50vw")
+                .set("height", "25px")
+                .set("max-height", "50px")
+                .set("z-index", "0");
+
+        return layout;
     }
 
     private HorizontalLayout initEventsLayout() {
         final HorizontalLayout layout;
         layout = new HorizontalLayout();
-        layout.setWidthFull();
-        layout.setMargin(false);
-        layout.setPadding(false);
-        layout.setSpacing(false);
-        layout.setHeight("10vh");
+        layout.getStyle()
+                .set("position", "absolute")
+                .set("margin-bottom", "15vh")
+                .set("margin-left", "0")
+                .set("padding", "0")
+                .set("width", "100vw")
+                .set("height", "25px")
+                .set("max-height", "50px")
+                .set("z-index", "0");
+
         return layout;
     }
 
@@ -106,7 +133,8 @@ public class PhysicalCheckinLayout extends VerticalLayout {
                 " display: block;" +
                 " width: 100%;" +
                 " height: 100%;" +
-                " object-fit: cover;";
+                " object-fit: cover;" +
+                " z-index: -1;";
         final var type = "video";
         final var layout = new ZXingVaadinReader();
         layout.setFrom(Constants.From.camera);

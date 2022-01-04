@@ -13,14 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import static it.vkod.models.entities.Event.*;
-import static it.vkod.models.entities.Event.REMOTE_IN;
 
 @RequiredArgsConstructor
 @Service
@@ -145,8 +143,7 @@ public class CheckService {
     public List<Check> fetchAllByCourse(final Course course, Event... types) {
 
         final var nowDate = java.sql.Date.valueOf(LocalDate.now());
-        final var nowTime = java.sql.Time.valueOf(LocalTime.now());
-        return this.checkRepository.findAllByCourseAndType(course, nowDate, nowTime, Set.of(types));
+        return this.checkRepository.findAllByCourseAndType(course, nowDate, Set.of(types));
     }
 
 }

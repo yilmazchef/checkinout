@@ -39,7 +39,11 @@ public interface CheckRepository extends JpaRepository<Check, Long>, JpaSpecific
     @Query("select c from Check c where c.active = true and c.course = :course")
     List<Check> findAllByCourse(@Param("course") final Course course);
 
+    @Query("select c from Check c where c.active = true and c.course = :course and c.onDate = :onDate and c.event in :events")
+    List<Check> findAllByCourseAndType(final @Param("course") @NotEmpty Course course, @Param("onDate") final java.sql.Date onDate, @Param("events") final Collection<Event> events);
+
     @Query("select c from Check c where c.active = true and c.course = :course and c.onDate = :onDate and c.atTime = :atTime and c.event in :events")
     List<Check> findAllByCourseAndType(final @Param("course") @NotEmpty Course course, @Param("onDate") final java.sql.Date onDate, @Param("atTime") final java.sql.Time atTime, @Param("events") final Collection<Event> events);
+
 
 }

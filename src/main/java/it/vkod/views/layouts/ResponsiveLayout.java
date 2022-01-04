@@ -10,6 +10,7 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 import it.vkod.services.exceptions.ErrorNotificationHandler;
+import it.vkod.views.pages.CheckinDetailsPage;
 import it.vkod.views.pages.CheckinPage;
 import it.vkod.views.pages.CheckoutPage;
 
@@ -23,6 +24,7 @@ public class ResponsiveLayout extends AppLayout {
         final var tabs = new Tabs();
         tabs.add(
                 createTab(VaadinIcon.COMPRESS_SQUARE, CheckinPage.class),
+                createTab(VaadinIcon.USERS, CheckinDetailsPage.class),
                 createTab(VaadinIcon.EXPAND_SQUARE, CheckoutPage.class)
         );
         tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL, TabsVariant.LUMO_EQUAL_WIDTH_TABS);
