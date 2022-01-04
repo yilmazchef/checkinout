@@ -24,6 +24,7 @@ import it.vkod.models.entities.UserRole;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
+import it.vkod.views.pages.LoginPage;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import java.io.ByteArrayInputStream;
@@ -56,6 +57,7 @@ public class GuestCheckinLayout extends VerticalLayout {
     private final TextField email;
     private final TextField phone;
     private final Button submit;
+    private final Button login;
 
     private static final String WHATSAPP_REDIRECT_URL = "https://api.whatsapp.com/send?phone=";
 
@@ -83,6 +85,7 @@ public class GuestCheckinLayout extends VerticalLayout {
         phone.setClearButtonVisible(true);
         phone.setPlaceholder("+32XXXXXXXXX");
         submit = new Button("Submit");
+        login = new Button("Already Registered? Login");
 
         formLayout = new FormLayout();
         formLayout.add(
@@ -90,7 +93,7 @@ public class GuestCheckinLayout extends VerticalLayout {
                 username, email, phone,
                 organizers,
                 course,
-                submit
+                submit, login
         );
         formLayout.setResponsiveSteps(
                 // Use one column by default
@@ -99,6 +102,10 @@ public class GuestCheckinLayout extends VerticalLayout {
                 new FormLayout.ResponsiveStep("480px", 2),
                 new FormLayout.ResponsiveStep("640px", 3)
         );
+
+        login.addClickListener(onLogin -> {
+            UI.getCurrent().navigate(LoginPage.class);
+        });
 
         submit.addClickListener(onSubmit -> {
             String pwd = UUID.randomUUID().toString();

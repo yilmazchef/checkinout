@@ -43,7 +43,8 @@ public class CheckinPage extends VerticalLayout {
         authService.get().ifPresentOrElse(user -> {
                     if (user.getRoles().stream().anyMatch(role -> role == UserRole.STUDENT)) {
                         add(remoteCheckinLayout);
-                    } else if (user.getRoles().stream().anyMatch(role -> role == UserRole.TEACHER)) {
+                    } else if (user.getRoles().stream().anyMatch(role ->
+                            (role == UserRole.TEACHER) || (role == UserRole.MANAGER) || (role == UserRole.ADMIN))) {
                         add(physicalCheckinLayout);
                     } else {
                         UI.getCurrent().navigate(RegisterPage.class);

@@ -45,7 +45,8 @@ public class CheckoutPage extends VerticalLayout {
                     if (user.getRoles().stream().anyMatch(role -> role == UserRole.STUDENT)) {
                         add(remoteCheckoutLayout);
                         getUI().ifPresent(ui -> ui.getPage().setTitle("Remote uitchecken"));
-                    } else if (user.getRoles().stream().anyMatch(role -> role == UserRole.TEACHER)) {
+                    } else if (user.getRoles().stream().anyMatch(role ->
+                            (role == UserRole.TEACHER) || (role == UserRole.MANAGER) || (role == UserRole.ADMIN))) {
                         add(physicalCheckoutLayout);
                     } else {
                         UI.getCurrent().navigate(RegisterPage.class);

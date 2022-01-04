@@ -36,7 +36,7 @@ public class HomePage extends VerticalLayout {
 
         Optional<User> oUser = authService.get();
         if (oUser.isEmpty()) {
-            add(new GuestCheckinLayout(this.userService, this.checkService, emailService));
+            add(new GuestCheckinLayout(this.userService, this.checkService, this.emailService));
         } else {
 
             if (hasRole(oUser.get(), UserRole.TEACHER)) {
@@ -49,7 +49,7 @@ public class HomePage extends VerticalLayout {
 
     }
 
-    private boolean hasRole(User oUser, UserRole role) {
-        return oUser.getRoles().stream().anyMatch(userRole -> userRole == role);
+    private boolean hasRole(User user, UserRole role) {
+        return user.getRoles().stream().anyMatch(userRole -> userRole == role);
     }
 }

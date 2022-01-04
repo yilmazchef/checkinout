@@ -14,7 +14,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -55,9 +56,7 @@ public class User implements Serializable, Cloneable, Persistable<Long> {
     @ElementCollection(fetch = FetchType.EAGER)
     Set<UserRole> roles = new LinkedHashSet<>();
 
-    ZonedDateTime registered;
-
-    ZonedDateTime updated;
+    Timestamp registered;
 
     @URL
     String profile;
@@ -97,14 +96,8 @@ public class User implements Serializable, Cloneable, Persistable<Long> {
     @PrePersist
     public void prePersist() {
 
-        this.registered = ZonedDateTime.now();
-    }
+        this.registered = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
-
-    @PreUpdate
-    public void preUpdate() {
-
-        this.updated = ZonedDateTime.now();
     }
 
 

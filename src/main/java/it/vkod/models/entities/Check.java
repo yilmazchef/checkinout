@@ -9,169 +9,151 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.LocalTime;
 
-@ToString( onlyExplicitlyIncluded = true )
+@ToString(onlyExplicitlyIncluded = true)
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Accessors( chain = true )
-@FieldDefaults( level = AccessLevel.PRIVATE )
-@Table( name = "checks" )
+@Accessors(chain = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "checks")
 @Entity
-public class Check implements Serializable, Cloneable, Persistable< Long > {
+public class Check implements Serializable, Cloneable, Persistable<Long> {
 
 
-	@Id
-	@GeneratedValue( strategy = GenerationType.IDENTITY )
-	Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
 
-	@Min( value = 1000 )
-	@Max( 9999 )
-	Integer validation;
+    @Min(value = 1000)
+    @Max(9999)
+    Integer validation;
 
-	ZonedDateTime created;
+    java.sql.Date onDate;
 
-	ZonedDateTime updated;
+    java.sql.Time atTime;
 
-	@ToString.Include
-	@NotEmpty
-	String session;
+    Integer gmtZone;
 
-	Boolean active = Boolean.TRUE;
+    @ToString.Include
+    @NotEmpty
+    String session;
 
-	Float latitude;
+    Boolean active = Boolean.TRUE;
 
-	Float longitude;
+    Float latitude;
 
-	@NotEmpty
-	String course;
+    Float longitude;
 
-	@Enumerated( EnumType.STRING )
-	CheckType type;
+    @NotEmpty
+    String course;
 
-	@ManyToOne( optional = false )
-	@JoinColumn( name = "attendee_id", nullable = false )
-	private User attendee;
+    @Enumerated(EnumType.STRING)
+    CheckType type;
 
-	@ManyToOne( optional = false )
-	@JoinColumn( name = "organizer_id", nullable = false )
-	private User organizer;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "attendee_id", nullable = false)
+    private User attendee;
 
-
-	public Check setLatitude( @NotNull Float lat ) {
-
-		this.latitude = lat;
-		return this;
-	}
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "organizer_id", nullable = false)
+    private User organizer;
 
 
-	public Check setLat( @NotNull Double lat ) {
+    public Check setLatitude(@NotNull Float lat) {
 
-		this.latitude = lat.floatValue();
-		return this;
-	}
-
-
-	public Check setLat( @NotNull String lat ) {
-
-		this.latitude = Float.parseFloat( lat );
-		return this;
-	}
+        this.latitude = lat;
+        return this;
+    }
 
 
-	public Check setLongitude( @NotNull Float lon ) {
+    public Check setLat(@NotNull Double lat) {
 
-		this.longitude = lon;
-		return this;
-	}
-
-
-	public Check setLon( @NotNull Double lon ) {
-
-		this.longitude = lon.floatValue();
-		return this;
-	}
+        this.latitude = lat.floatValue();
+        return this;
+    }
 
 
-	public Check setLon( @NotNull String lon ) {
+    public Check setLat(@NotNull String lat) {
 
-		this.longitude = Float.parseFloat( lon );
-		return this;
-	}
-
-
-	public boolean isNew() {
-
-		return this.id == null;
-	}
+        this.latitude = Float.parseFloat(lat);
+        return this;
+    }
 
 
-	@Override
-	public Check clone() {
+    public Check setLongitude(@NotNull Float lon) {
 
-		try {
-			return ( ( Check ) super.clone() )
-					.setOrganizer( this.getOrganizer() )
-					.setAttendee( this.getAttendee() )
-					.setValidation( this.getValidation() )
-					.setCreated( this.getCreated() )
-					.setUpdated( this.getUpdated() )
-					.setSession( this.getSession() )
-					.setActive( this.getActive() )
-					.setLatitude( this.getLatitude() )
-					.setLongitude( this.getLongitude() );
-
-		} catch ( CloneNotSupportedException e ) {
-			throw new AssertionError();
-		}
-	}
+        this.longitude = lon;
+        return this;
+    }
 
 
-	@PrePersist
-	public void prePersist() {
+    public Check setLon(@NotNull Double lon) {
 
-		this.created = ZonedDateTime.now();
-	}
-
-
-	@PreUpdate
-	public void preUpdate() {
-
-		this.updated = ZonedDateTime.now();
-	}
+        this.longitude = lon.floatValue();
+        return this;
+    }
 
 
-	@Override
-	public boolean equals( final Object o ) {
+    public Check setLon(@NotNull String lon) {
 
-		if ( this == o ) {
-			return true;
-		}
-
-		if ( !( o instanceof Check ) ) {
-			return false;
-		}
-
-		final Check check = ( Check ) o;
-
-		return new EqualsBuilder().append( ofDate( getCreated() ), ofDate( check.getCreated() ) ).append( ofDate( getUpdated() ), ofDate( check.getUpdated() ) ).append( getCourse(), check.getCourse() ).append( getType(), check.getType() ).append( getAttendee(), check.getAttendee() ).append( getOrganizer(), check.getOrganizer() ).isEquals();
-	}
+        this.longitude = Float.parseFloat(lon);
+        return this;
+    }
 
 
-	@Override
-	public int hashCode() {
+    public boolean isNew() {
 
-		return new HashCodeBuilder( 17, 37 ).append( ofDate( getCreated() ) ).append( ofDate( getUpdated() ) ).append( getCourse() ).append( getType() ).append( getAttendee() ).append( getOrganizer() ).toHashCode();
-	}
+        return this.id == null;
+    }
 
 
-	public Date ofDate( ZonedDateTime zdt ) {
+    @Override
+    public Check clone() {
 
-		return Date.from( zdt.toInstant() );
-	}
+        try {
+            return ((Check) super.clone())
+                    .setOrganizer(this.getOrganizer())
+                    .setAttendee(this.getAttendee())
+                    .setValidation(this.getValidation())
+                    .setAtTime(this.getAtTime())
+                    .setSession(this.getSession())
+                    .setActive(this.getActive())
+                    .setLatitude(this.getLatitude())
+                    .setLongitude(this.getLongitude());
 
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
+
+    @PrePersist
+    public void prePersist() {
+
+        this.atTime = java.sql.Time.valueOf(LocalTime.now());
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof Check)) return false;
+
+        Check check = (Check) o;
+
+        return new EqualsBuilder().append(getOnDate(), check.getOnDate()).append(getAtTime(), check.getAtTime()).append(getActive(), check.getActive()).append(getCourse(), check.getCourse()).append(getType(), check.getType()).append(getAttendee(), check.getAttendee()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(getOnDate()).append(getAtTime()).append(getActive()).append(getCourse()).append(getType()).append(getAttendee()).toHashCode();
+    }
 }
