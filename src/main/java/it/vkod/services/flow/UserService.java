@@ -1,8 +1,9 @@
 package it.vkod.services.flow;
 
 
+import it.vkod.models.entities.Course;
 import it.vkod.models.entities.User;
-import it.vkod.models.entities.UserRole;
+import it.vkod.models.entities.Role;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -59,29 +60,29 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public List<User> fromCourse(final String course) {
+    public List<User> fromCourse(final Course course) {
 
         return userRepository.findAllByCourse(course);
     }
 
     public List<User> students() {
 
-        return userRepository.findAllByRoles(Set.of(UserRole.STUDENT));
+        return userRepository.findAllByRoles(Set.of(Role.STUDENT));
     }
 
     public List<User> teachers() {
-        return all().stream().filter(user -> user.getRoles().stream().anyMatch(userRole -> userRole == UserRole.TEACHER)).collect(Collectors.toUnmodifiableList());
+        return all().stream().filter(user -> user.getRoles().stream().anyMatch(userRole -> userRole == Role.TEACHER)).collect(Collectors.toUnmodifiableList());
 //        return userRepository.findAllByRoles(Set.of(UserRole.TEACHER));
     }
 
     public List<User> managers() {
 
-        return userRepository.findAllByRoles(Set.of(UserRole.MANAGER, UserRole.ADMIN));
+        return userRepository.findAllByRoles(Set.of(Role.MANAGER, Role.ADMIN));
     }
 
     public List<User> admins() {
 
-        return userRepository.findAllByRoles(Collections.singleton(UserRole.ADMIN));
+        return userRepository.findAllByRoles(Collections.singleton(Role.ADMIN));
     }
 
 
@@ -146,7 +147,7 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public List<String> fetchAllUsernamesByCourse(final String course) {
+    public List<String> fetchAllUsernamesByCourse(final Course course) {
 
         return userRepository.findAllByCourse(course).stream().map(User::getUsername).collect(Collectors.toUnmodifiableList());
     }

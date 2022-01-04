@@ -12,7 +12,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.models.entities.Check;
-import it.vkod.models.entities.CheckType;
+import it.vkod.models.entities.Event;
 import it.vkod.models.entities.User;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
@@ -22,7 +22,7 @@ import org.vaadin.elmot.flow.sensors.GeoLocation;
 import java.time.LocalDateTime;
 import java.util.Random;
 
-import static it.vkod.models.entities.CheckType.PHYSICAL_IN;
+import static it.vkod.models.entities.Event.PHYSICAL_IN;
 
 public class SafeCheckinLayout extends VerticalLayout {
 
@@ -120,7 +120,7 @@ public class SafeCheckinLayout extends VerticalLayout {
                         events.add(checkLayout);
                     }
 
-                    NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
+                    NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getEvent().name()).open();
 
 
                 });
@@ -155,7 +155,7 @@ public class SafeCheckinLayout extends VerticalLayout {
     }
 
 
-    public Check check(User organizer, User attendee, GeoLocation location, CheckType type) {
+    public Check check(User organizer, User attendee, GeoLocation location, Event type) {
 
         return new Check()
                 .setOrganizer(organizer)
@@ -165,7 +165,7 @@ public class SafeCheckinLayout extends VerticalLayout {
                 .setLon(location.getValue().getLongitude())
                 .setValidation(new Random().nextInt(8999) + 1000)
                 .setSession(VaadinSession.getCurrent().getSession().getId())
-                .setType(type);
+                .setEvent(type);
     }
 
 }

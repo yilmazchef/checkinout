@@ -54,15 +54,15 @@ public class User implements Serializable, Cloneable, Persistable<Long> {
 
     @CollectionTable(name = "roles")
     @ElementCollection(fetch = FetchType.EAGER)
-    Set<UserRole> roles = new LinkedHashSet<>();
+    Set<Role> roles = new LinkedHashSet<>();
 
     Timestamp registered;
 
     @URL
     String profile;
 
-    @NotEmpty
-    private String course;
+    @Enumerated(EnumType.STRING)
+    private Course course;
 
 
     @Override

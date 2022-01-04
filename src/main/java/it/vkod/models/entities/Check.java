@@ -54,11 +54,11 @@ public class Check implements Serializable, Cloneable, Persistable<Long> {
 
     Float longitude;
 
-    @NotEmpty
-    String course;
+    @Enumerated(EnumType.STRING)
+    Course course;
 
     @Enumerated(EnumType.STRING)
-    CheckType type;
+    Event event;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "attendee_id", nullable = false)
@@ -157,11 +157,11 @@ public class Check implements Serializable, Cloneable, Persistable<Long> {
 
         Check check = (Check) o;
 
-        return new EqualsBuilder().append(getOnDate(), check.getOnDate()).append(getAtTime(), check.getAtTime()).append(getActive(), check.getActive()).append(getCourse(), check.getCourse()).append(getType(), check.getType()).append(getAttendee(), check.getAttendee()).isEquals();
+        return new EqualsBuilder().append(getOnDate(), check.getOnDate()).append(getAtTime(), check.getAtTime()).append(getActive(), check.getActive()).append(getCourse(), check.getCourse()).append(getEvent(), check.getEvent()).append(getAttendee(), check.getAttendee()).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(getOnDate()).append(getAtTime()).append(getActive()).append(getCourse()).append(getType()).append(getAttendee()).toHashCode();
+        return new HashCodeBuilder(17, 37).append(getOnDate()).append(getAtTime()).append(getActive()).append(getCourse()).append(getEvent()).append(getAttendee()).toHashCode();
     }
 }

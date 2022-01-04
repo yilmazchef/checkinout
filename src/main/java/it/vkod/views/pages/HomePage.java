@@ -5,7 +5,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import it.vkod.models.entities.User;
-import it.vkod.models.entities.UserRole;
+import it.vkod.models.entities.Role;
 import it.vkod.services.flow.*;
 import it.vkod.views.layouts.GuestCheckinLayout;
 import it.vkod.views.layouts.ResponsiveLayout;
@@ -39,9 +39,9 @@ public class HomePage extends VerticalLayout {
             add(new GuestCheckinLayout(this.userService, this.checkService, this.emailService));
         } else {
 
-            if (hasRole(oUser.get(), UserRole.TEACHER)) {
+            if (hasRole(oUser.get(), Role.TEACHER)) {
                 add(new CheckinPage(this.authService, this.userService, this.checkService));
-            } else if (hasRole(oUser.get(), UserRole.MANAGER)) {
+            } else if (hasRole(oUser.get(), Role.MANAGER)) {
                 add(new AdminPage(this.authService, this.adminService));
             }
         }
@@ -49,7 +49,7 @@ public class HomePage extends VerticalLayout {
 
     }
 
-    private boolean hasRole(User user, UserRole role) {
+    private boolean hasRole(User user, Role role) {
         return user.getRoles().stream().anyMatch(userRole -> userRole == role);
     }
 }

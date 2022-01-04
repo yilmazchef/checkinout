@@ -1,6 +1,6 @@
 package it.vkod.models.entities;
 
-public enum CheckType {
+public enum Event {
 
     GUEST_IN,
     GUEST_OUT,

@@ -18,7 +18,7 @@ import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import it.vkod.models.entities.User;
-import it.vkod.models.entities.UserRole;
+import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
@@ -42,14 +42,14 @@ public class RegisterPage extends VerticalLayout {
 
         initLayout();
 
-        final var userRole = new RadioButtonGroup<UserRole>();
-        userRole.setItems(DataProvider.ofItems(UserRole.values()));
+        final var userRole = new RadioButtonGroup<Role>();
+        userRole.setItems(DataProvider.ofItems(Role.values()));
 
         if (authService.get().isPresent()) {
 
             final var oUser = authService.get();
             if (oUser.isPresent()) {
-                if (hasRole(oUser.get(), UserRole.ADMIN) || hasRole(oUser.get(), UserRole.MANAGER)) {
+                if (hasRole(oUser.get(), Role.ADMIN) || hasRole(oUser.get(), Role.MANAGER)) {
                     add(userRole);
                 }
             }
@@ -129,7 +129,7 @@ public class RegisterPage extends VerticalLayout {
                         .setEmail(emailField.getValue().toLowerCase())
                         .setPassword(passwordEncoder.encode(passwordField.getValue()))
                         .setPhone(phoneField.getValue())
-                        .setRoles(Collections.singleton(UserRole.STUDENT));
+                        .setRoles(Collections.singleton(Role.STUDENT));
 
                 final var savedUser = userService.createUser(user);
 
@@ -206,7 +206,7 @@ public class RegisterPage extends VerticalLayout {
                 (InputStreamFactory) () -> new ByteArrayInputStream(imageData)), username);
     }
 
-    private boolean hasRole(User user, UserRole role) {
+    private boolean hasRole(User user, Role role) {
         return user.getRoles().stream().anyMatch(userRole -> userRole == role);
     }
 

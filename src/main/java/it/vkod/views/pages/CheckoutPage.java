@@ -7,7 +7,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import it.vkod.models.entities.UserRole;
+import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
@@ -39,14 +39,14 @@ public class CheckoutPage extends VerticalLayout {
         this.checkService = checkService;
 
         physicalCheckoutLayout = new PhysicalCheckoutLayout(authService, checkService);
-        remoteCheckoutLayout = new RemoteCheckoutLayout(authService, userService, checkService);
+        remoteCheckoutLayout = new RemoteCheckoutLayout(authService, checkService);
 
         authService.get().ifPresentOrElse(user -> {
-                    if (user.getRoles().stream().anyMatch(role -> role == UserRole.STUDENT)) {
+                    if (user.getRoles().stream().anyMatch(role -> role == Role.STUDENT)) {
                         add(remoteCheckoutLayout);
                         getUI().ifPresent(ui -> ui.getPage().setTitle("Remote uitchecken"));
                     } else if (user.getRoles().stream().anyMatch(role ->
-                            (role == UserRole.TEACHER) || (role == UserRole.MANAGER) || (role == UserRole.ADMIN))) {
+                            (role == Role.TEACHER) || (role == Role.MANAGER) || (role == Role.ADMIN))) {
                         add(physicalCheckoutLayout);
                     } else {
                         UI.getCurrent().navigate(RegisterPage.class);

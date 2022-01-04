@@ -17,10 +17,7 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.models.entities.Check;
-import it.vkod.models.entities.CheckType;
-import it.vkod.models.entities.User;
-import it.vkod.models.entities.UserRole;
+import it.vkod.models.entities.*;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
@@ -33,7 +30,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import static it.vkod.models.entities.CheckType.GUEST_IN;
+import static it.vkod.models.entities.Event.GUEST_IN;
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PreserveOnRefresh
@@ -50,7 +47,7 @@ public class GuestCheckinLayout extends VerticalLayout {
     private final FormLayout formLayout;
 
     private final Select<User> organizers;
-    private final TextField course;
+    private final Select<Course> course;
     private final TextField firstName;
     private final TextField lastName;
     private final TextField username;
@@ -74,7 +71,7 @@ public class GuestCheckinLayout extends VerticalLayout {
         generate = initGenerateLayout();
         organizers = initOrganizersLayout();
 
-        course = new TextField("Course");
+        course = new Select<>(Course.values());
 
         firstName = new TextField("Voornaam");
         lastName = new TextField("Familienaam");
@@ -117,7 +114,7 @@ public class GuestCheckinLayout extends VerticalLayout {
                     .setLastName(lastName.getValue())
                     .setCourse(course.getValue())
                     .setPassword(pwd)
-                    .setRoles(Set.of(UserRole.GUEST))
+                    .setRoles(Set.of(Role.GUEST))
             );
 
             final var newCheck = initCheckinLayout(course.getValue(), organizers.getValue(), attendee);
@@ -153,7 +150,7 @@ public class GuestCheckinLayout extends VerticalLayout {
 
                 }
 
-                NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getType().name()).open();
+                NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getEvent().name()).open();
 
             });
 
@@ -227,7 +224,7 @@ public class GuestCheckinLayout extends VerticalLayout {
     }
 
 
-    private Check initCheckinLayout(final String course, final User organizer, final User attendee) {
+    private Check initCheckinLayout(final Course course, final User organizer, final User attendee) {
 
         final var checks = checkService.fetchAllByCourse(course, GUEST_IN);
 
@@ -258,7 +255,7 @@ public class GuestCheckinLayout extends VerticalLayout {
     }
 
 
-    public Check check(User organizer, User attendee, GeoLocation location, CheckType type) {
+    public Check check(User organizer, User attendee, GeoLocation location, Event type) {
 
         return new Check()
                 .setOrganizer(organizer)
@@ -268,7 +265,7 @@ public class GuestCheckinLayout extends VerticalLayout {
                 .setLon(location.getValue().getLongitude())
                 .setValidation(new Random().nextInt(8999) + 1000)
                 .setSession(VaadinSession.getCurrent().getSession().getId())
-                .setType(type);
+                .setEvent(type);
     }
 
 }

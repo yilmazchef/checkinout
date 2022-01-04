@@ -136,7 +136,7 @@ public class PDFExporter {
             table.addCell(new Phrase(check.getAttendee().getEmail(), cFont));
             table.addCell(new Phrase(check.getOnDate().toString(), cFont));
             table.addCell(new Phrase(check.getAtTime().toString(), cFont));
-            table.addCell(new Phrase(check.getType().toString(), cFont));
+            table.addCell(new Phrase(check.getEvent().toString(), cFont));
         }
     }
 

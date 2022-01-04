@@ -2,7 +2,8 @@ package it.vkod.services.flow;
 
 
 import it.vkod.models.entities.Check;
-import it.vkod.models.entities.CheckType;
+import it.vkod.models.entities.Course;
+import it.vkod.models.entities.Event;
 import it.vkod.repositories.CheckRepository;
 import it.vkod.repositories.UserRepository;
 import it.vkod.services.exceptions.CheckinoutException;
@@ -18,8 +19,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import static it.vkod.models.entities.CheckType.*;
-import static it.vkod.models.entities.CheckType.REMOTE_IN;
+import static it.vkod.models.entities.Event.*;
+import static it.vkod.models.entities.Event.REMOTE_IN;
 
 @RequiredArgsConstructor
 @Service
@@ -29,9 +30,9 @@ public class CheckService {
     private final CheckRepository checkRepository;
 
     private Check generate(
-            final String session, final CheckType type,
+            final String session, final Event type,
             final String organizer, final String attendee,
-            final String course, final Double[] location) throws CheckinoutException {
+            final Course course, final Double[] location) throws CheckinoutException {
 
         final var oOrganizer = this.userRepository.findByUsername(organizer);
         final var oAttendee = this.userRepository.findByUsername(attendee);
@@ -52,7 +53,7 @@ public class CheckService {
                 .setLon(location[1])
                 .setValidation(new Random().nextInt(8999) + 1000)
                 .setSession(session)
-                .setType(type);
+                .setEvent(type);
     }
 
     public List<Check> today() {
@@ -79,7 +80,7 @@ public class CheckService {
     }
 
     @Transactional
-    public Check checkin(@NotEmpty final String session, @NotEmpty final String course,
+    public Check checkin(@NotEmpty final String session, @NotEmpty final Course course,
                          @NotEmpty final String organizer, @NotEmpty final String attendee,
                          @NotEmpty final Double latitude, @NotEmpty final Double longitude,
                          final boolean remote, final boolean guest) {
@@ -100,7 +101,7 @@ public class CheckService {
     }
 
     @Transactional
-    public Check checkout(@NotEmpty final String session, @NotEmpty final String course,
+    public Check checkout(@NotEmpty final String session, @NotEmpty final Course course,
                           @NotEmpty final String organizer, @NotEmpty final String attendee,
                           @NotEmpty final Double latitude, @NotEmpty final Double longitude,
                           final boolean remote, final boolean guest) {
@@ -135,13 +136,13 @@ public class CheckService {
     }
 
 
-    public List<Check> fromCourse(final String course) {
+    public List<Check> fromCourse(final Course course) {
 
         return this.checkRepository.findAllByCourse(course);
     }
 
 
-    public List<Check> fetchAllByCourse(final String course, CheckType... types) {
+    public List<Check> fetchAllByCourse(final Course course, Event... types) {
 
         final var nowDate = java.sql.Date.valueOf(LocalDate.now());
         final var nowTime = java.sql.Time.valueOf(LocalTime.now());

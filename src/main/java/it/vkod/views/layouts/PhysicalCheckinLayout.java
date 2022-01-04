@@ -11,7 +11,7 @@ import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import static it.vkod.models.entities.CheckType.*;
+import static it.vkod.models.entities.Event.*;
 import static it.vkod.views.layouts.NotificationLayout.*;
 
 public class PhysicalCheckinLayout extends VerticalLayout {
@@ -57,7 +57,7 @@ public class PhysicalCheckinLayout extends VerticalLayout {
                 if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
                     final var checkLayout = new CheckedUserLayout(checkRequest);
                     events.add(checkLayout);
-                    success(checkRequest.getAttendee().toString() + ": " + checkRequest.getType().name()).open();
+                    success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
                 } else {
                     error("User has checked in before. Checkin process is rolled-back.").open();
                 }

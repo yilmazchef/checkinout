@@ -7,7 +7,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import it.vkod.models.entities.UserRole;
+import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
@@ -37,14 +37,14 @@ public class CheckinPage extends VerticalLayout {
         this.checkService = checkService;
 
         physicalCheckinLayout = new PhysicalCheckinLayout(authService, checkService);
-        remoteCheckinLayout = new RemoteCheckinLayout(authService, userService, checkService);
+        remoteCheckinLayout = new RemoteCheckinLayout(authService, checkService);
         type = new CheckTypeDialogLayout();
 
         authService.get().ifPresentOrElse(user -> {
-                    if (user.getRoles().stream().anyMatch(role -> role == UserRole.STUDENT)) {
+                    if (user.getRoles().stream().anyMatch(role -> role == Role.STUDENT)) {
                         add(remoteCheckinLayout);
                     } else if (user.getRoles().stream().anyMatch(role ->
-                            (role == UserRole.TEACHER) || (role == UserRole.MANAGER) || (role == UserRole.ADMIN))) {
+                            (role == Role.TEACHER) || (role == Role.MANAGER) || (role == Role.ADMIN))) {
                         add(physicalCheckinLayout);
                     } else {
                         UI.getCurrent().navigate(RegisterPage.class);
