@@ -1,7 +1,6 @@
 package it.vkod.views.layouts;
 
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.server.VaadinSession;
@@ -10,13 +9,15 @@ import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.models.entities.Course;
 import it.vkod.models.entities.Event;
 import it.vkod.models.entities.Role;
-import it.vkod.services.flow.AuthenticationService;
+import it.vkod.models.entities.User;
 import it.vkod.services.flow.CheckService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-public class PhysicalCheckinLayout extends VerticalLayout {
+import static it.vkod.models.entities.Event.*;
+import static it.vkod.views.layouts.NotificationLayout.*;
 
-    private final AuthenticationService authService;
+public class CheckEventLayout extends VerticalLayout {
+
     private final CheckService checkService;
 
     private final GeoLocation location;
@@ -24,9 +25,9 @@ public class PhysicalCheckinLayout extends VerticalLayout {
     private final Select<Course> course;
 
 
-    public PhysicalCheckinLayout(final AuthenticationService authService, final CheckService checkService) {
+    public CheckEventLayout(final CheckService checkService,
+                            final User user, final Event event) {
 
-        this.authService = authService;
         this.checkService = checkService;
 
         initCheckinLayoutStyle();
@@ -34,35 +35,34 @@ public class PhysicalCheckinLayout extends VerticalLayout {
         location = initLocationLayout();
         scanner = initScannerLayout();
         course = initCourseLayout();
+        course.setValue(user.getCourse());
 
-        authService.get().ifPresent(user -> {
+        final var authorized = (user.getRoles().stream().anyMatch(role -> role == Role.MANAGER || role == Role.ADMIN));
 
-            course.setValue(user.getCourse());
-            final var authorized = (user.getRoles().stream().anyMatch(role -> role == Role.MANAGER || role == Role.ADMIN));
+        if (!authorized) {
+            course.setReadOnly(true);
+        }
 
-            if (!authorized) {
-                course.setReadOnly(true);
+        final var checks = checkService.fetchAllByCourse(course.getValue(), PHYSICAL_IN);
+
+        scanner.addValueChangeListener(onScan -> {
+
+            final var checkRequest = checkService.checkin(
+                    VaadinSession.getCurrent().getSession().getId(),
+                    course.getValue(),
+                    (event == PHYSICAL_IN || event == PHYSICAL_OUT) ? user.getUsername() : onScan.getValue(),
+                    (event == PHYSICAL_IN || event == PHYSICAL_OUT) ? onScan.getValue() : user.getUsername(),
+                    location.getValue().getLatitude(),
+                    location.getValue().getLongitude(),
+                    (event == REMOTE_IN || event == REMOTE_OUT), (event == GUEST_IN || event == GUEST_OUT)
+            );
+
+            if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
+                success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
+            } else {
+                error("User has checked in before. Checkin process is rolled-back.").open();
             }
 
-            final var checks = checkService.fetchAllByCourse(course.getValue(), Event.PHYSICAL_IN);
-
-            scanner.addValueChangeListener(onScan -> {
-
-                final var checkRequest = checkService.checkin(
-                        VaadinSession.getCurrent().getSession().getId(),
-                        user.getCourse(), user.getUsername(), onScan.getValue(),
-                        location.getValue().getLatitude(),
-                        location.getValue().getLongitude(),
-                        false, false
-                );
-
-                if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
-                    NotificationLayout.success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
-                } else {
-                    NotificationLayout.error("User has checked in before. Checkin process is rolled-back.").open();
-                }
-
-            });
         });
 
         add(course, location, scanner);
@@ -81,22 +81,6 @@ public class PhysicalCheckinLayout extends VerticalLayout {
                 .set("padding", "0")
                 .set("width", "200px")
                 .set("max-width", "50vw")
-                .set("height", "25px")
-                .set("max-height", "50px")
-                .set("z-index", "0");
-
-        return layout;
-    }
-
-    private HorizontalLayout initEventsLayout() {
-        final HorizontalLayout layout;
-        layout = new HorizontalLayout();
-        layout.getStyle()
-                .set("position", "absolute")
-                .set("margin-bottom", "15vh")
-                .set("margin-left", "0")
-                .set("padding", "0")
-                .set("width", "100vw")
                 .set("height", "25px")
                 .set("max-height", "50px")
                 .set("z-index", "0");

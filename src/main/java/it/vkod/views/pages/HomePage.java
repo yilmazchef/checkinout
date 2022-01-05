@@ -40,7 +40,7 @@ public class HomePage extends VerticalLayout {
         } else {
 
             if (hasRole(oUser.get(), Role.TEACHER)) {
-                add(new CheckinPage(this.authService, this.userService, this.checkService));
+                add(new CheckinPage(this.authService, this.userService, this.checkService, this.emailService));
             } else if (hasRole(oUser.get(), Role.MANAGER)) {
                 add(new AdminPage(this.authService, this.adminService));
             }

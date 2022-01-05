@@ -3,10 +3,12 @@ package it.vkod.views.layouts;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.models.entities.Check;
+import it.vkod.models.entities.Course;
+import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
@@ -19,9 +21,9 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
     private final AuthenticationService authService;
     private final CheckService checkService;
 
-    private final HorizontalLayout events;
     private final GeoLocation location;
     private final ZXingVaadinReader scanner;
+    private final Select<Course> course;
 
 
     public PhysicalCheckoutLayout(final AuthenticationService authService, final CheckService checkService) {
@@ -29,20 +31,22 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
         this.authService = authService;
         this.checkService = checkService;
 
-        initCheckinLayoutStyle();
+        initCheckoutLayoutStyle();
 
         location = initLocationLayout();
-        events = initEventsLayout();
         scanner = initScannerLayout();
+        course = initCourseLayout();
 
         authService.get().ifPresent(user -> {
 
-            final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_OUT);
+            course.setValue(user.getCourse());
+            final var authorized = (user.getRoles().stream().anyMatch(role -> role == Role.MANAGER || role == Role.ADMIN));
 
-            for (final Check check : checks) {
-                final var checkLayout = new CheckedUserLayout(check);
-                events.add(checkLayout);
+            if (!authorized) {
+                course.setReadOnly(true);
             }
+
+            final var checks = checkService.fetchAllByCourse(course.getValue(), PHYSICAL_IN);
 
             scanner.addValueChangeListener(onScan -> {
 
@@ -55,28 +59,50 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
                 );
 
                 if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
-                    final var checkLayout = new CheckedUserLayout(checkRequest);
-                    events.add(checkLayout);
                     success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
                 } else {
-                    error("User has already checked out before. Checkout process is rolled-back.").open();
+                    error("User has checked in before. Checkout process is rolled-back.").open();
                 }
 
             });
         });
 
-        add(location, events, scanner);
+        add(course, location, scanner);
 
+    }
+
+    private Select<Course> initCourseLayout() {
+        final var layout = new Select<>(Course.values());
+        layout.setRequiredIndicatorVisible(true);
+
+        layout.setEmptySelectionAllowed(false);
+        layout.getStyle()
+                .set("position", "absolute")
+                .set("margin-top", "0")
+                .set("margin-left", "0")
+                .set("padding", "0")
+                .set("width", "200px")
+                .set("max-width", "50vw")
+                .set("height", "25px")
+                .set("max-height", "50px")
+                .set("z-index", "0");
+
+        return layout;
     }
 
     private HorizontalLayout initEventsLayout() {
         final HorizontalLayout layout;
         layout = new HorizontalLayout();
-        layout.setWidthFull();
-        layout.setMargin(false);
-        layout.setPadding(false);
-        layout.setSpacing(false);
-        layout.setHeight("10vh");
+        layout.getStyle()
+                .set("position", "absolute")
+                .set("margin-bottom", "15vh")
+                .set("margin-left", "0")
+                .set("padding", "0")
+                .set("width", "100vw")
+                .set("height", "25px")
+                .set("max-height", "50px")
+                .set("z-index", "0");
+
         return layout;
     }
 
@@ -90,7 +116,7 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
         return layout;
     }
 
-    private void initCheckinLayoutStyle() {
+    private void initCheckoutLayoutStyle() {
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         setMargin(false);
@@ -106,7 +132,8 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
                 " display: block;" +
                 " width: 100%;" +
                 " height: 100%;" +
-                " object-fit: cover;";
+                " object-fit: cover;" +
+                " z-index: -1;";
         final var type = "video";
         final var layout = new ZXingVaadinReader();
         layout.setFrom(Constants.From.camera);
