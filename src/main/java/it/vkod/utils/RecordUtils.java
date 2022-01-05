@@ -3,8 +3,8 @@ package it.vkod.utils;
 
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import it.vkod.models.entities.Course;
-import it.vkod.models.entities.User;
 import it.vkod.models.entities.Role;
+import it.vkod.models.entities.User;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -45,23 +45,6 @@ public class RecordUtils {
                 mock("cindy.pipeleers", "Cindy", "Pipeleers", Course.ONGEDEFINEERD, MANAGER);
 
                 mock("yilmaz.mustafa", "Yilmaz", "Mustafa", Course.BO_JAVA_21_JUNI, TEACHER);
-                mock("patrick.geudens", "Patrick", "Geudens", Course.BO_JAVA_21_SEPT, TEACHER);
-                mock("atilla.balin", "Atilla", "Balin", Course.BO_FRONT_END_DEV_21_NOV, TEACHER);
-                mock("manuel.cogneau", "Manuel", "Cogneau", Course.BO_JAVA_21_JAN, TEACHER);
-                mock("benedikt.lantsoght", "Benedikt", "Lantsoght", Course.BO_FRONT_END_DEV_20_SEPT, TEACHER);
-                mock("kenan.kurda", "Kenan", "Kurda", Course.BO_DOT_NET_21_JUNI, TEACHER);
-                mock("alexander.keisse", "Alexander", "Keisse", Course.BO_DOT_NET_21_SEPT, TEACHER);
-                mock("quinten.declerck", "Quinten", "De Clerck", Course.BO_DOT_NET_21_JUNI, TEACHER);
-
-                mock("hilal.demir", "Hilal", "Demir", Course.BO_JAVA_21_JUNI, STUDENT);
-                mock("ahmed.faqiri", "Ahmed", "Faqiri", Course.BO_JAVA_21_JUNI, STUDENT);
-                mock("alexandru.tudorache", "Alexandru", "Tudorache", Course.BO_JAVA_21_JUNI, STUDENT);
-                mock("sameerun.acchukatla", "Sameerun", "Acchukatla", Course.BO_JAVA_21_JUNI, STUDENT);
-                mock("rahime.yildiz", "Rahime", "Yildiz", Course.BO_JAVA_21_JUNI, STUDENT);
-                mock("sinan.hubeyb.cam", "Sinan", "Hubeyb Cam", Course.BO_JAVA_21_JUNI, STUDENT);
-                mock("joey.de.kort", "Joey", "De Kort", Course.BO_JAVA_21_JUNI, STUDENT);
-                mock("irina.afanassenko", "Irina", "Afanassenko", Course.BO_JAVA_21_JUNI, STUDENT);
-                mock("ali.jamal.alwasseti", "Ali Jamal", "Alwasseti", Course.BO_JAVA_21_JUNI, STUDENT);
 
             }
 

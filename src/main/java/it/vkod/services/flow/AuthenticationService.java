@@ -4,6 +4,7 @@ package it.vkod.services.flow;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 import it.vkod.configs.SecurityConfiguration;
+import it.vkod.models.entities.Role;
 import it.vkod.models.entities.User;
 import it.vkod.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,13 @@ public class AuthenticationService {
     }
 
 
-    public Optional< User > get() {
+    public Optional<User> get() {
 
         return getAuthentication().map(authentication -> userRepository.getByUsername(authentication.getName()));
+    }
+
+    public boolean hasRole(final Role role) {
+        return get().map(user -> user.getRoles().stream().anyMatch(userRole -> userRole == role)).orElse(false);
     }
 
 

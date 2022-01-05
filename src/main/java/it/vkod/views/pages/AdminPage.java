@@ -12,6 +12,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinSession;
+import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AdminService;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.views.layouts.NotificationLayout;
@@ -36,15 +37,14 @@ public class AdminPage extends VerticalLayout {
 
         final var authUser = this.authService.get();
 
-        if (authUser.isEmpty()) {
-            NotificationLayout.error("The active user is not authorized!").open();
-        } else {
-
-            Button flushButton = new Button("Close session", event -> {
+        if (this.authService.hasRole(Role.ADMIN)) {
+            final var flushButton = new Button("Close session", event -> {
                 VaadinSession.getCurrent().getSession().invalidate();
                 UI.getCurrent().getPage().reload();
             });
 
+            add(flushButton);
+        } else if (this.authService.hasRole(Role.ADMIN) || this.authService.hasRole(Role.MANAGER) || this.authService.hasRole(Role.TEACHER)) {
             final var courseField = new TextField("Voer hier de course-code in: ");
             courseField.setRequired(true);
             courseField.setRequiredIndicatorVisible(true);
@@ -64,7 +64,12 @@ public class AdminPage extends VerticalLayout {
                     });
 
 
-            add(courseField, flushButton);
+            add(courseField);
+        } else {
+
+            NotificationLayout.error("The active user is not authorized!").open();
+
+
         }
 
 

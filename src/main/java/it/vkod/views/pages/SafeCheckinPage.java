@@ -1,4 +1,4 @@
-package it.vkod.views.layouts;
+package it.vkod.views.pages;
 
 
 import com.vaadin.flow.component.button.Button;
@@ -8,6 +8,10 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.PreserveOnRefresh;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
@@ -17,14 +21,23 @@ import it.vkod.models.entities.User;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
+import it.vkod.views.layouts.CheckedUserLayout;
+import it.vkod.views.layouts.NotificationLayout;
+import it.vkod.views.layouts.ResponsiveLayout;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
+import javax.annotation.security.PermitAll;
 import java.time.LocalDateTime;
 import java.util.Random;
 
-import static it.vkod.models.entities.Event.PHYSICAL_OUT;
+import static it.vkod.models.entities.Event.*;
 
-public class SafeCheckoutLayout extends VerticalLayout {
+@PageTitle("Failsafe inchecken")
+@Route(value = "in/safe", layout = ResponsiveLayout.class)
+@RouteAlias(value = "checkin/safe", layout = ResponsiveLayout.class)
+@PermitAll
+@PreserveOnRefresh
+public class SafeCheckinPage extends VerticalLayout {
 
     private final AuthenticationService authService;
     private final UserService userService;
@@ -35,7 +48,7 @@ public class SafeCheckoutLayout extends VerticalLayout {
     private final ZXingVaadinReader scanner;
 
 
-    public SafeCheckoutLayout(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
+    public SafeCheckinPage(final AuthenticationService authService, final UserService userService, final CheckService checkService) {
 
         this.authService = authService;
         this.userService = userService;
@@ -86,7 +99,7 @@ public class SafeCheckoutLayout extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_OUT);
+        final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_IN, REMOTE_IN, GUEST_IN);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);
@@ -113,7 +126,7 @@ public class SafeCheckoutLayout extends VerticalLayout {
                 safeSubmit.addClickListener(onSafeSubmit -> {
 
                     final var newCheck = checkService.createOrUpdate(
-                            check(user, userService.getByUsername(onScan.getValue()), location, PHYSICAL_OUT));
+                            check(user, userService.getByUsername(onScan.getValue()), location, PHYSICAL_IN));
 
                     if (!checks.contains(newCheck)) {
                         final var checkLayout = new CheckedUserLayout(newCheck);

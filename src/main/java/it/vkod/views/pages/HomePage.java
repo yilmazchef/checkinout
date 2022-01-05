@@ -39,17 +39,13 @@ public class HomePage extends VerticalLayout {
             add(new GuestCheckinLayout(this.userService, this.checkService, this.emailService));
         } else {
 
-            if (hasRole(oUser.get(), Role.TEACHER)) {
+            if (this.authService.hasRole(Role.TEACHER)) {
                 add(new CheckinPage(this.authService, this.userService, this.checkService, this.emailService));
-            } else if (hasRole(oUser.get(), Role.MANAGER)) {
+            } else if (this.authService.hasRole(Role.MANAGER)) {
                 add(new AdminPage(this.authService, this.adminService));
             }
         }
 
 
-    }
-
-    private boolean hasRole(User user, Role role) {
-        return user.getRoles().stream().anyMatch(userRole -> userRole == role);
     }
 }
