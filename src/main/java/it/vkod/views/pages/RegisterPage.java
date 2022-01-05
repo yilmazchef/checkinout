@@ -23,7 +23,6 @@ import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
 import it.vkod.views.layouts.ResponsiveLayout;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -39,16 +38,28 @@ import static it.vkod.views.layouts.NotificationLayout.*;
 @AnonymousAllowed
 public class RegisterPage extends VerticalLayout {
 
-    public RegisterPage(@Autowired AuthenticationService authService, @Autowired UserService userService, @Autowired BCryptPasswordEncoder passwordEncoder, @Autowired EmailService emailService) {
+    private final AuthenticationService authService;
+    private final UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder;
+    /**
+     * Email Service is still under testing.
+     */
+    private final EmailService emailService;
+
+    public RegisterPage(AuthenticationService authService, UserService userService, BCryptPasswordEncoder passwordEncoder, EmailService emailService) {
+        this.authService = authService;
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
 
         initLayout();
 
         final var userRole = new RadioButtonGroup<Role>();
         userRole.setItems(DataProvider.ofItems(Role.values()));
 
-        if (authService.get().isPresent()) {
+        if (this.authService.get().isPresent()) {
 
-            final var oUser = authService.get();
+            final var oUser = this.authService.get();
             if (oUser.isPresent()) {
                 if (hasRole(oUser.get(), Role.ADMIN) || hasRole(oUser.get(), Role.MANAGER)) {
                     add(userRole);
@@ -60,7 +71,6 @@ public class RegisterPage extends VerticalLayout {
         final var formLayout = new FormLayout();
         final var phoneField = new TextField();
         final var emailField = new EmailField();
-        emailField.setReadOnly(true);
         final var usernameField = new TextField();
         usernameField.setRequiredIndicatorVisible(true);
         usernameField.setRequired(true);
@@ -76,10 +86,8 @@ public class RegisterPage extends VerticalLayout {
         firstNameField.setAutofocus(true);
 
         final var lastNameField = new TextField();
-        lastNameField.addValueChangeListener(onChange -> {
-            usernameField.setValue(
-                    firstNameField.getValue().toLowerCase().concat(".").concat(lastNameField.getValue().toLowerCase()));
-        });
+        lastNameField.addValueChangeListener(onChange -> usernameField.setValue(
+                firstNameField.getValue().toLowerCase().concat(".").concat(lastNameField.getValue().toLowerCase())));
 
         final var passwordField = new PasswordField();
         passwordField.setRequired(true);
@@ -120,7 +128,7 @@ public class RegisterPage extends VerticalLayout {
 
         final var submitButton = new Button("Submit Form", onClick -> {
 
-            final var exists = userService.existsByUsername(usernameField.getValue());
+            final var exists = this.userService.existsByUsername(usernameField.getValue());
 
             if (exists.equals(Boolean.FALSE)) {
                 final var user = new User()
@@ -128,16 +136,16 @@ public class RegisterPage extends VerticalLayout {
                         .setLastName(lastNameField.getValue().toLowerCase())
                         .setUsername(usernameField.getValue().toLowerCase())
                         .setEmail(emailField.getValue().toLowerCase())
-                        .setPassword(passwordEncoder.encode(passwordField.getValue()))
+                        .setPassword(this.passwordEncoder.encode(passwordField.getValue()))
                         .setPhone(phoneField.getValue())
                         .setRoles(Collections.singleton(Role.STUDENT));
 
-                final var savedUser = userService.createUser(user);
+                final var savedUser = this.userService.createUser(user);
 
                 if (!savedUser.isNew()) {
 
                     try {
-                        emailService.sendSimpleMessage(
+                        this.emailService.sendSimpleMessage(
                                 savedUser.getEmail(),
                                 "Your << CheckInOut >> Account is successfully created.",
                                 "Username: ".concat(savedUser.getUsername()).concat("\n").concat("Password: ")

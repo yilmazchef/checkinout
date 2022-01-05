@@ -13,13 +13,6 @@ services:
       - MYSQL_DATABASE=checkinout_prod
       - MYSQL_ROOT_PASSWORD=P@ssw0rd
       - TZ=Europe/Brussels
-    command:
-      [
-        'mysqld',
-        '--character-set-server=utf8mb4',
-        '--collation-server=utf8mb4_unicode_ci',
-        '--default-time-zone=+01:00'
-      ]
 
   checkinout-app:
     image: yilmazchef/checkinout:latest
@@ -28,6 +21,8 @@ services:
       - checkinout-db
     networks:
       - checknet
+    links:
+      - checkinout-db:checkinout-db
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://checkinout-db:3306/checkinout_prod
       SPRING_DATASOURCE_USERNAME: root
