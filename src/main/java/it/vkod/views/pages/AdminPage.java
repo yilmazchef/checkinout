@@ -6,7 +6,6 @@ import com.vaadin.flow.component.KeyDownEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
@@ -15,27 +14,32 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinSession;
 import it.vkod.services.flow.AdminService;
 import it.vkod.services.flow.AuthenticationService;
-import it.vkod.views.layouts.PdfLayout;
 import it.vkod.views.layouts.NotificationLayout;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.security.RolesAllowed;
+
+import static it.vkod.api.ExportController.*;
 
 @PageTitle("Administratie")
 @Route(value = "admin")
 @RolesAllowed({"ADMIN", "MANAGER", "LEADER", "TEACHER"})
 public class AdminPage extends VerticalLayout {
 
+    private final AuthenticationService authService;
+    private final AdminService adminService;
 
-    public AdminPage(@Autowired AuthenticationService authService, @Autowired AdminService adminService) {
 
-        final var authUser = authService.get();
+    public AdminPage(AuthenticationService authService, AdminService adminService) {
+        this.authService = authService;
+        this.adminService = adminService;
+
+        final var authUser = this.authService.get();
 
         if (authUser.isEmpty()) {
             NotificationLayout.error("The active user is not authorized!").open();
         } else {
 
-            Button closeButton = new Button("Close session", event -> {
+            Button flushButton = new Button("Close session", event -> {
                 VaadinSession.getCurrent().getSession().invalidate();
                 UI.getCurrent().getPage().reload();
             });
@@ -45,29 +49,21 @@ public class AdminPage extends VerticalLayout {
             courseField.setRequiredIndicatorVisible(true);
             courseField.addKeyDownListener(com.vaadin.flow.component.Key.ENTER,
                     (ComponentEventListener<KeyDownEvent>) keyDownEvent -> {
-                        final var actionLayout = new HorizontalLayout();
-                        final var route = RouteConfiguration.forSessionScope().getUrl(HomePage.class);
 
-                        final String PDF = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
-                        final String CSV = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
-                        final String XLS = route + "/api/v1/export/checks/pdf/" + courseField.getValue().replaceAll(" ", "%20");
-                        final String USERS = route + "/api/v1/export/users/pdf/" + courseField.getValue().replaceAll(" ", "%20");
+                        final var course = courseField.getValue().replaceAll(" ", "+");
+                        final var route = RouteConfiguration.forSessionScope().getUrl(HomePage.class).concat(API);
 
-                        final var pdfAnchor = new Anchor(PDF, "Druk als PDF");
-                        final var csvAnchor = new Anchor(CSV, "Druk als CSV");
-                        final var excelAnchor = new Anchor(XLS, "Druk als EXCEL");
+                        final var pdfAnchor = new Anchor(route.concat(PDF).concat("/").concat(course), "PDF");
+                        final var csvAnchor = new Anchor(route.concat(CSV).concat("/").concat(course), "CSV");
+                        final var excelAnchor = new Anchor(route.concat(EXCEL).concat("/").concat(course), "EXCEL");
+                        final var qrAnchor = new Anchor(route.concat(USERS).concat("/").concat(course), "Gebruikers-QR");
 
-                        final var viewerLayout = new VerticalLayout();
-                        viewerLayout.add(new PdfLayout(USERS));
-
-                        actionLayout.add(pdfAnchor, csvAnchor, excelAnchor);
-
-                        add(actionLayout, viewerLayout);
+                        add(pdfAnchor, csvAnchor, excelAnchor, qrAnchor);
 
                     });
 
 
-            add(courseField);
+            add(courseField, flushButton);
         }
 
 

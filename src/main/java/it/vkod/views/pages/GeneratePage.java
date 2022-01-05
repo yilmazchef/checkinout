@@ -15,17 +15,18 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 import it.vkod.services.flow.UserService;
+import it.vkod.views.layouts.ResponsiveLayout;
 
+import javax.annotation.security.PermitAll;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Genereer QR")
-@Route(value = "generate")
-@AnonymousAllowed
+@Route(value = "generate", layout = ResponsiveLayout.class)
+@PermitAll
 public class GeneratePage extends VerticalLayout {
 
     private final UserService userService;
@@ -63,9 +64,9 @@ public class GeneratePage extends VerticalLayout {
                             generateLayout.add(
                                     convertToImage(generateQR(user.getUsername(), 512, 512), user.getUsername()));
                             Notification.show(
-                                    ("Generated a QR Code for " + user.getUsername()),
-                                    8000,
-                                    Notification.Position.BOTTOM_CENTER)
+                                            ("Generated a QR Code for " + user.getUsername()),
+                                            8000,
+                                            Notification.Position.BOTTOM_CENTER)
                                     .open();
 
                             final var sendWhatsAppButton = new Button("Verzenden via Whatsapp", onSendClick -> {
