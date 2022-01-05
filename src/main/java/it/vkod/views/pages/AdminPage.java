@@ -15,13 +15,14 @@ import com.vaadin.flow.server.VaadinSession;
 import it.vkod.services.flow.AdminService;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.views.layouts.NotificationLayout;
+import it.vkod.views.layouts.ResponsiveLayout;
 
 import javax.annotation.security.RolesAllowed;
 
 import static it.vkod.api.ExportController.*;
 
 @PageTitle("Administratie")
-@Route(value = "admin")
+@Route(value = "admin", layout = ResponsiveLayout.class)
 @RolesAllowed({"ADMIN", "MANAGER", "LEADER", "TEACHER"})
 public class AdminPage extends VerticalLayout {
 

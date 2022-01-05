@@ -22,6 +22,7 @@ import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
+import it.vkod.views.layouts.ResponsiveLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -34,7 +35,7 @@ import static it.vkod.utils.QRUtils.generateQR;
 import static it.vkod.views.layouts.NotificationLayout.*;
 
 @PageTitle("Inschrijven")
-@Route(value = "register")
+@Route(value = "register", layout = ResponsiveLayout.class)
 @AnonymousAllowed
 public class RegisterPage extends VerticalLayout {
 
