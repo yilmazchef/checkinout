@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run Spring boot app" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="checkinout" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="it.vkod.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="it.vkod.Application" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

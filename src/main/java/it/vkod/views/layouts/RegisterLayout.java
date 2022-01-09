@@ -14,11 +14,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.VaadinSession;
-import com.wontlost.zxing.Constants;
-import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.models.entities.*;
-import it.vkod.services.flow.CheckService;
+import it.vkod.models.entities.Course;
+import it.vkod.models.entities.Role;
+import it.vkod.models.entities.User;
 import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
 import it.vkod.utils.QRUtils;
@@ -27,22 +25,17 @@ import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import static it.vkod.models.entities.Event.GUEST_IN;
-
 @PreserveOnRefresh
-public class GuestCheckinLayout extends VerticalLayout {
+public class RegisterLayout extends VerticalLayout {
 
     private final UserService userService;
-    private final CheckService checkService;
     private final EmailService emailService;
 
     private final HorizontalLayout events;
     private final GeoLocation location;
-    private final ZXingVaadinReader scanner;
     private final VerticalLayout generate;
 
     private final FormLayout formLayout;
@@ -57,19 +50,13 @@ public class GuestCheckinLayout extends VerticalLayout {
     private final Button submit;
     private final Button login;
 
-    private static final String WHATSAPP_REDIRECT_URL = "https://api.whatsapp.com/send?phone=";
-
-    public GuestCheckinLayout(final UserService userService, final CheckService checkService, final EmailService emailService) {
+    public RegisterLayout(final UserService userService, final EmailService emailService) {
 
         this.userService = userService;
-        this.checkService = checkService;
         this.emailService = emailService;
-
-        initCheckinLayoutStyle();
 
         location = initLocationLayout();
         events = initEventsLayout();
-        scanner = initScannerLayout();
         generate = initGenerateLayout();
         organizers = initOrganizersLayout();
 
@@ -102,9 +89,7 @@ public class GuestCheckinLayout extends VerticalLayout {
                 new FormLayout.ResponsiveStep("640px", 3)
         );
 
-        login.addClickListener(onLogin -> {
-            UI.getCurrent().navigate(LoginPage.class);
-        });
+        login.addClickListener(onLogin -> UI.getCurrent().navigate(LoginPage.class));
 
         submit.addClickListener(onSubmit -> {
             final var pwd = UUID.randomUUID().toString();
@@ -119,46 +104,33 @@ public class GuestCheckinLayout extends VerticalLayout {
                     .setRoles(Set.of(Role.GUEST))
             );
 
-            final var newCheck = initCheckinLayout(course.getValue(), organizers.getValue(), attendee);
 
-            scanner.addValueChangeListener(onScan -> {
+            try {
 
-                if (onScan.getValue().equalsIgnoreCase(String.valueOf(newCheck.getValidation()))) {
+                final var image = convertToImage(QRUtils.generateQR(attendee.getUsername(), 256, 256), attendee.getUsername());
+                generate.add(
+                        image);
+                Notification.show((
+                        "Generated a QR Code for " + attendee.getUsername()), 8000, Notification.Position.BOTTOM_CENTER).open();
 
-                    try {
+                final var sendEmailButton = new Button("Email", onSendClick -> {
+                    this.emailService.sendSimpleMessage(attendee.getEmail(), "Welcome bij Intec. Je QR code is nu klaar.", image.getSrc());
+                });
 
-                        final var image = convertToImage(QRUtils.generateQR(attendee.getUsername(), 256, 256), attendee.getUsername());
-                        generate.add(
-                                image);
-                        Notification.show((
-                                "Generated a QR Code for " + attendee.getUsername()), 8000, Notification.Position.BOTTOM_CENTER).open();
+                generate.add(sendEmailButton);
+                generate.setVisible(true);
+                events.setVisible(false);
 
-                        final var sendWhatsAppButton = new Button("Whatsapp", onSendClick -> {
-                            UI.getCurrent().getPage().setLocation(WHATSAPP_REDIRECT_URL.concat(attendee.getPhone()));
-                        });
+                NotificationLayout.success("Success! Een opniuew account voor " + attendee + " wodt gecreëerd.").open();
 
-                        final var sendEmailButton = new Button("Email", onSendClick -> {
-                            this.emailService.sendSimpleMessage(attendee.getEmail(), "Welcome bij Intec. Je QR code is nu klaar.", image.getSrc());
-                        });
 
-                        generate.add(sendWhatsAppButton, sendEmailButton);
-                        generate.setVisible(true);
-                        scanner.setVisible(false);
-                        events.setVisible(false);
+            } catch (WriterException | IOException fileEx) {
+                Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER).open();
+            }
 
-                    } catch (WriterException | IOException fileEx) {
-                        Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER).open();
-                    }
-
-                }
-
-                NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getEvent().name()).open();
-
-            });
-
-            add(scanner, generate);
         });
 
+        add(generate);
         events.add(formLayout);
 
         add(location, events);
@@ -184,7 +156,8 @@ public class GuestCheckinLayout extends VerticalLayout {
     }
 
     private VerticalLayout initGenerateLayout() {
-        final var layout = new VerticalLayout();
+        final VerticalLayout layout;
+        layout = new VerticalLayout();
         layout.setWidthFull();
         layout.setMargin(false);
         layout.setPadding(false);
@@ -195,7 +168,8 @@ public class GuestCheckinLayout extends VerticalLayout {
     }
 
     private HorizontalLayout initEventsLayout() {
-        final var layout = new HorizontalLayout();
+        final HorizontalLayout layout;
+        layout = new HorizontalLayout();
         layout.setWidthFull();
         layout.setMargin(false);
         layout.setPadding(false);
@@ -205,7 +179,8 @@ public class GuestCheckinLayout extends VerticalLayout {
     }
 
     private GeoLocation initLocationLayout() {
-        final var layout = new GeoLocation();
+        final GeoLocation layout;
+        layout = new GeoLocation();
         layout.setWatch(true);
         layout.setHighAccuracy(true);
         layout.setTimeout(100000);
@@ -213,58 +188,5 @@ public class GuestCheckinLayout extends VerticalLayout {
         return layout;
     }
 
-    private void initCheckinLayoutStyle() {
-        setAlignItems(Alignment.CENTER);
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setMargin(false);
-        setPadding(false);
-        setSpacing(false);
-        setSizeFull();
-    }
-
-
-    private Check initCheckinLayout(final Course course, final User organizer, final User attendee) {
-
-        final var checks = checkService.fetchAllByCourse(course, GUEST_IN);
-
-        for (final Check check : checks) {
-            final var checkLayout = new CheckedUserLayout(check);
-            events.add(checkLayout);
-        }
-
-        return checkService.createOrUpdate(check(organizer, attendee, location, GUEST_IN));
-
-
-    }
-
-    private ZXingVaadinReader initScannerLayout() {
-        final var style = "position: absolute;" +
-                " top: 0;" +
-                " left: 0;" +
-                " display: block;" +
-                " width: 100%;" +
-                " height: 100%;" +
-                " object-fit: cover;";
-        final var type = "video";
-        final var layout = new ZXingVaadinReader();
-        layout.setFrom(Constants.From.camera);
-        layout.setId(type); // id needs to be 'video' if From.camera.
-        layout.setStyle(style);
-        return layout;
-    }
-
-
-    public Check check(User organizer, User attendee, GeoLocation location, Event type) {
-
-        return new Check()
-                .setOrganizer(organizer)
-                .setAttendee(attendee)
-                .setCourse(attendee.getCourse())
-                .setLat(location.getValue().getLatitude())
-                .setLon(location.getValue().getLongitude())
-                .setValidation(new Random().nextInt(8999) + 1000)
-                .setSession(VaadinSession.getCurrent().getSession().getId())
-                .setEvent(type);
-    }
 
 }

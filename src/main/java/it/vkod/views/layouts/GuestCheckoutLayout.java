@@ -48,8 +48,7 @@ public class GuestCheckoutLayout extends VerticalLayout {
     }
 
     private HorizontalLayout initEventsLayout() {
-        final HorizontalLayout layout;
-        layout = new HorizontalLayout();
+        final var layout = new HorizontalLayout();
         layout.setWidthFull();
         layout.setMargin(false);
         layout.setPadding(false);
@@ -59,8 +58,7 @@ public class GuestCheckoutLayout extends VerticalLayout {
     }
 
     private GeoLocation initLocationLayout() {
-        final GeoLocation layout;
-        layout = new GeoLocation();
+        final var layout = new GeoLocation();
         layout.setWatch(true);
         layout.setHighAccuracy(true);
         layout.setTimeout(100000);
@@ -80,7 +78,7 @@ public class GuestCheckoutLayout extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fetchAllByCourse(user.getCourse(), REMOTE_OUT);
+        final var checks = this.checkService.fetchAllByCourse(user.getCourse(), REMOTE_OUT);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);
@@ -89,7 +87,7 @@ public class GuestCheckoutLayout extends VerticalLayout {
 
         scanner.addValueChangeListener(onScan -> {
 
-            final var newCheck = checkService.createOrUpdate(
+            final var newCheck = this.checkService.createOrUpdate(
                     check(userService.getByUsername(onScan.getValue()), user, location, REMOTE_OUT));
 
             if (!checks.contains(newCheck)) {

@@ -16,13 +16,12 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import it.vkod.services.flow.UserService;
+import it.vkod.utils.QRUtils;
 import it.vkod.views.layouts.ResponsiveLayout;
 
 import javax.annotation.security.PermitAll;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
-import static it.vkod.utils.QRUtils.generateQR;
 
 @PageTitle("Genereer QR")
 @Route(value = "generate", layout = ResponsiveLayout.class)
@@ -62,7 +61,7 @@ public class GeneratePage extends VerticalLayout {
                         try {
 
                             generateLayout.add(
-                                    convertToImage(generateQR(user.getUsername(), 512, 512), user.getUsername()));
+                                    convertToImage(QRUtils.generateQR(user.getUsername(), 512, 512), user.getUsername()));
                             Notification.show(
                                             ("Generated a QR Code for " + user.getUsername()),
                                             8000,

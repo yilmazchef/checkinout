@@ -31,7 +31,7 @@ public class PDFExporter {
 
         document.open();
         final var hFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
-        hFont.setSize(14);
+        hFont.setSize(12);
         hFont.setColor(Color.BLUE);
 
         final var hi = "Aanmelden van " + LocalDate.now();
@@ -82,7 +82,7 @@ public class PDFExporter {
                 "www.intecbrussel.be  - meer kansen op werk!";
 
         final var fFont = FontFactory.getFont(FontFactory.TIMES_ROMAN);
-        fFont.setSize(10F);
+        fFont.setSize(9F);
         fFont.setColor(Color.BLACK);
 
         final var p = new Paragraph(pi, fFont);
@@ -102,7 +102,7 @@ public class PDFExporter {
         cell.setPadding(2);
 
         final var font = FontFactory.getFont(FontFactory.HELVETICA);
-        font.setSize(10F);
+        font.setSize(9F);
         font.setColor(Color.WHITE);
 
         cell.setPhrase(new Phrase("Familienaam", font));

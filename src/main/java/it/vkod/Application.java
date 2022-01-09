@@ -13,7 +13,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @SpringBootApplication
 @PWA(
         name = "checkinout", shortName = "checkinout",
-        iconPath = "images/intec-logo.png",
+        iconPath = "images/logo.png",
         offlinePath = "offline.html",
         offlineResources = {"./images/offline.png"})
 @NpmPackage(value = "line-awesome", version = "1.3.0")

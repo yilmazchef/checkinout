@@ -52,8 +52,8 @@ public class CheckEventLayout extends VerticalLayout {
                     course.getValue(),
                     (event == PHYSICAL_IN || event == PHYSICAL_OUT) ? user.getUsername() : onScan.getValue(),
                     (event == PHYSICAL_IN || event == PHYSICAL_OUT) ? onScan.getValue() : user.getUsername(),
-                    location.getValue().getLatitude(),
-                    location.getValue().getLongitude(),
+                    location.getValue() == null ? 0.00 : location.getValue().getLatitude(),
+                    location.getValue() == null ? 0.00 : location.getValue().getLongitude(),
                     (event == REMOTE_IN || event == REMOTE_OUT), (event == GUEST_IN || event == GUEST_OUT)
             );
 

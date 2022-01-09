@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
 
-  checkinout-db:
+  db:
     image: mysql:latest
     restart: unless-stopped
     networks:
@@ -14,17 +14,17 @@ services:
       - MYSQL_ROOT_PASSWORD=P@ssw0rd
       - TZ=Europe/Brussels
 
-  checkinout-app:
+  app:
     image: yilmazchef/checkinout:latest
-    restart: on-failure
+    restart: always
     depends_on:
-      - checkinout-db
+      - db
     networks:
       - checknet
     links:
-      - checkinout-db:checkinout-db
+      - db:db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://checkinout-db:3306/checkinout_prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/checkinout_prod
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: P@ssw0rd
     ports:
