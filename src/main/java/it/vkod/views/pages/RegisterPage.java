@@ -7,6 +7,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.EmailService;
@@ -23,18 +26,21 @@ public class RegisterPage extends VerticalLayout {
     private final AuthenticationService authService;
     private final UserService userService;
     private final EmailService emailService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     private final Dialog dialog;
 
-    public RegisterPage(AuthenticationService authService, UserService userService, EmailService emailService) {
+    public RegisterPage(final AuthenticationService authService, final UserService userService,
+            final EmailService emailService, final BCryptPasswordEncoder passwordEncoder) {
         this.authService = authService;
         this.userService = userService;
         this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
 
         this.dialog = new Dialog();
 
         if (this.authService.hasRole(Role.GUEST) || this.authService.get().isEmpty()) {
-            add(new RegisterLayout(this.userService, this.emailService));
+            add(new RegisterLayout(this.userService, this.emailService, this.passwordEncoder));
 
         } else {
 

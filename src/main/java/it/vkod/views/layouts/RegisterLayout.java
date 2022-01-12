@@ -1,6 +1,5 @@
 package it.vkod.views.layouts;
 
-
 import com.google.zxing.WriterException;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -57,7 +56,8 @@ public class RegisterLayout extends VerticalLayout {
     private final Button submit;
     private final Button login;
 
-    public RegisterLayout(final UserService userService, final EmailService emailService, final BCryptPasswordEncoder passwordEncoder) {
+    public RegisterLayout(final UserService userService, final EmailService emailService,
+            final BCryptPasswordEncoder passwordEncoder) {
 
         this.userService = userService;
         this.emailService = emailService;
@@ -90,15 +90,13 @@ public class RegisterLayout extends VerticalLayout {
                 email, phone,
                 organizers,
                 course,
-                submit, login
-        );
+                submit, login);
         formLayout.setResponsiveSteps(
                 // Use one column by default
                 new FormLayout.ResponsiveStep("0", 1),
                 // Use two columns, if layout's width exceeds 500px
                 new FormLayout.ResponsiveStep("480px", 2),
-                new FormLayout.ResponsiveStep("640px", 3)
-        );
+                new FormLayout.ResponsiveStep("640px", 3));
 
         login.addClickListener(onLogin -> UI.getCurrent().navigate(LoginPage.class));
 
@@ -112,20 +110,20 @@ public class RegisterLayout extends VerticalLayout {
                     .setLastName(lastName.getValue())
                     .setCourse(course.getValue())
                     .setPassword(pwd)
-                    .setRoles(Set.of(Role.GUEST))
-            );
-
+                    .setRoles(Set.of(Role.GUEST)));
 
             try {
 
-                final var image = convertToImage(QRUtils.generateQR(attendee.getUsername(), 256, 256), attendee.getUsername());
+                final var image = convertToImage(QRUtils.generateQR(attendee.getUsername(), 256, 256),
+                        attendee.getUsername());
                 generate.add(
                         image);
-                Notification.show((
-                        "Generated a QR Code for " + attendee.getUsername()), 8000, Notification.Position.BOTTOM_CENTER).open();
+                Notification.show(("Generated a QR Code for " + attendee.getUsername()), 8000,
+                        Notification.Position.BOTTOM_CENTER).open();
 
                 final var sendEmailButton = new Button("Email", onSendClick -> {
-                    this.emailService.sendSimpleMessage(attendee.getEmail(), "Welcome bij Intec. Je QR code is nu klaar.", image.getSrc());
+                    this.emailService.sendSimpleMessage(attendee.getEmail(),
+                            "Welcome bij Intec. Je QR code is nu klaar.", image.getSrc());
                 });
 
                 generate.add(sendEmailButton);
@@ -133,7 +131,6 @@ public class RegisterLayout extends VerticalLayout {
                 events.setVisible(false);
 
                 NotificationLayout.success("Success! Een opniuew account voor " + attendee + " wodt gecreëerd.").open();
-
 
             } catch (WriterException | IOException fileEx) {
                 Notification.show(fileEx.getMessage(), 3000, Notification.Position.BOTTOM_CENTER).open();
@@ -145,7 +142,6 @@ public class RegisterLayout extends VerticalLayout {
         events.add(formLayout);
 
         add(location, events);
-
 
     }
 
@@ -198,6 +194,5 @@ public class RegisterLayout extends VerticalLayout {
         layout.setMaxAge(200000);
         return layout;
     }
-
 
 }
