@@ -11,8 +11,13 @@ services:
       - "3443:3306"
     environment:
       - MYSQL_DATABASE=checkinout_prod
-      - MYSQL_ROOT_PASSWORD=P@ssw0rd
+      - MYSQL_USER=checkinout
+      - MYSQL_PASSWORD=checkinout
+      - MYSQL_ROOT_PASSWORD=1a2z3e4a5z6e7a8z9e 
       - TZ=Europe/Brussels
+    volumes:
+        - ./dump:/docker-entrypoint-initdb.d
+        - persistent:/var/lib/mysql
 
   app:
     image: yilmazchef/checkinout:latest
@@ -21,15 +26,16 @@ services:
       - db
     networks:
       - checknet
-    links:
-      - db:db
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/checkinout_prod
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: P@ssw0rd
+      SPRING_DATASOURCE_PASSWORD: 1a2z3e4a5z6e7a8z9e
     ports:
       - "443:8443"
 
 networks:
   checknet:
     attachable: true
+    
+volumes:
+  persistent:
