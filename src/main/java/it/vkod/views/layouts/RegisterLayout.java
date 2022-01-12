@@ -10,6 +10,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.server.InputStreamFactory;
@@ -21,6 +22,8 @@ import it.vkod.services.flow.EmailService;
 import it.vkod.services.flow.UserService;
 import it.vkod.utils.QRUtils;
 import it.vkod.views.pages.LoginPage;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +37,8 @@ public class RegisterLayout extends VerticalLayout {
     private final UserService userService;
     private final EmailService emailService;
 
+    private final BCryptPasswordEncoder passwordEncoder;
+
     private final HorizontalLayout events;
     private final GeoLocation location;
     private final VerticalLayout generate;
@@ -45,15 +50,18 @@ public class RegisterLayout extends VerticalLayout {
     private final TextField firstName;
     private final TextField lastName;
     private final TextField username;
+    private final PasswordField password;
+    private final PasswordField repeat;
     private final TextField email;
     private final TextField phone;
     private final Button submit;
     private final Button login;
 
-    public RegisterLayout(final UserService userService, final EmailService emailService) {
+    public RegisterLayout(final UserService userService, final EmailService emailService, final BCryptPasswordEncoder passwordEncoder) {
 
         this.userService = userService;
         this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
 
         location = initLocationLayout();
         events = initEventsLayout();
@@ -65,6 +73,8 @@ public class RegisterLayout extends VerticalLayout {
         firstName = new TextField("Voornaam");
         lastName = new TextField("Familienaam");
         username = new TextField("Gebruikersnaam");
+        password = new PasswordField("Wachtwoord");
+        repeat = new PasswordField("Valideer Wachtwoord");
         email = new TextField("Email");
         phone = new TextField("GSM-nummer");
         phone.setRequiredIndicatorVisible(true);
@@ -76,7 +86,8 @@ public class RegisterLayout extends VerticalLayout {
         formLayout = new FormLayout();
         formLayout.add(
                 firstName, lastName,
-                username, email, phone,
+                username, password, repeat,
+                email, phone,
                 organizers,
                 course,
                 submit, login
@@ -92,7 +103,7 @@ public class RegisterLayout extends VerticalLayout {
         login.addClickListener(onLogin -> UI.getCurrent().navigate(LoginPage.class));
 
         submit.addClickListener(onSubmit -> {
-            final var pwd = UUID.randomUUID().toString();
+            final var pwd = passwordEncoder.encode(password.getValue());
             final var attendee = this.userService.createUser(new User()
                     .setUsername(username.getValue())
                     .setEmail(email.getValue())
