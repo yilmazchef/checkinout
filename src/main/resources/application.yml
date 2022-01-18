@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:9999}
+  port: ${PORT:8080}
   # ssl:
   #   key-store: classpath:testy.p12
   #   key-store-password: P@ssw0rd
