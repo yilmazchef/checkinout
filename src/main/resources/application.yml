@@ -1,9 +1,9 @@
 server:
-  port: ${PORT:8443}
-  ssl:
-    key-store: classpath:checkinout.p12
-    key-store-password: P@ssw0rd
-    keyStoreType: PKCS12
+  port: ${PORT:9999}
+  # ssl:
+  #   key-store: classpath:testy.p12
+  #   key-store-password: P@ssw0rd
+  #   keyStoreType: PKCS12
 
 logging.level:
   org.atmosphere: warn
@@ -33,8 +33,8 @@ spring:
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/checkinout_dev}
-    username: ${SPRING_DATASOURCE_USERNAME:chef}
-    password: ${SPRING_DATASOURCE_PASSWORD:P@ssw0rd}
+    username: ${SPRING_DATASOURCE_USERNAME:checkinout}
+    password: ${SPRING_DATASOURCE_PASSWORD:checkinout}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   security:
