@@ -16,9 +16,10 @@ services:
       - MYSQL_PASSWORD=checkinout
       - MYSQL_ROOT_PASSWORD=toor 
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "checkinout_db_server"]
+      timeout: 10s
       retries: 10
+      
   checkinout_db_admin:
     container_name: checkinout_db_admin
     image: adminer
@@ -53,5 +54,4 @@ services:
 
 networks:
   check_net:
-    attachable: true
 
