@@ -2,40 +2,56 @@ version: '3.3'
 
 services:
 
-  db:
+  checkinout_db_server:
+    container_name: checkinout_db_server
     image: mysql:latest
     restart: unless-stopped
     networks:
-      - checknet
+      - check_net
     ports:
       - "3999:3306"
     environment:
-      - MYSQL_DATABASE=checkinout_prod
+      - MYSQL_DATABASE=checkinout_dev
       - MYSQL_USER=checkinout
       - MYSQL_PASSWORD=checkinout
-      - MYSQL_ROOT_PASSWORD=1a2z3e4a5z6e7a8z9e 
-      - TZ=Europe/Brussels
-    volumes:
-        - ./dump:/docker-entrypoint-initdb.d
-        - persistent:/var/lib/mysql
+      - MYSQL_ROOT_PASSWORD=toor 
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+  checkinout_db_admin:
+    container_name: checkinout_db_admin
+    image: adminer
+    restart: always
+    links:
+      - "checkinout_db_server:checkinout_db_server"
+    depends_on:
+      checkinout_db_server:
+        condition: service_healthy
+    networks:
+      - check_net
+    ports:
+      - "1999:8080"
 
-  app:
+  checkinout_app:
+    container_name: checkinout_app
     image: yilmazchef/checkinout:latest
     restart: always
+    links:
+    - "checkinout_db_server:checkinout_db_server"
     depends_on:
-      - db
+      checkinout_db_server:
+        condition: service_healthy
     networks:
-      - checknet
+      - check_net
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/checkinout_prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://checkinout_db_server:3306/checkinout_dev?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 1a2z3e4a5z6e7a8z9e
+      SPRING_DATASOURCE_PASSWORD: toor
     ports:
       - "9999:8080"
 
 networks:
-  checknet:
+  check_net:
     attachable: true
-    
-volumes:
-  persistent:
+
