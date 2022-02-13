@@ -7,7 +7,6 @@ import it.vkod.models.entities.Event;
 import it.vkod.repositories.CheckRepository;
 import it.vkod.repositories.UserRepository;
 import it.vkod.services.exceptions.CheckinoutException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +19,17 @@ import java.util.Set;
 
 import static it.vkod.models.entities.Event.*;
 
-@RequiredArgsConstructor
 @Service
 public class CheckService {
 
     private final UserRepository userRepository;
     private final CheckRepository checkRepository;
+    
+
+    public CheckService(final UserRepository userRepository, final CheckRepository checkRepository) {
+        this.userRepository = userRepository;
+        this.checkRepository = checkRepository;
+    }
 
     private Check generate(
             final String session, final Event type,
@@ -56,25 +60,25 @@ public class CheckService {
 
     public List<Check> today() {
 
-        return this.checkRepository.findAllToday();
+        return checkRepository.findAllToday();
     }
 
 
     public List<Check> on(final java.sql.Date on) {
 
-        return this.checkRepository.findAll(on);
+        return checkRepository.findAll(on);
     }
 
 
     public List<Check> ofAttendee(final java.sql.Date on, final java.sql.Time at, final String username) {
 
-        return this.checkRepository.findAllByAttendee(on, at, username);
+        return checkRepository.findAllByAttendee(on, at, username);
     }
 
 
     public List<Check> fromOrganizer(final java.sql.Date on, final java.sql.Time at, final String username) {
 
-        return this.checkRepository.findAllByOrganizer(on, at, username);
+        return checkRepository.findAllByOrganizer(on, at, username);
     }
 
     @Transactional
@@ -83,13 +87,13 @@ public class CheckService {
                          @NotEmpty final Double latitude, @NotEmpty final Double longitude,
                          final boolean remote, final boolean guest) {
 
-        final var checkins = this.checkRepository.findAllCheckinsByAttendee(attendee);
+        final var checkins = checkRepository.findAllCheckinsByAttendee(attendee);
         var type = PHYSICAL_IN;
         if (remote) type = REMOTE_IN;
         if (guest) type = GUEST_IN;
 
         return checkins.isEmpty() ?
-                this.checkRepository.save(
+                checkRepository.save(
                         generate(
                                 session, type, organizer, attendee, course, new Double[]{latitude, longitude}
                         )
@@ -104,14 +108,14 @@ public class CheckService {
                           @NotEmpty final Double latitude, @NotEmpty final Double longitude,
                           final boolean remote, final boolean guest) {
 
-        final var checkins = this.checkRepository.findAllCheckinsByAttendee(attendee);
-        final var checkouts = this.checkRepository.findAllCheckoutsByAttendee(attendee);
+        final var checkins = checkRepository.findAllCheckinsByAttendee(attendee);
+        final var checkouts = checkRepository.findAllCheckoutsByAttendee(attendee);
         var type = PHYSICAL_OUT;
         if (remote) type = REMOTE_OUT;
         if (guest) type = GUEST_OUT;
 
         return (!checkins.isEmpty() && checkouts.isEmpty()) ?
-                this.checkRepository.save(
+                checkRepository.save(
                         generate(
                                 session, type, organizer, attendee, course, new Double[]{latitude, longitude}
                         )
@@ -124,11 +128,11 @@ public class CheckService {
     @Transactional
     public Check createOrUpdate(Check check) {
 
-        final var existing = this.checkRepository.findAllByAttendee(
+        final var existing = checkRepository.findAllByAttendee(
                 check.getOnDate(), Collections.singleton(PHYSICAL_IN), check.getAttendee().getUsername());
 
         return existing.isEmpty() ?
-                this.checkRepository.save(check).setDuplicated(false)
+                checkRepository.save(check).setDuplicated(false)
                 : existing.get(0).setDuplicated(true);
 
     }
@@ -136,14 +140,14 @@ public class CheckService {
 
     public List<Check> fromCourse(final Course course) {
 
-        return this.checkRepository.findAllByCourse(course);
+        return checkRepository.findAllByCourse(course);
     }
 
 
     public List<Check> fetchAllByCourse(final Course course, Event... types) {
 
         final var nowDate = java.sql.Date.valueOf(LocalDate.now());
-        return this.checkRepository.findAllByCourseAndType(course, nowDate, Set.of(types));
+        return checkRepository.findAllByCourseAndType(course, nowDate, Set.of(types));
     }
 
 }

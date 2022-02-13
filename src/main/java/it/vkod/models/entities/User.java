@@ -16,7 +16,6 @@ import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 @ToString(onlyExplicitlyIncluded = true)
@@ -54,7 +53,7 @@ public class User implements Serializable, Cloneable, Persistable<Long> {
 
     @CollectionTable(name = "roles")
     @ElementCollection(fetch = FetchType.EAGER)
-    Set<Role> roles = new LinkedHashSet<>();
+    Set<Role> roles;
 
     Timestamp registered;
 

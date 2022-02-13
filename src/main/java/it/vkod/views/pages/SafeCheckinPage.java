@@ -36,7 +36,6 @@ import static it.vkod.models.entities.Event.*;
 @Route(value = "in/safe", layout = ResponsiveLayout.class)
 @RouteAlias(value = "checkin/safe", layout = ResponsiveLayout.class)
 @PermitAll
-@PreserveOnRefresh
 public class SafeCheckinPage extends VerticalLayout {
 
     private final AuthenticationService authService;
@@ -62,7 +61,7 @@ public class SafeCheckinPage extends VerticalLayout {
 
         add(location, events, scanner);
 
-        authService.get().ifPresent(this::initCheckinLayout);
+        this.authService.get().ifPresent(this::initCheckinLayout);
 
     }
 

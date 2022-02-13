@@ -12,8 +12,6 @@ services:
       - "3999:3306"
     environment:
       - MYSQL_DATABASE=checkinout_dev
-      - MYSQL_USER=checkinout
-      - MYSQL_PASSWORD=checkinout
       - MYSQL_ROOT_PASSWORD=toor 
       
   checkinout_db_admin:
@@ -40,9 +38,9 @@ services:
     networks:
       - check_net
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://checkinout_db_server:3306/checkinout_dev?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: toor
+      CHECKINOUT_DATASOURCE_URL: jdbc:mysql://checkinout_db_server:3306/checkinout_dev?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      CHECKINOUT_DATASOURCE_USERNAME: root
+      CHECKINOUT_DATASOURCE_PASSWORD: toor
     ports:
       - "9999:8080"
 

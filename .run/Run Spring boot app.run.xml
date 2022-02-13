@@ -9,6 +9,9 @@
     </extension>
     <option name="SPRING_BOOT_MAIN_CLASS" value="it.vkod.Application" />
     <option name="ALTERNATIVE_JRE_PATH" />
+    <envs>
+      <env name="SPRING_BOOT_DATASOURCE: jdbc:mysql://checkinout_db_server:3306/checkinout_dev?createDatabaseIfNotExist" value="true&amp;autoReconnect=true&amp;useSSL=false&amp;allowPublicKeyRetrieval=true" />
+    </envs>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

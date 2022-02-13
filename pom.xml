@@ -6,7 +6,8 @@
 
     <groupId>it.vkod</groupId>
     <artifactId>checkinout</artifactId>
-    <name>Aanmeldingssysteem voor Intec Brussel</name>
+    <name>checkinout</name>
+    <description>Aanmeldingssysteem voor Intec Brussel</description>
     <version>1.0</version>
     <packaging>jar</packaging>
 

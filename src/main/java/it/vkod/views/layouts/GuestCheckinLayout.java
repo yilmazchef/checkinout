@@ -33,7 +33,6 @@ import java.util.UUID;
 
 import static it.vkod.models.entities.Event.GUEST_IN;
 
-@PreserveOnRefresh
 public class GuestCheckinLayout extends VerticalLayout {
 
     private final UserService userService;
