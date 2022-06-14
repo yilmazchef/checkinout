@@ -56,7 +56,7 @@ public class User implements Serializable, Cloneable, Persistable<Long> {
     Set<Role> roles;
 
     Timestamp registered;
-
+    
     @URL
     String profile;
 

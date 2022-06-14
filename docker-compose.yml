@@ -1,26 +1,26 @@
 version: "3.9"
 services:
 
-  checkinout_dev_appserver:
+  app:
     build: .
     ports:
-      - "80:8080"
+      - "8080"
     depends_on:
-      - checkinout_dev_database_server
+      - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://checkinout_dev_database_server:5432/checkinoutdb
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/checkinoutdb
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     networks:
-      - checkinout_development_network
+      - devnet
     volumes:
-      - checkinout_application_volume:/var/lib/checkinout
+      - devvol:/var/lib/checkinout
 
-  checkinout_dev_database_server:
+  db:
     image: postgres:latest
     ports:
-      - "5432:5432"
+      - "5432"
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
@@ -31,23 +31,23 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - checkinout_development_network
+      - devnet
     volumes:
-      - checkinout_database_volume:/var/lib/postgresql/data
+      - dbvol:/var/lib/postgresql/data
 
-  checkinout_dev_database_admin:
+  dba:
     image: adminer:latest
     restart: always
     ports:
-      - "9090:8080"
+      - "8080"
     networks:
-      - checkinout_development_network
+      - devnet
 
 networks:
-  checkinout_production_network:
-  checkinout_development_network:
+  pronet:
+  devnet:
 
 
 volumes:
-  checkinout_database_volume: {}
-  checkinout_application_volume: {}
+  dbvol: {}
+  devvol: {}

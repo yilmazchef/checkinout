@@ -1,6 +1,5 @@
 package it.vkod.api;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -65,7 +64,8 @@ public class CheckController {
             @RequestParam(required = false) @NotEmpty final Double longitude,
             @RequestParam(required = false) final boolean remote, @RequestParam(required = false) final boolean guest) {
 
-        return checkService.checkin(session, Course.valueOf(course), organizer, attendee, latitude, longitude, remote, guest);
+        return checkService.checkin(session, Course.valueOf(course), organizer, attendee, latitude, longitude, remote,
+                guest);
 
     }
 
@@ -75,7 +75,8 @@ public class CheckController {
             @NotEmpty final Double latitude, @NotEmpty final Double longitude,
             @RequestParam(required = false) final boolean remote, @RequestParam(required = false) final boolean guest) {
 
-        return checkService.checkout(session, Course.valueOf(course), organizer, attendee, latitude, longitude, remote, guest);
+        return checkService.checkout(session, Course.valueOf(course), organizer, attendee, latitude, longitude, remote,
+                guest);
 
     }
 
@@ -93,7 +94,8 @@ public class CheckController {
     }
 
     @GetMapping("course_with_events/{course_id}")
-    public List<Check> fetchAllByCourse(@PathVariable("course_id") final String course, @RequestParam final Set<Event> types) {
+    public List<Check> fetchAllByCourse(@PathVariable("course_id") final String course,
+            @RequestParam final Set<Event> types) {
 
         return checkService.fetchAllByCourse(Course.valueOf(course), types.toArray(Event[]::new));
     }
