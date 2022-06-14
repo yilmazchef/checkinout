@@ -79,7 +79,7 @@
         </dependencies>
     </dependencyManagement>
 
-    
+
     <distributionManagement>
         <repository>
             <id>github</id>
