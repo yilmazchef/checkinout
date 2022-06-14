@@ -146,11 +146,7 @@
     "webpack-merge": "4.2.2",
     "workbox-core": "6.5.0",
     "workbox-precaching": "6.5.0",
-    "workbox-webpack-plugin": "6.5.0",
-    "validator": "13.1.17",
-    "@types/validator": "13.1.0",
-    "ts-loader": "8.0.12",
-    "webpack-manifest-plugin": "3.0.0"
+    "workbox-webpack-plugin": "6.5.0"
   },
   "overrides": {
     "@vaadin/accordion": "$@vaadin/accordion",
@@ -269,7 +265,12 @@
     "lit": "$lit",
     "chokidar": "$chokidar",
     "@vaadin/lit-renderer": "$@vaadin/lit-renderer",
-    "line-awesome": "$line-awesome"
+    "line-awesome": "$line-awesome",
+    "@granite-elements/granite-qrcode-scanner": "$@granite-elements/granite-qrcode-scanner",
+    "@zxing/browser": "$@zxing/browser",
+    "@zxing/library": "$@zxing/library",
+    "apexcharts": "$apexcharts",
+    "onecolor": "$onecolor"
   },
   "vaadin": {
     "dependencies": {
@@ -416,12 +417,8 @@
       "webpack-merge": "4.2.2",
       "workbox-core": "6.5.0",
       "workbox-precaching": "6.5.0",
-      "workbox-webpack-plugin": "6.5.0",
-      "validator": "13.1.17",
-      "@types/validator": "13.1.0",
-      "ts-loader": "8.0.12",
-      "webpack-manifest-plugin": "3.0.0"
+      "workbox-webpack-plugin": "6.5.0"
     },
-    "hash": "1c1ba81a236b0a040163b154344b3d2d6dfb87c2088eff3dd2130f94f6a3517a"
+    "hash": "0314784de7f12691d195bbfd4bec1386ced274d7abe8ff70d6bf1205617083d3"
   }
 }
