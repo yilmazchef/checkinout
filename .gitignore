@@ -26,3 +26,5 @@ lin/
 win/
 mac/
 node_modules/
+
+.fake

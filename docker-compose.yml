@@ -1,49 +1,53 @@
-version: '3.3'
-
+version: "3.9"
 services:
 
-  checkinout_db_server:
-    container_name: checkinout_db_server
-    image: mysql:latest
-    restart: unless-stopped
-    networks:
-      - check_net
+  checkinout_dev_appserver:
+    build: .
     ports:
-      - "3999:3306"
-    environment:
-      - MYSQL_DATABASE=checkinout_dev
-      - MYSQL_ROOT_PASSWORD=toor 
-      
-  checkinout_db_admin:
-    container_name: checkinout_db_admin
-    image: adminer
-    restart: always
-    links:
-      - "checkinout_db_server:checkinout_db_server"
+      - "80:8080"
     depends_on:
-      - "checkinout_db_server"
+      - checkinout_dev_database_server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://checkinout_dev_database_server:5432/checkinoutdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     networks:
-      - check_net
-    ports:
-      - "1999:8080"
+      - checkinout_development_network
+    volumes:
+      - checkinout_application_volume:/var/lib/checkinout
 
-  checkinout_app:
-    container_name: checkinout_app
-    image: yilmazchef/checkinout:latest
-    restart: always
-    links:
-    - "checkinout_db_server:checkinout_db_server"
-    depends_on:
-      - "checkinout_db_server"
-    networks:
-      - check_net
-    environment:
-      CHECKINOUT_DATASOURCE_URL: jdbc:mysql://checkinout_db_server:3306/checkinout_dev?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
-      CHECKINOUT_DATASOURCE_USERNAME: root
-      CHECKINOUT_DATASOURCE_PASSWORD: toor
+  checkinout_dev_database_server:
+    image: postgres:latest
     ports:
-      - "9999:8080"
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=checkinoutdb
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - checkinout_development_network
+    volumes:
+      - checkinout_database_volume:/var/lib/postgresql/data
+
+  checkinout_dev_database_admin:
+    image: adminer:latest
+    restart: always
+    ports:
+      - "9090:8080"
+    networks:
+      - checkinout_development_network
 
 networks:
-  check_net:
+  checkinout_production_network:
+  checkinout_development_network:
 
+
+volumes:
+  checkinout_database_volume: {}
+  checkinout_application_volume: {}

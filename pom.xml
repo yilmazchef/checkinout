@@ -1,43 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>it.vkod</groupId>
+    <!-- Project from https://start.vaadin.com/project/7273f936-dc4f-46a8-83b5-dec9b6ac3c05 -->
+    <groupId>be.intecbrussel</groupId>
     <artifactId>checkinout</artifactId>
     <name>checkinout</name>
-    <description>Aanmeldingssysteem voor Intec Brussel</description>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <vaadin.version>21.0.3</vaadin.version>
-        <spring.boot.version>2.6.1</spring.boot.version>
+        <vaadin.version>23.1.0</vaadin.version>
+        <selenium.version>4.1.2</selenium.version>
         <start-class>it.vkod.Application</start-class>
     </properties>
-
-    <developers>
-        <developer>
-            <email>yilmaz.mustafa@intecbrussel.be</email>
-            <organization>Intec Brussel</organization>
-            <roles>
-                <role>Java Instructor</role>
-                <role>Python Instructor</role>
-            </roles>
-            <organizationUrl>https://www.intecbrussel.be</organizationUrl>
-            <url>https://checkinout.intecbrussel.be</url>
-            <timezone>Brussel</timezone>
-        </developer>
-    </developers>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.6</version>
+        <version>2.7.0</version>
     </parent>
 
     <repositories>
@@ -65,20 +48,7 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
     </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/yilmazchef/checkinout</url>
-        </repository>
-    </distributionManagement>
 
     <pluginRepositories>
         <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
@@ -109,13 +79,16 @@
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
+    
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/yilmazchef/checkinout</url>
+        </repository>
+    </distributionManagement>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>2.6.1</version>
-        </dependency>
+    <dependencies>
 
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -127,71 +100,70 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <version>2.6.1</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
-            <scope>provided</scope>
+            <groupId>com.vaadin</groupId>
+            <artifactId>exampledata</artifactId>
+            <version>5.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
-            <version>2.6.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <version>2.6.1</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>2.6.1</version>
-            <scope>test</scope>
+            <groupId>sk.smartbase.component</groupId>
+            <artifactId>qr-scanner</artifactId>
+            <version>1.0.4</version>
         </dependency>
 
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
+            <groupId>com.mlottmann.VStepper</groupId>
+            <artifactId>VStepper</artifactId>
+            <version>1.0.9</version>
         </dependency>
 
-        <!-- Include JUnit 4 support for TestBench and others -->
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>5.8.2</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.0.2</version>
-            <scope>test</scope>
+            <groupId>com.github.appreciated</groupId>
+            <artifactId>apexcharts</artifactId>
+            <version>2.0.0.beta10</version>
         </dependency>
 
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.4.0-b180830.0359</version>
+            <version>2.3.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.13.3</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
@@ -206,27 +178,16 @@
         </dependency>
 
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.22</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
-            <version>3.4.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>javase</artifactId>
-            <version>3.4.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.wontlost</groupId>
-            <artifactId>zxing-vaadin</artifactId>
-            <version>1.0.2-8</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>3.3.0</version>
         </dependency>
 
         <dependency>
@@ -262,26 +223,79 @@
         </dependency>
 
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.27</version>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.3.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.wontlost</groupId>
+            <artifactId>zxing-vaadin</artifactId>
+            <version>1.0.2-8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flowingcode.addons</groupId>
+            <artifactId>simple-timer</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Include JUnit 4 support for TestBench and others -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>5.1.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
-
-        <finalName>${project.artifactId}</finalName>
-
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
-
                 <!-- Clean build and startup time for Vaadin apps sometimes may exceed
-                     the default Spring Boot's 30sec timeout.  -->
+                 the default Spring Boot's 30sec timeout.  -->
                 <configuration>
                     <image>
                         <name>docker.io/yilmazchef/${project.artifactId}:latest</name>
@@ -309,22 +323,18 @@
                     </execution>
                 </executions>
             </plugin>
-
-
         </plugins>
     </build>
 
     <profiles>
         <profile>
+            <!-- Production mode is activated using -Pproduction -->
             <id>production</id>
-
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-
             <build>
                 <plugins>
-
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>vaadin-maven-plugin</artifactId>
@@ -339,22 +349,14 @@
                         </executions>
                         <configuration>
                             <productionMode>true</productionMode>
-                            <pnpmEnable>false</pnpmEnable>
                         </configuration>
                     </plugin>
-
                 </plugins>
             </build>
-
         </profile>
 
         <profile>
-            <id>development</id>
-
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-
+            <id>it</id>
             <build>
                 <plugins>
                     <plugin>
@@ -382,7 +384,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.21.0</version>
                         <executions>
                             <execution>
                                 <goals>
