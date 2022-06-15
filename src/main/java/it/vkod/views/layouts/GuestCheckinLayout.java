@@ -11,7 +11,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
@@ -27,9 +26,7 @@ import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static it.vkod.models.entities.Event.GUEST_IN;
 
@@ -118,11 +115,11 @@ public class GuestCheckinLayout extends VerticalLayout {
                     .setRoles(Set.of(Role.GUEST))
             );
 
-            final var newCheck = initCheckinLayout(course.getValue(), organizers.getValue(), attendee);
+            final Optional<Check> newCheck = initCheckinLayout(course.getValue(), organizers.getValue(), attendee);
 
             scanner.addValueChangeListener(onScan -> {
 
-                if (onScan.getValue().equalsIgnoreCase(String.valueOf(newCheck.getValidation()))) {
+                if (newCheck.isPresent() && onScan.getValue().equalsIgnoreCase(String.valueOf(newCheck.get().getValidation()))) {
 
                     try {
 
@@ -151,7 +148,7 @@ public class GuestCheckinLayout extends VerticalLayout {
 
                 }
 
-                NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getEvent().name()).open();
+                NotificationLayout.success(newCheck.get().getAttendee().toString() + ": " + newCheck.get().getEvent().name()).open();
 
             });
 
@@ -222,9 +219,9 @@ public class GuestCheckinLayout extends VerticalLayout {
     }
 
 
-    private Check initCheckinLayout(final Course course, final User organizer, final User attendee) {
+    private Optional<Check> initCheckinLayout(final Course course, final User organizer, final User attendee) {
 
-        final var checks = checkService.fetchAllByCourse(course, GUEST_IN);
+        final List<Check> checks = checkService.fetchAllByCourse(course, GUEST_IN);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);

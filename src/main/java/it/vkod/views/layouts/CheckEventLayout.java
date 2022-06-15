@@ -6,15 +6,16 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
-import it.vkod.models.entities.Course;
-import it.vkod.models.entities.Event;
-import it.vkod.models.entities.Role;
-import it.vkod.models.entities.User;
+import it.vkod.models.entities.*;
 import it.vkod.services.flow.CheckService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
+import java.util.List;
+import java.util.Optional;
+
 import static it.vkod.models.entities.Event.*;
-import static it.vkod.views.layouts.NotificationLayout.*;
+import static it.vkod.views.layouts.NotificationLayout.error;
+import static it.vkod.views.layouts.NotificationLayout.success;
 
 public class CheckEventLayout extends VerticalLayout {
 
@@ -43,11 +44,11 @@ public class CheckEventLayout extends VerticalLayout {
             course.setReadOnly(true);
         }
 
-        final var checks = checkService.fetchAllByCourse(course.getValue(), PHYSICAL_IN);
+        final List<Check> checks = checkService.fetchAllByCourse(course.getValue(), PHYSICAL_IN);
 
         scanner.addValueChangeListener(onScan -> {
 
-            final var checkRequest = checkService.checkin(
+            final Optional<Check> checkRequest = checkService.checkin(
                     VaadinSession.getCurrent().getSession().getId(),
                     course.getValue(),
                     (event == PHYSICAL_IN || event == PHYSICAL_OUT) ? user.getUsername() : onScan.getValue(),
@@ -57,8 +58,8 @@ public class CheckEventLayout extends VerticalLayout {
                     (event == REMOTE_IN || event == REMOTE_OUT), (event == GUEST_IN || event == GUEST_OUT)
             );
 
-            if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
-                success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
+            if (checkRequest.isPresent() && !checks.contains(checkRequest) && !checkRequest.get().isDuplicated()) {
+                success(checkRequest.get().getAttendee().toString() + ": " + checkRequest.get().getEvent().name()).open();
             } else {
                 error("User has checked in before. Checkin process is rolled-back.").open();
             }

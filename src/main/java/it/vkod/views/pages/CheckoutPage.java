@@ -12,12 +12,19 @@ import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
 import it.vkod.views.layouts.NotificationLayout;
-import it.vkod.views.layouts.ResponsiveLayout;
 import it.vkod.views.layouts.PhysicalCheckoutLayout;
 import it.vkod.views.layouts.RemoteCheckoutLayout;
+import it.vkod.views.layouts.ResponsiveLayout;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.security.PermitAll;
+import java.text.MessageFormat;
+import java.util.stream.Collectors;
 
+// LOMBOK
+@Slf4j
+
+// VAADIN
 @PageTitle("Uitchecken")
 @Route(value = "out", layout = ResponsiveLayout.class)
 @RouteAlias(value = "checkout", layout = ResponsiveLayout.class)
@@ -42,7 +49,17 @@ public class CheckoutPage extends VerticalLayout {
         remoteCheckoutLayout = new RemoteCheckoutLayout(authService, checkService);
 
         authService.get().ifPresentOrElse(user -> {
+
+                    log.info(
+                            MessageFormat.format(
+                                    "User {0} with role {1} is trying to checkout",
+                                    user.getUsername(),
+                                    user.getRoles().stream().map(Role::name).collect(Collectors.joining(", "))
+                            )
+                    );
+
                     if (user.getRoles().stream().anyMatch(role -> role == Role.STUDENT)) {
+
                         add(remoteCheckoutLayout);
                         getUI().ifPresent(ui -> ui.getPage().setTitle("Remote uitchecken"));
                     } else if (user.getRoles().stream().anyMatch(role ->

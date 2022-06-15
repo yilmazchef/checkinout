@@ -14,6 +14,8 @@ import it.vkod.services.flow.CheckService;
 import it.vkod.services.flow.UserService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static it.vkod.models.entities.Event.REMOTE_OUT;
@@ -78,7 +80,7 @@ public class GuestCheckoutLayout extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = this.checkService.fetchAllByCourse(user.getCourse(), REMOTE_OUT);
+        final List<Check> checks = this.checkService.fetchAllByCourse(user.getCourse(), REMOTE_OUT);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);
@@ -87,15 +89,16 @@ public class GuestCheckoutLayout extends VerticalLayout {
 
         scanner.addValueChangeListener(onScan -> {
 
-            final var newCheck = this.checkService.createOrUpdate(
+            final Optional<Check> newCheck = this.checkService.createOrUpdate(
                     check(userService.getByUsername(onScan.getValue()), user, location, REMOTE_OUT));
 
-            if (!checks.contains(newCheck)) {
-                final var checkLayout = new CheckedUserLayout(newCheck);
+            if (newCheck.isPresent() && !checks.contains(newCheck.get())) {
+                final var checkLayout = new CheckedUserLayout(newCheck.get());
                 events.add(checkLayout);
+                NotificationLayout.success(newCheck.get().getAttendee().toString() + ": " + newCheck.get().getEvent().name()).open();
+            } else {
+                NotificationLayout.error(onScan.getValue() + ": " + " not acceptable.").open();
             }
-
-            NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getEvent().name()).open();
 
         });
 

@@ -11,8 +11,12 @@ import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import static it.vkod.models.entities.Event.*;
-import static it.vkod.views.layouts.NotificationLayout.*;
+import java.util.List;
+import java.util.Optional;
+
+import static it.vkod.models.entities.Event.REMOTE_IN;
+import static it.vkod.views.layouts.NotificationLayout.error;
+import static it.vkod.views.layouts.NotificationLayout.success;
 
 public class RemoteCheckinLayout extends VerticalLayout {
 
@@ -37,7 +41,7 @@ public class RemoteCheckinLayout extends VerticalLayout {
 
         authService.get().ifPresent(user -> {
 
-            final var checks = checkService.fetchAllByCourse(user.getCourse(), REMOTE_IN);
+            final List<Check> checks = checkService.fetchAllByCourse(user.getCourse(), REMOTE_IN);
 
             for (final Check check : checks) {
                 final var checkLayout = new CheckedUserLayout(check);
@@ -46,7 +50,7 @@ public class RemoteCheckinLayout extends VerticalLayout {
 
             scanner.addValueChangeListener(onScan -> {
 
-                final var checkRequest = checkService.checkin(
+                final Optional<Check> checkRequest = checkService.checkin(
                         VaadinSession.getCurrent().getSession().getId(),
                         user.getCourse(), onScan.getValue(), user.getUsername(),
                         location.getValue().getLatitude(),
@@ -54,10 +58,10 @@ public class RemoteCheckinLayout extends VerticalLayout {
                         false, false
                 );
 
-                if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
-                    final var checkLayout = new CheckedUserLayout(checkRequest);
+                if (!checks.contains(checkRequest) && checkRequest.isPresent() && !checkRequest.get().isDuplicated()) {
+                    final var checkLayout = new CheckedUserLayout(checkRequest.get());
                     events.add(checkLayout);
-                    success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
+                    success(checkRequest.get().getAttendee().toString() + ": " + checkRequest.get().getEvent().name()).open();
                 } else {
                     error("User has checked in before. Remote checkin process is rolled-back.").open();
                 }

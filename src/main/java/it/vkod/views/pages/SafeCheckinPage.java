@@ -9,7 +9,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
@@ -27,7 +26,10 @@ import it.vkod.views.layouts.ResponsiveLayout;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static it.vkod.models.entities.Event.*;
@@ -98,7 +100,7 @@ public class SafeCheckinPage extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_IN, REMOTE_IN, GUEST_IN);
+        final List<Check> checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_IN, REMOTE_IN, GUEST_IN);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);
@@ -124,15 +126,31 @@ public class SafeCheckinPage extends VerticalLayout {
                 final var safeSubmit = new Button("Verzenden", VaadinIcon.CHECK_SQUARE.create());
                 safeSubmit.addClickListener(onSafeSubmit -> {
 
-                    final var newCheck = checkService.createOrUpdate(
+                    final Optional<Check> newCheck = checkService.createOrUpdate(
                             check(user, userService.getByUsername(onScan.getValue()), location, PHYSICAL_IN));
 
                     if (!checks.contains(newCheck)) {
-                        final var checkLayout = new CheckedUserLayout(newCheck);
+                        final var checkLayout = new CheckedUserLayout(newCheck.get());
                         events.add(checkLayout);
                     }
 
-                    NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getEvent().name()).open();
+                    if (newCheck.isPresent()) {
+                        NotificationLayout.success(
+                                MessageFormat.format(
+                                        "Check ingegeven voor {0} op {1}",
+                                        newCheck.get().getAttendee().getUsername(),
+                                        newCheck.get().getOnDate()
+                                )
+                        ).open();
+                    } else {
+                        NotificationLayout.error(
+                                MessageFormat.format(
+                                        "Check niet ingegeven voor {0} op {1}",
+                                        onScan.getValue(),
+                                        safeDate.getValue()
+                                )
+                        ).open();
+                    }
 
 
                 });

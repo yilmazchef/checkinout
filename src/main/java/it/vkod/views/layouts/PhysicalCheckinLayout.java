@@ -7,12 +7,16 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
+import it.vkod.models.entities.Check;
 import it.vkod.models.entities.Course;
 import it.vkod.models.entities.Event;
 import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
+
+import java.util.List;
+import java.util.Optional;
 
 public class PhysicalCheckinLayout extends VerticalLayout {
 
@@ -44,11 +48,11 @@ public class PhysicalCheckinLayout extends VerticalLayout {
                 course.setReadOnly(true);
             }
 
-            final var checks = checkService.fetchAllByCourse(course.getValue(), Event.PHYSICAL_IN);
+            final List<Check> checks = checkService.fetchAllByCourse(course.getValue(), Event.PHYSICAL_IN);
 
             scanner.addValueChangeListener(onScan -> {
 
-                final var checkRequest = checkService.checkin(
+                final Optional<Check> checkRequest = checkService.checkin(
                         VaadinSession.getCurrent().getSession().getId(),
                         user.getCourse(), user.getUsername(), onScan.getValue(),
                         location.getValue().getLatitude(),
@@ -56,8 +60,8 @@ public class PhysicalCheckinLayout extends VerticalLayout {
                         false, false
                 );
 
-                if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
-                    NotificationLayout.success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
+                if (!checks.contains(checkRequest) && checkRequest.isPresent() && !checkRequest.get().isDuplicated()) {
+                    NotificationLayout.success(checkRequest.get().getAttendee().toString() + ": " + checkRequest.get().getEvent().name()).open();
                 } else {
                     NotificationLayout.error("User has checked in before. Checkin process is rolled-back.").open();
                 }

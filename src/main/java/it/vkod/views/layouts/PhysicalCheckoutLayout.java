@@ -7,15 +7,24 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.server.VaadinSession;
 import com.wontlost.zxing.Constants;
 import com.wontlost.zxing.ZXingVaadinReader;
+import it.vkod.models.entities.Check;
 import it.vkod.models.entities.Course;
 import it.vkod.models.entities.Role;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
+import lombok.extern.slf4j.Slf4j;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import static it.vkod.models.entities.Event.*;
-import static it.vkod.views.layouts.NotificationLayout.*;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Optional;
 
+import static it.vkod.models.entities.Event.PHYSICAL_IN;
+import static it.vkod.views.layouts.NotificationLayout.error;
+import static it.vkod.views.layouts.NotificationLayout.success;
+
+// LOMBOK
+@Slf4j
 public class PhysicalCheckoutLayout extends VerticalLayout {
 
     private final AuthenticationService authService;
@@ -39,6 +48,16 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
 
         authService.get().ifPresent(user -> {
 
+            final List<Check> checks = checkService.fetchAllByCourse(course.getValue(), PHYSICAL_IN);
+
+            log.info(
+                    MessageFormat.format(
+                            "Found {0} physical checks for course {1}",
+                            checks.size(),
+                            user.getCourse()
+                    )
+            );
+
             course.setValue(user.getCourse());
             final var authorized = (user.getRoles().stream().anyMatch(role -> role == Role.MANAGER || role == Role.ADMIN));
 
@@ -46,11 +65,16 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
                 course.setReadOnly(true);
             }
 
-            final var checks = checkService.fetchAllByCourse(course.getValue(), PHYSICAL_IN);
-
             scanner.addValueChangeListener(onScan -> {
 
-                final var checkRequest = checkService.checkout(
+                log.info(
+                        MessageFormat.format(
+                                "Scanning physical checkout with code {0}",
+                                onScan.getValue()
+                        )
+                );
+
+                final Optional<Check> checkRequest = checkService.checkout(
                         VaadinSession.getCurrent().getSession().getId(),
                         user.getCourse(), user.getUsername(), onScan.getValue(),
                         location.getValue().getLatitude(),
@@ -58,8 +82,15 @@ public class PhysicalCheckoutLayout extends VerticalLayout {
                         false, false
                 );
 
-                if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
-                    success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
+                log.info(
+                        MessageFormat.format(
+                                "Checkout request {0}",
+                                checkRequest.isPresent() ? "succeeded" : "failed"
+                        )
+                );
+
+                if (!checks.contains(checkRequest) && checkRequest.isPresent() && !checkRequest.get().isDuplicated()) {
+                    success(checkRequest.get().getAttendee().toString() + ": " + checkRequest.get().getEvent().name()).open();
                 } else {
                     error("User has checked in before. Checkout process is rolled-back.").open();
                 }

@@ -9,11 +9,19 @@ import com.wontlost.zxing.ZXingVaadinReader;
 import it.vkod.models.entities.Check;
 import it.vkod.services.flow.AuthenticationService;
 import it.vkod.services.flow.CheckService;
+import lombok.extern.slf4j.Slf4j;
 import org.vaadin.elmot.flow.sensors.GeoLocation;
 
-import static it.vkod.models.entities.Event.*;
-import static it.vkod.views.layouts.NotificationLayout.*;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Optional;
 
+import static it.vkod.models.entities.Event.REMOTE_OUT;
+import static it.vkod.views.layouts.NotificationLayout.error;
+import static it.vkod.views.layouts.NotificationLayout.success;
+
+// LOMBOK
+@Slf4j
 public class RemoteCheckoutLayout extends VerticalLayout {
 
     private final AuthenticationService authService;
@@ -37,7 +45,15 @@ public class RemoteCheckoutLayout extends VerticalLayout {
 
         authService.get().ifPresent(user -> {
 
-            final var checks = checkService.fetchAllByCourse(user.getCourse(), REMOTE_OUT);
+            final List<Check> checks = checkService.fetchAllByCourse(user.getCourse(), REMOTE_OUT);
+
+            log.info(
+                    MessageFormat.format(
+                            "Found {0} remote checks for course {1}",
+                            checks.size(),
+                            user.getCourse()
+                    )
+            );
 
             for (final Check check : checks) {
                 final var checkLayout = new CheckedUserLayout(check);
@@ -46,7 +62,14 @@ public class RemoteCheckoutLayout extends VerticalLayout {
 
             scanner.addValueChangeListener(onScan -> {
 
-                final var checkRequest = checkService.checkout(
+                log.info(
+                        MessageFormat.format(
+                                "Scanning remote checkout with code {0}",
+                                onScan.getValue()
+                        )
+                );
+
+                final Optional<Check> checkRequest = checkService.checkout(
                         VaadinSession.getCurrent().getSession().getId(),
                         user.getCourse(), onScan.getValue(), user.getUsername(),
                         location.getValue().getLatitude(),
@@ -54,12 +77,37 @@ public class RemoteCheckoutLayout extends VerticalLayout {
                         false, false
                 );
 
-                if (!checks.contains(checkRequest) && !checkRequest.isDuplicated()) {
-                    final var checkLayout = new CheckedUserLayout(checkRequest);
+                log.info(
+                        MessageFormat.format(
+                                "Checkout request for code {0} returned {1}",
+                                onScan.getValue(),
+                                checkRequest
+                        )
+                );
+
+                if (!checks.contains(checkRequest) && checkRequest.isPresent() && !checkRequest.get().isDuplicated()) {
+
+                    log.info(
+                            MessageFormat.format(
+                                    "Checkout request for code {0} is valid",
+                                    onScan.getValue()
+                            )
+                    );
+
+                    final var checkLayout = new CheckedUserLayout(checkRequest.get());
                     events.add(checkLayout);
-                    success(checkRequest.getAttendee().toString() + ": " + checkRequest.getEvent().name()).open();
+                    success(checkRequest.get().getAttendee().toString() + ": " + checkRequest.get().getEvent().name()).open();
                 } else {
-                    error("User has already checked out before. Checkout process is rolled-back.").open();
+
+                    String message = MessageFormat.format(
+                            "Checkout request for code {0} is invalid",
+                            onScan.getValue()
+                    );
+                    log.info(
+                            message
+                    );
+
+                    error(message).open();
                 }
 
             });

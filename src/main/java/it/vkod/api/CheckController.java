@@ -1,23 +1,17 @@
 package it.vkod.api;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import it.vkod.models.entities.Check;
 import it.vkod.models.entities.Course;
 import it.vkod.models.entities.Event;
 import it.vkod.services.flow.CheckService;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping(path = CheckController.BASE_ENDPOINT)
@@ -58,11 +52,11 @@ public class CheckController {
     }
 
     @PostMapping("in")
-    public Check checkin(@RequestParam @NotEmpty final String session, @RequestParam @NotEmpty final String course,
-            @RequestParam @NotEmpty final String organizer, @RequestParam @NotEmpty final String attendee,
-            @RequestParam(required = false) @NotEmpty final Double latitude,
-            @RequestParam(required = false) @NotEmpty final Double longitude,
-            @RequestParam(required = false) final boolean remote, @RequestParam(required = false) final boolean guest) {
+    public Optional<Check> checkin(@RequestParam @NotEmpty final String session, @RequestParam @NotEmpty final String course,
+                                   @RequestParam @NotEmpty final String organizer, @RequestParam @NotEmpty final String attendee,
+                                   @RequestParam(required = false) @NotEmpty final Double latitude,
+                                   @RequestParam(required = false) @NotEmpty final Double longitude,
+                                   @RequestParam(required = false) final boolean remote, @RequestParam(required = false) final boolean guest) {
 
         return checkService.checkin(session, Course.valueOf(course), organizer, attendee, latitude, longitude, remote,
                 guest);
@@ -70,10 +64,10 @@ public class CheckController {
     }
 
     @PostMapping("out")
-    public Check checkout(@RequestParam @NotEmpty final String session, @RequestParam @NotEmpty final String course,
-            @RequestParam @NotEmpty final String organizer, @RequestParam @NotEmpty final String attendee,
-            @NotEmpty final Double latitude, @NotEmpty final Double longitude,
-            @RequestParam(required = false) final boolean remote, @RequestParam(required = false) final boolean guest) {
+    public Optional<Check> checkout(@RequestParam @NotEmpty final String session, @RequestParam @NotEmpty final String course,
+                                    @RequestParam @NotEmpty final String organizer, @RequestParam @NotEmpty final String attendee,
+                                    @NotEmpty final Double latitude, @NotEmpty final Double longitude,
+                                    @RequestParam(required = false) final boolean remote, @RequestParam(required = false) final boolean guest) {
 
         return checkService.checkout(session, Course.valueOf(course), organizer, attendee, latitude, longitude, remote,
                 guest);
@@ -81,7 +75,7 @@ public class CheckController {
     }
 
     @PostMapping("in/json")
-    public Check createOrUpdate(@RequestBody @Valid final Check check) {
+    public Optional<Check> createOrUpdate(@RequestBody @Valid final Check check) {
 
         return checkService.createOrUpdate(check);
 
@@ -95,7 +89,7 @@ public class CheckController {
 
     @GetMapping("course_with_events/{course_id}")
     public List<Check> fetchAllByCourse(@PathVariable("course_id") final String course,
-            @RequestParam final Set<Event> types) {
+                                                  @RequestParam final Set<Event> types) {
 
         return checkService.fetchAllByCourse(Course.valueOf(course), types.toArray(Event[]::new));
     }

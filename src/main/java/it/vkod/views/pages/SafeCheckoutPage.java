@@ -28,6 +28,8 @@ import org.vaadin.elmot.flow.sensors.GeoLocation;
 
 import javax.annotation.security.PermitAll;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static it.vkod.models.entities.Event.*;
@@ -99,7 +101,7 @@ public class SafeCheckoutPage extends VerticalLayout {
 
     private void initCheckinLayout(User user) {
 
-        final var checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_OUT, REMOTE_OUT, GUEST_OUT);
+        final List<Check> checks = checkService.fetchAllByCourse(user.getCourse(), PHYSICAL_OUT, REMOTE_OUT, GUEST_OUT);
 
         for (final Check check : checks) {
             final var checkLayout = new CheckedUserLayout(check);
@@ -125,17 +127,16 @@ public class SafeCheckoutPage extends VerticalLayout {
                 final var safeSubmit = new Button("Verzenden", VaadinIcon.CHECK_SQUARE.create());
                 safeSubmit.addClickListener(onSafeSubmit -> {
 
-                    final var newCheck = checkService.createOrUpdate(
+                    final Optional<Check> newCheck = checkService.createOrUpdate(
                             check(user, userService.getByUsername(onScan.getValue()), location, PHYSICAL_OUT));
 
-                    if (!checks.contains(newCheck)) {
-                        final var checkLayout = new CheckedUserLayout(newCheck);
+                    if (!checks.contains(newCheck) && newCheck.isPresent()) {
+                        final var checkLayout = new CheckedUserLayout(newCheck.get());
                         events.add(checkLayout);
+                        NotificationLayout.success(newCheck.get().getAttendee().toString() + ": " + newCheck.get().getEvent().name()).open();
+                    } else {
+                        NotificationLayout.error("Deze gebruiker is al uitgecheckt.").open();
                     }
-
-                    NotificationLayout.success(newCheck.getAttendee().toString() + ": " + newCheck.getEvent().name()).open();
-
-
                 });
 
                 failSafeForm.add(safeUsername, safeDate, safeSubmit);
